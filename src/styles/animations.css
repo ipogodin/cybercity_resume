@@ -1,0 +1,358 @@
+/* Animation Utilities */
+
+/* Fade Animations */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes fadeOut {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes fadeInDown {
+	from {
+		opacity: 0;
+		transform: translateY(-30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Slide Animations */
+@keyframes slideInLeft {
+	from {
+		transform: translateX(-100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slideInRight {
+	from {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+	to {
+		transform: translateX(0);
+		opacity: 1;
+	}
+}
+
+@keyframes slideOutLeft {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(-100%);
+		opacity: 0;
+	}
+}
+
+@keyframes slideOutRight {
+	from {
+		transform: translateX(0);
+		opacity: 1;
+	}
+	to {
+		transform: translateX(100%);
+		opacity: 0;
+	}
+}
+
+/* Scale Animations */
+@keyframes scaleIn {
+	from {
+		transform: scale(0.9);
+		opacity: 0;
+	}
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+@keyframes scaleOut {
+	from {
+		transform: scale(1);
+		opacity: 1;
+	}
+	to {
+		transform: scale(0.9);
+		opacity: 0;
+	}
+}
+
+/* Rotate Animations */
+@keyframes rotate {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+/* Float Animation */
+@keyframes float {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+/* Bounce Animation */
+@keyframes bounce {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-20px);
+	}
+}
+
+/* Shake Animation */
+@keyframes shake {
+	0%, 100% {
+		transform: translateX(0);
+	}
+	10%, 30%, 50%, 70%, 90% {
+		transform: translateX(-5px);
+	}
+	20%, 40%, 60%, 80% {
+		transform: translateX(5px);
+	}
+}
+
+/* Flicker Animation */
+@keyframes flicker {
+	0%, 100% {
+		opacity: 1;
+	}
+	41.99% {
+		opacity: 1;
+	}
+	42% {
+		opacity: 0;
+	}
+	43% {
+		opacity: 0;
+	}
+	43.01% {
+		opacity: 1;
+	}
+	47.99% {
+		opacity: 1;
+	}
+	48% {
+		opacity: 0;
+	}
+	49% {
+		opacity: 0;
+	}
+	49.01% {
+		opacity: 1;
+	}
+}
+
+/* Utility Classes for Animations */
+.animate-fadeIn {
+	animation: fadeIn 0.5s ease-in;
+}
+
+.animate-fadeOut {
+	animation: fadeOut 0.5s ease-out;
+}
+
+.animate-fadeInUp {
+	animation: fadeInUp 0.6s ease-out;
+}
+
+.animate-slideInLeft {
+	animation: slideInLeft 0.6s ease-out;
+}
+
+.animate-slideInRight {
+	animation: slideInRight 0.6s ease-out;
+}
+
+.animate-scaleIn {
+	animation: scaleIn 0.5s ease-out;
+}
+
+.animate-float {
+	animation: float 3s ease-in-out infinite;
+}
+
+.animate-bounce {
+	animation: bounce 1s ease-in-out infinite;
+}
+
+.animate-rotate {
+	animation: rotate 2s linear infinite;
+}
+
+.animate-flicker {
+	animation: flicker 3s linear infinite;
+}
+
+/* Delay Classes */
+.delay-100 {
+	animation-delay: 0.1s;
+}
+
+.delay-200 {
+	animation-delay: 0.2s;
+}
+
+.delay-300 {
+	animation-delay: 0.3s;
+}
+
+.delay-500 {
+	animation-delay: 0.5s;
+}
+
+/* Duration Classes */
+.duration-fast {
+	animation-duration: 0.3s;
+}
+
+.duration-normal {
+	animation-duration: 0.6s;
+}
+
+.duration-slow {
+	animation-duration: 1s;
+}
+
+/* Scene Transition Animations */
+@keyframes sceneTransitionOut {
+	0% {
+		opacity: 1;
+		filter: blur(0);
+	}
+	100% {
+		opacity: 0;
+		filter: blur(10px);
+	}
+}
+
+@keyframes sceneTransitionIn {
+	0% {
+		opacity: 0;
+		filter: blur(10px);
+	}
+	100% {
+		opacity: 1;
+		filter: blur(0);
+	}
+}
+
+.scene-transition-out {
+	animation: sceneTransitionOut var(--transition-scene) ease-in-out;
+}
+
+.scene-transition-in {
+	animation: sceneTransitionIn var(--transition-scene) ease-in-out;
+}
+
+/* Character Walk Animation */
+@keyframes characterWalkLeft {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(-100px);
+	}
+}
+
+@keyframes characterWalkRight {
+	0% {
+		transform: translateX(0);
+	}
+	100% {
+		transform: translateX(100px);
+	}
+}
+
+.character-walk-left {
+	animation: characterWalkLeft 1s ease-in-out;
+}
+
+.character-walk-right {
+	animation: characterWalkRight 1s ease-in-out;
+}
+
+/* Idle Sway Animation */
+@keyframes idleSway {
+	0%, 100% {
+		transform: translateX(0) rotate(0deg);
+	}
+	25% {
+		transform: translateX(-2px) rotate(-0.5deg);
+	}
+	75% {
+		transform: translateX(2px) rotate(0.5deg);
+	}
+}
+
+.idle-sway {
+	animation: idleSway 4s ease-in-out infinite;
+}
+
+/* Typing Effect */
+@keyframes typing {
+	from {
+		width: 0;
+	}
+	to {
+		width: 100%;
+	}
+}
+
+@keyframes blink-caret {
+	from, to {
+		border-color: transparent;
+	}
+	50% {
+		border-color: var(--color-neon-cyan);
+	}
+}
+
+.typing-effect {
+	overflow: hidden;
+	border-right: 2px solid var(--color-neon-cyan);
+	white-space: nowrap;
+	animation: 
+		typing 3.5s steps(40, end),
+		blink-caret 0.75s step-end infinite;
+}

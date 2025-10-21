@@ -1,0 +1,317 @@
+/* Cyberpunk Theme Styles */
+
+/* Neon Text Effects */
+.neon-text {
+	color: var(--color-neon-cyan);
+	text-shadow: var(--shadow-neon-cyan);
+	animation: neon-flicker 3s infinite alternate;
+}
+
+.neon-text-pink {
+	color: var(--color-neon-pink);
+	text-shadow: var(--shadow-neon-pink);
+}
+
+.neon-text-purple {
+	color: var(--color-neon-purple);
+	text-shadow: var(--shadow-neon-purple);
+}
+
+/* Neon Glow on Hover */
+.neon-hover {
+	transition: all var(--transition-normal);
+}
+
+.neon-hover:hover {
+	color: var(--color-neon-cyan);
+	text-shadow: var(--shadow-neon-cyan);
+	transform: scale(1.05);
+}
+
+/* Neon Border Effects */
+.neon-border {
+	border: 2px solid var(--color-neon-cyan);
+	box-shadow: 
+		inset 0 0 10px var(--color-glow-cyan),
+		0 0 10px var(--color-glow-cyan);
+}
+
+.neon-border-pink {
+	border: 2px solid var(--color-neon-pink);
+	box-shadow: 
+		inset 0 0 10px var(--color-glow-pink),
+		0 0 10px var(--color-glow-pink);
+}
+
+/* Scanline Overlay Effect */
+.scanlines {
+	position: relative;
+	overflow: hidden;
+}
+
+.scanlines::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: repeating-linear-gradient(
+		0deg,
+		rgba(0, 0, 0, 0.15),
+		rgba(0, 0, 0, 0.15) 1px,
+		transparent 1px,
+		transparent 2px
+	);
+	pointer-events: none;
+	z-index: var(--z-overlay);
+	opacity: 0.5;
+	animation: scanline-move 8s linear infinite;
+}
+
+@keyframes scanline-move {
+	0% {
+		transform: translateY(0);
+	}
+	100% {
+		transform: translateY(10px);
+	}
+}
+
+/* CRT Screen Effect */
+.crt-effect {
+	position: relative;
+}
+
+.crt-effect::after {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: radial-gradient(
+		ellipse at center,
+		rgba(0, 0, 0, 0) 0%,
+		rgba(0, 0, 0, 0.3) 100%
+	);
+	pointer-events: none;
+	z-index: var(--z-overlay);
+}
+
+/* Glitch Text Effect */
+.glitch {
+	position: relative;
+	display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+	content: attr(data-text);
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0.8;
+}
+
+.glitch::before {
+	animation: glitch-1 2.5s infinite;
+	color: var(--color-neon-cyan);
+	z-index: -1;
+}
+
+.glitch::after {
+	animation: glitch-2 2.5s infinite;
+	color: var(--color-neon-pink);
+	z-index: -2;
+}
+
+@keyframes glitch-1 {
+	0%, 100% {
+		transform: translate(0);
+	}
+	20% {
+		transform: translate(-2px, 2px);
+	}
+	40% {
+		transform: translate(-2px, -2px);
+	}
+	60% {
+		transform: translate(2px, 2px);
+	}
+	80% {
+		transform: translate(2px, -2px);
+	}
+}
+
+@keyframes glitch-2 {
+	0%, 100% {
+		transform: translate(0);
+	}
+	20% {
+		transform: translate(2px, -2px);
+	}
+	40% {
+		transform: translate(2px, 2px);
+	}
+	60% {
+		transform: translate(-2px, -2px);
+	}
+	80% {
+		transform: translate(-2px, 2px);
+	}
+}
+
+/* Neon Flicker Animation */
+@keyframes neon-flicker {
+	0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+		text-shadow: var(--shadow-neon-cyan);
+		opacity: 1;
+	}
+	20%, 24%, 55% {
+		text-shadow: none;
+		opacity: 0.7;
+	}
+}
+
+/* Glassmorphism Card */
+.glass-card {
+	background: rgba(26, 29, 63, 0.7);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(0, 255, 240, 0.2);
+	border-radius: 8px;
+	box-shadow: 
+		0 8px 32px 0 rgba(0, 0, 0, 0.37),
+		inset 0 0 20px rgba(0, 255, 240, 0.1);
+}
+
+.glass-card:hover {
+	border-color: rgba(0, 255, 240, 0.5);
+	box-shadow: 
+		0 8px 32px 0 rgba(0, 0, 0, 0.37),
+		inset 0 0 20px rgba(0, 255, 240, 0.2),
+		0 0 30px rgba(0, 255, 240, 0.3);
+	transition: all var(--transition-normal);
+}
+
+/* Neon Button */
+.btn-neon {
+	padding: var(--spacing-sm) var(--spacing-lg);
+	background: transparent;
+	border: 2px solid var(--color-neon-cyan);
+	color: var(--color-neon-cyan);
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	cursor: pointer;
+	position: relative;
+	overflow: hidden;
+	transition: all var(--transition-normal);
+	box-shadow: 0 0 10px var(--color-glow-cyan);
+}
+
+.btn-neon::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: var(--color-neon-cyan);
+	transition: left var(--transition-normal);
+	z-index: -1;
+}
+
+.btn-neon:hover {
+	color: var(--color-bg-primary);
+	box-shadow: 0 0 20px var(--color-glow-cyan), 0 0 40px var(--color-glow-cyan);
+}
+
+.btn-neon:hover::before {
+	left: 0;
+}
+
+/* Cyberpunk Divider */
+.cyber-divider {
+	height: 2px;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		var(--color-neon-cyan) 20%,
+		var(--color-neon-cyan) 80%,
+		transparent
+	);
+	box-shadow: 0 0 10px var(--color-glow-cyan);
+	margin: var(--spacing-xl) 0;
+}
+
+/* Holographic Effect */
+.holographic {
+	background: linear-gradient(
+		45deg,
+		var(--color-neon-cyan),
+		var(--color-neon-purple),
+		var(--color-neon-pink),
+		var(--color-neon-cyan)
+	);
+	background-size: 300% 300%;
+	animation: holographic-shift 5s ease infinite;
+	-webkit-background-clip: text;
+	background-clip: text;
+	-webkit-text-fill-color: transparent;
+}
+
+@keyframes holographic-shift {
+	0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
+
+/* Pulse Animation */
+.pulse {
+	animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+	0%, 100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
+
+/* Glow Pulse */
+.glow-pulse {
+	animation: glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+	0%, 100% {
+		box-shadow: 0 0 10px var(--color-glow-cyan);
+	}
+	50% {
+		box-shadow: 0 0 30px var(--color-glow-cyan), 0 0 50px var(--color-glow-cyan);
+	}
+}
+
+/* Typography Enhancements */
+.cyber-heading {
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 3px;
+	color: var(--color-neon-cyan);
+	text-shadow: var(--shadow-neon-cyan);
+}
+
+.tech-font {
+	font-family: 'Share Tech Mono', 'Courier New', monospace;
+}
