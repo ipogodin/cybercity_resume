@@ -152,8 +152,8 @@
 		
 		<!-- Stage Info -->
 		<div class="stage-info">
-			<p class="tech-font neon-text-purple">Stage 12: Projects Alley ✅</p>
-			<p class="tech-font neon-text-cyan" style="font-size: 0.75rem; margin-top: 0.25rem;">75% Complete</p>
+			<p class="tech-font neon-text-purple">Stage 12: Character Animations ✅</p>
+			<p class="tech-font neon-text-cyan" style="font-size: 0.75rem; margin-top: 0.25rem;">75% Complete • Next: Education & Contact</p>
 		</div>
 	</div>
 </Scene>
