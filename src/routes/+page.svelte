@@ -150,8 +150,8 @@
 		
 		<!-- Stage Info -->
 		<div class="stage-info">
-			<p class="tech-font neon-text-purple">Stage 10: Experience Avenue ✅</p>
-			<p class="tech-font neon-text-cyan" style="font-size: 0.75rem; margin-top: 0.25rem;">62% Complete</p>
+			<p class="tech-font neon-text-purple">Stage 11: Skills District ✅</p>
+			<p class="tech-font neon-text-cyan" style="font-size: 0.75rem; margin-top: 0.25rem;">69% Complete</p>
 		</div>
 	</div>
 </Scene>
@@ -253,7 +253,7 @@
 	.location-display {
 		position: fixed;
 		top: 1.5rem;
-		left: 1.5rem;
+		left: 3rem; /* Moved right from 1.5rem */
 		padding: 1.5rem 2rem;
 		animation: fadeInDown 0.6s ease-out;
 		z-index: 100;
@@ -356,7 +356,7 @@
 	.settings {
 		position: fixed;
 		bottom: 1.5rem;
-		right: 1.5rem;
+		right: 3rem; /* Moved left from 1.5rem */
 		animation: fadeInUp 0.6s ease-out 0.3s backwards;
 		z-index: 100;
 	}

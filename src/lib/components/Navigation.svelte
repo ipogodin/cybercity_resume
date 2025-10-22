@@ -89,7 +89,7 @@
 		</div>
 	{:else}
 		<!-- Desktop Mini-Map -->
-		<div class="minimap glass-card">
+		<div class="minimap">
 			<p class="minimap-title neon-text tech-font">Navigation</p>
 			<div class="minimap-grid">
 				<div class="map-cell north" class:active={isDirectionAvailable('north')}>
@@ -135,7 +135,8 @@
 <style>
 	.navigation {
 		position: fixed;
-		z-index: var(--z-ui);
+		z-index: 200; /* Higher z-index to ensure it's on top */
+		pointer-events: auto; /* Ensure it always receives pointer events */
 	}
 	
 	/* Mobile D-Pad */
@@ -218,28 +219,49 @@
 	
 	/* Desktop Mini-Map */
 	.navigation:not(.mobile) {
-		bottom: 2rem;
-		left: 2rem;
+		top: 2rem;
+		right: 3rem; /* Moved left from 2rem */
+		opacity: 0.5;
+		transition: opacity var(--transition-normal);
+	}
+	
+	.navigation:not(.mobile):hover {
+		opacity: 1;
 	}
 	
 	.minimap {
-		padding: 1rem;
-		min-width: 180px;
+		padding: 0.75rem;
+		min-width: 140px;
+		background: rgba(26, 29, 63, 0.5);
+		backdrop-filter: blur(10px);
+		border: 2px solid rgba(0, 255, 240, 0.3);
+		border-radius: 8px;
+		box-shadow: 
+			0 0 20px rgba(0, 255, 240, 0.1),
+			inset 0 0 40px rgba(0, 255, 240, 0.02);
+		transition: all var(--transition-normal);
+	}
+	
+	.navigation:not(.mobile):hover .minimap {
+		border-color: rgba(0, 255, 240, 0.6);
+		box-shadow: 
+			0 0 30px rgba(0, 255, 240, 0.2),
+			inset 0 0 60px rgba(0, 255, 240, 0.05);
 	}
 	
 	.minimap-title {
-		font-size: 0.875rem;
-		margin: 0 0 0.75rem 0;
+		font-size: 0.75rem;
+		margin: 0 0 0.5rem 0;
 		text-align: center;
 		text-transform: uppercase;
-		letter-spacing: 2px;
+		letter-spacing: 1.5px;
 	}
 	
 	.minimap-grid {
 		display: grid;
-		grid-template-columns: repeat(3, 40px);
-		grid-template-rows: repeat(3, 40px);
-		gap: 4px;
+		grid-template-columns: repeat(3, 32px);
+		grid-template-rows: repeat(3, 32px);
+		gap: 3px;
 	}
 	
 	.map-cell {
@@ -260,7 +282,7 @@
 		background: transparent;
 		border: none;
 		color: var(--color-neon-cyan);
-		font-size: 1.25rem;
+		font-size: 1rem;
 		cursor: pointer;
 		transition: all var(--transition-fast);
 	}

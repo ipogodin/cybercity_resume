@@ -23,7 +23,9 @@
 <RainEffect enabled={true} intensity={100} speed={2} />
 
 <Scene background="/images/scenes/skills_district.png" location="skills" enableParallax={true}>
-	<Character position="right" scale={0.9} delay={1000} />
+	<div class="character-wrapper">
+		<Character position="right" scale={5} delay={150} />
+	</div>
 	
 	<div class="skills-content">
 		<div class="skills-container">
@@ -48,6 +50,13 @@
 </Scene>
 
 <style>
+	.character-wrapper {
+		position: absolute;
+		bottom: -60%; /* Lower than default 15% */
+		right: 0;
+		z-index: 50;
+	}
+	
 	.skills-content {
 		position: absolute;
 		top: 0;
@@ -57,7 +66,7 @@
 		overflow-y: auto;
 		overflow-x: hidden;
 		padding: 4rem 2rem 8rem 2rem;
-		z-index: 50;
+		z-index: 1;
 		animation: fadeIn 1s ease-out;
 		
 		/* Custom scrollbar */
@@ -86,13 +95,14 @@
 	}
 	
 	.skills-container {
-		max-width: 1400px;
-		margin: 0 auto;
+		max-width: 1100px; /* Constrain to fit ~3 columns */
+		margin: 0; /* Align to left instead of center */
+		margin-left: 2rem; /* Add some spacing from left edge */
 	}
 	
 	/* Header Styles */
 	.skills-header {
-		text-align: center;
+		text-align: left; /* Align header to left */
 		margin-bottom: 3rem;
 		animation: slideDown 1s ease-out;
 	}
@@ -129,11 +139,10 @@
 		height: 3px;
 		background: linear-gradient(
 			90deg,
-			transparent,
 			var(--color-neon-cyan),
 			transparent
 		);
-		margin: 0 auto;
+		margin: 0; /* Align divider to left */
 		box-shadow: 0 0 10px var(--color-glow-cyan);
 		animation: pulse 2s ease-in-out infinite;
 	}
