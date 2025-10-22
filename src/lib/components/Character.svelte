@@ -7,19 +7,24 @@
 	 * @prop {string} [image] - Path to character image
 	 * @prop {number} [scale=1] - Scale multiplier for character size (e.g., 0.8 = 80% size, 1.5 = 150% size)
 	 * @prop {number} [delay=1000] - Delay in ms before character appears
+	 * @prop {string} [entrance='bottom'] - Entrance animation direction (left, right, top, bottom)
 	 */
 	
 	let { 
 		position = 'left', 
 		image = '/images/character/character.png',
 		scale = 1,
-		delay = 1000
+		delay = 1000,
+		entrance = 'bottom'
 	} = $props();
 	
 	let visible = $state(false);
 	
 	// Get CSS class for position
 	const positionClass = $derived(`character-${position}`);
+	
+	// Get CSS class for entrance direction
+	const entranceClass = $derived(`entrance-${entrance}`);
 	
 	// Calculate scaled dimensions
 	const scaledWidth = $derived(100 * scale);
@@ -35,7 +40,7 @@
 </script>
 
 <div 
-	class="character {positionClass}" 
+	class="character {positionClass} {entranceClass}" 
 	class:visible
 	style="width: {scaledWidth}px; height: {scaledHeight}px;"
 >
@@ -56,13 +61,30 @@
 		z-index: 2; /* Lower than neon signs (20), below UI (40) */
 		filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.7));
 		opacity: 0;
-		transform: translateY(20px);
 		transition: opacity 1s ease-out, transform 1s ease-out;
 	}
 	
+	/* Entrance animations - initial positions */
+	.character.entrance-bottom {
+		transform: translateY(20px);
+	}
+	
+	.character.entrance-top {
+		transform: translateY(-20px);
+	}
+	
+	.character.entrance-left {
+		transform: translateX(-20px);
+	}
+	
+	.character.entrance-right {
+		transform: translateX(20px);
+	}
+	
+	/* Visible state - reset transform */
 	.character.visible {
 		opacity: 1;
-		transform: translateY(0);
+		transform: translateY(0) translateX(0);
 	}
 	
 	/* Position variants */
@@ -73,8 +95,23 @@
 	
 	.character-center {
 		left: 75%; 
-		transform: translateX(-50%); /* Center based on actual width */
 		transform-origin: center bottom;
+	}
+	
+	.character-center.entrance-bottom {
+		transform: translateX(-50%) translateY(20px);
+	}
+	
+	.character-center.entrance-top {
+		transform: translateX(-50%) translateY(-20px);
+	}
+	
+	.character-center.entrance-left {
+		transform: translateX(-50%) translateX(-20px);
+	}
+	
+	.character-center.entrance-right {
+		transform: translateX(-50%) translateX(20px);
 	}
 	
 	.character-center.visible {

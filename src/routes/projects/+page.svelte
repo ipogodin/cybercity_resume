@@ -23,7 +23,9 @@
 <RainEffect enabled={true} intensity={120} speed={2.5} />
 
 <Scene background="/images/scenes/projects_alley.png" location="projects" enableParallax={true}>
-	<Character position="left" scale={1.2} delay={1000} />
+	<div class="character-wrapper">
+		<Character position="right" scale={5} entrance="right" delay={150} />
+	</div>
 	
 	<div class="projects-content">
 		<div class="projects-container">
@@ -50,17 +52,26 @@
 </Scene>
 
 <style>
+	.character-wrapper {
+		position: absolute;
+		bottom: -60%;
+		left: 0;
+		z-index: 10; /* Higher to be visible */
+		transform: scaleX(-1); /* Mirror the character */
+		pointer-events: none; /* Allow clicks to pass through */
+	}
+	
 	.projects-content {
 		position: absolute;
 		top: 0;
-		left: 0;
-		width: 100%;
+		left: 35%; /* Start content from 35% to leave space for character */
+		width: 65%; /* Take only right 65% of space */
 		height: 100%;
 		overflow-y: auto;
 		overflow-x: hidden;
 		padding: 4rem 2rem 8rem 2rem;
-		z-index: 1;
-		animation: fadeIn 1s ease-out;
+		z-index: 5;
+		animation: fadeIn 7s ease-out;
 		
 		/* Custom scrollbar */
 		scrollbar-width: thin;
@@ -143,7 +154,7 @@
 	/* Projects Grid */
 	.projects-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+		grid-template-columns: repeat(2, 1fr); /* Force exactly 2 columns */
 		gap: 2rem;
 		animation: fadeInUp 1.2s ease-out 0.3s both;
 	}
@@ -189,8 +200,12 @@
 	
 	/* Tablet adjustments */
 	@media (max-width: 1024px) {
+		.character-wrapper {
+			display: none; /* Hide character on tablet/mobile */
+		}
+		
 		.projects-content {
-			padding: 3rem 1.5rem 6rem 1.5rem;
+			padding: 3rem 1.5rem 6rem 1.5rem; /* Remove left padding */
 		}
 		
 		.title-main {
@@ -203,7 +218,7 @@
 		}
 		
 		.projects-grid {
-			grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+			grid-template-columns: repeat(2, 1fr); /* Keep 2 columns on tablet */
 			gap: 1.5rem;
 		}
 	}

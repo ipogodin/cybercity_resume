@@ -7,9 +7,9 @@
 export const projects = [
 	{
 		name: 'Meta Tupperware Rebalancer',
-		description: 'Large-scale Kubernetes infrastructure optimization service for AI training workloads across Meta\'s entire fleet. Handles resource allocation and rebalancing for mission-critical ML infrastructure.',
+		description: 'Large-scale Tupperware(Kubernetes) infrastructure optimization service for AI training workloads across Meta\'s entire fleet. Handles resource allocation and rebalancing for mission-critical ML infrastructure.',
 		technologies: [
-			'Kubernetes',
+			'TUpperware(Kubernetes)',
 			'Python',
 			'Distributed Systems',
 			'AI/ML Infrastructure',

@@ -79,7 +79,9 @@
 <!-- Main Scene -->
 <Scene background="/images/scenes/main_hub_scene.png" location="hub" enableParallax={true}>
 	<!-- Character - dynamic position and size per scene, fades in smoothly -->
-	<Character position="center" scale={1} delay={1000} />
+    <div class="character-wrapper">
+		<Character position="right" scale={1} entrance="right" />
+	</div>
 	
 	<!-- Hub Neon Signs (only show at hub) -->
 	<div class="neon-signs">
@@ -378,6 +380,13 @@
 	.stage-info p {
 		margin: 0;
 		font-size: 0.875rem;
+	}
+
+    .character-wrapper {
+		position: absolute;
+		bottom: 15%; /* Lower than default 15% */
+		right: 15rem;
+		z-index: 2;
 	}
 	
 	/* Mobile adjustments */

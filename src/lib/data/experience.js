@@ -11,9 +11,9 @@ export const experience = [
 		role: 'Software Engineer L5',
 		period: '2025 - Present',
 		location: 'Bellevue, WA',
-		description: 'Leading infrastructure optimization for Tupperware allocator - Internal Kubernetes managing Meta\'s entire fleet. Focused on AI training optimization and reliability improvements.',
+		description: 'Leading infrastructure optimization for Tupperware allocator - Internal Kubernetes-like system for managing Meta\'s entire fleet. Focused on AI training optimization and reliability improvements.',
 		technologies: [
-			'Kubernetes',
+			'Tupperware(Kubernetes)',
 			'Python',
 			'Distributed Systems',
 			'Infrastructure',

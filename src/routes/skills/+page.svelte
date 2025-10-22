@@ -24,7 +24,7 @@
 
 <Scene background="/images/scenes/skills_district.png" location="skills" enableParallax={true}>
 	<div class="character-wrapper">
-		<Character position="right" scale={5} delay={150} />
+		<Character position="right" scale={5} entrance="right" delay={150} />
 	</div>
 	
 	<div class="skills-content">
@@ -54,7 +54,7 @@
 		position: absolute;
 		bottom: -60%; /* Lower than default 15% */
 		right: 0;
-		z-index: 50;
+		z-index: 2;
 	}
 	
 	.skills-content {

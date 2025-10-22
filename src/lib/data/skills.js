@@ -10,10 +10,12 @@ export const skillCategories = [
 		skills: [
 			{ name: 'Java', proficiency: 'expert' },
 			{ name: 'Python', proficiency: 'expert' },
-			{ name: 'Scala', proficiency: 'advanced' },
+			{ name: 'Scala', proficiency: 'intermediate' },
+            { name: 'CPP', proficiency: 'intermediate' },
+            { name: 'Golang', proficiency: 'intermediate' },
 			{ name: 'JavaScript', proficiency: 'advanced' },
 			{ name: 'SQL', proficiency: 'advanced' },
-			{ name: 'Bash/Shell', proficiency: 'advanced' }
+			{ name: 'Bash/Shell', proficiency: 'intermediate' }
 		]
 	},
 	{
@@ -43,8 +45,8 @@ export const skillCategories = [
 	{
 		name: 'Infrastructure & Cloud',
 		skills: [
-			{ name: 'Kubernetes', proficiency: 'expert' },
-			{ name: 'Docker', proficiency: 'expert' },
+			{ name: 'Tupperware(Kubernetes)', proficiency: 'advanced' },
+			{ name: 'Docker', proficiency: 'advanced' },
 			{ name: 'AWS', proficiency: 'advanced' },
 			{ name: 'GCP', proficiency: 'advanced' },
 			{ name: 'Distributed Systems', proficiency: 'expert' },
