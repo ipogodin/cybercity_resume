@@ -129,6 +129,7 @@
 		bottom: -10%;
 		left: 0;
 		z-index: 2;
+		pointer-events: none; /* Allow clicks to pass through */
 	}
 	
 	.education-content {

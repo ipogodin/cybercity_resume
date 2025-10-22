@@ -25,7 +25,7 @@
 
 <Scene background="/images/scenes/contact_terminal.png" location="contact" enableParallax={true}>
 	<div class="character-wrapper">
-		<Character position="center" scale={5} entrance="bottom" delay={150} />
+		<Character position="center" scale={10} entrance="right" delay={1500} />
 	</div>
 	
 	<div class="contact-content">
@@ -46,33 +46,6 @@
 			
 			<!-- Contact Cards Grid -->
 			<div class="contact-grid">
-				<!-- Email Card -->
-				<div class="contact-card glass-card">
-					<div class="card-icon">📧</div>
-					<h3 class="card-title neon-text-cyan">Email</h3>
-					<a href="mailto:{contact.email}" class="contact-link tech-font">
-						{contact.email}
-					</a>
-					<p class="card-note">Preferred contact method</p>
-				</div>
-				
-				<!-- Phone Card -->
-				<div class="contact-card glass-card">
-					<div class="card-icon">📱</div>
-					<h3 class="card-title neon-text-purple">Phone</h3>
-					<a href="tel:{contact.phone.replace(/\./g, '')}" class="contact-link tech-font">
-						{contact.phone}
-					</a>
-					<p class="card-note">Seattle, WA</p>
-				</div>
-				
-				<!-- Location Card -->
-				<div class="contact-card glass-card">
-					<div class="card-icon">📍</div>
-					<h3 class="card-title neon-text-pink">Location</h3>
-					<p class="contact-link tech-font">{contact.location}</p>
-					<p class="card-note">{contact.availability}</p>
-				</div>
 				
 				<!-- LinkedIn Card -->
 				{#if socialLinks.linkedin}
@@ -111,10 +84,11 @@
 <style>
 	.character-wrapper {
 		position: absolute;
-		bottom: -10%;
-		left: 50%;
+		bottom: -150%;
+		right: 10%;
 		transform: translateX(-50%);
 		z-index: 2;
+		pointer-events: none; /* Allow clicks to pass through */
 	}
 	
 	.contact-content {
@@ -127,7 +101,7 @@
 		overflow-x: hidden;
 		padding: 4rem 2rem 8rem 2rem;
 		z-index: 1;
-		animation: fadeIn 1s ease-out;
+		animation: fadeIn 5s ease-out;
 		
 		/* Custom scrollbar */
 		scrollbar-width: thin;
@@ -210,7 +184,7 @@
 	/* Terminal Wrapper */
 	.terminal-wrapper {
 		margin-bottom: 3rem;
-		animation: fadeInUp 1.2s ease-out 0.3s both;
+		animation: fadeInUp 1s ease-out 0.3s both; /* First: terminal appears */
 	}
 	
 	/* Contact Cards Grid */
@@ -219,7 +193,7 @@
 		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 		gap: 2rem;
 		margin-bottom: 3rem;
-		animation: fadeInUp 1.4s ease-out 0.5s both;
+		animation: fadeInUp 1s ease-out 2.5s both; /* Third: cards appear after character */
 	}
 	
 	.contact-card {
@@ -294,7 +268,7 @@
 	.tagline-section {
 		text-align: center;
 		padding: 2rem;
-		animation: fadeInUp 1.6s ease-out 0.7s both;
+		animation: fadeInUp 1s ease-out 3.5s both; /* Fourth: tagline appears last */
 	}
 	
 	.tagline {
