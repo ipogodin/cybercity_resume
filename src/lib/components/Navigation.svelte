@@ -2,14 +2,30 @@
 	/**
 	 * Navigation Component - On-screen directional controls
 	 * @prop {string} currentLocation - Current location identifier
-	 * @prop {boolean} [mobile=false] - Show mobile-optimized D-pad
 	 * @prop {Function} [onNavigate] - Callback when direction is clicked
 	 */
 	
+	import { onMount } from 'svelte';
 	import { navigationGraph } from '$lib/stores/navigation.js';
 	import { goto } from '$app/navigation';
 	
-	let { currentLocation = 'hub', mobile = false, onNavigate } = $props();
+	let { currentLocation = 'hub', onNavigate } = $props();
+	
+	let isMobile = $state(false);
+	
+	// Detect if we're on a mobile device
+	function checkIfMobile() {
+		isMobile = window.innerWidth <= 768;
+	}
+	
+	onMount(() => {
+		checkIfMobile();
+		window.addEventListener('resize', checkIfMobile);
+		
+		return () => {
+			window.removeEventListener('resize', checkIfMobile);
+		};
+	});
 	
 	// Map locations to routes
 	const locationRouteMap = {
@@ -39,8 +55,8 @@
 	}
 </script>
 
-<div class="navigation" class:mobile>
-	{#if mobile}
+<div class="navigation" class:mobile={isMobile}>
+	{#if isMobile}
 		<!-- Mobile D-Pad -->
 		<div class="dpad">
 			<button 

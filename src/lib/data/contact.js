@@ -11,7 +11,7 @@ export const contact = {
 	resumeUrl: '/resume.pdf',
 	
 	social: {
-		linkedin: 'https://www.linkedin.com/in/illia-pogodin',
+		linkedin: 'https://www.linkedin.com/in/ipogodin',
 		github: '', // Add if you have a GitHub profile
 		twitter: '', // Add if you have Twitter
 		website: '' // Add if you have a personal website

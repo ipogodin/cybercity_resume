@@ -25,7 +25,7 @@
 
 <Scene background="/images/scenes/contact_terminal.png" location="contact" enableParallax={true}>
 	<div class="character-wrapper">
-		<Character position="center" scale={10} entrance="right" delay={1500} />
+		<Character position="center" scale={10} entrance="right" delay={150} />
 	</div>
 	
 	<div class="contact-content">
@@ -42,32 +42,6 @@
 			<!-- Terminal Interface -->
 			<div class="terminal-wrapper">
 				<ContactTerminal {contact} />
-			</div>
-			
-			<!-- Contact Cards Grid -->
-			<div class="contact-grid">
-				
-				<!-- LinkedIn Card -->
-				{#if socialLinks.linkedin}
-					<div class="contact-card glass-card">
-						<div class="card-icon">💼</div>
-						<h3 class="card-title neon-text-cyan">LinkedIn</h3>
-						<a href={socialLinks.linkedin} target="_blank" rel="noopener noreferrer" class="contact-link tech-font">
-							View Profile
-						</a>
-						<p class="card-note">Professional network</p>
-					</div>
-				{/if}
-				
-				<!-- Resume Download Card -->
-				<div class="contact-card glass-card resume-card">
-					<div class="card-icon">📄</div>
-					<h3 class="card-title neon-text-purple">Resume</h3>
-					<a href={contact.resumeUrl} download class="btn-neon" style="margin-top: 1rem;">
-						Download PDF
-					</a>
-					<p class="card-note">Full credentials</p>
-				</div>
 			</div>
 			
 			<!-- Tagline Section -->

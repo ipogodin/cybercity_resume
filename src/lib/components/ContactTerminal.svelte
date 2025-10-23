@@ -1,4 +1,6 @@
 <script>
+	import { onMount } from 'svelte';
+	
 	/**
 	 * ContactTerminal Component - Terminal-style contact interface
 	 * @prop {Object} contact - Contact data object
@@ -16,40 +18,109 @@
 		social = {}
 	} = contact;
 	
-	let terminalLines = $state([
-		{ type: 'system', text: 'CONTACT TERMINAL v2.0.77' },
-		{ type: 'system', text: 'Initializing secure connection...' },
-		{ type: 'success', text: 'Connection established.' },
-		{ type: 'prompt', text: 'Select communication channel:' }
-	]);
+	// Terminal scenario with computer output (CO) and user input (UI)
+	const terminalScenario = [
+		{ type: 'system', text: 'CONTACT TERMINAL v2.0.77', speed: 'fast', isUserInput: false, delayAfter: 0 },
+		{ type: 'system', text: 'Initializing secure connection...', speed: 'fast', isUserInput: false, delayAfter: 700 },
+		{ type: 'success', text: 'Connection established.', speed: 'fast', isUserInput: false, delayAfter: 700 },
+		{ type: 'prompt', text: 'get contact data --detailed', speed: 'human', isUserInput: true, delayAfter: 200 },
+		{ type: 'error', text: 'Access denied.', speed: 'fast', isUserInput: false, delayAfter: 400 },
+		{ type: 'prompt', text: 'sudo get contact data --detailed', speed: 'human', isUserInput: true, delayAfter: 100 },
+		{ type: 'success', text: '200 OK', speed: 'fast', isUserInput: false, delayAfter: 300 }
+	];
 	
+	let terminalLines = $state([]);
 	let showCopiedMessage = $state(false);
+	let terminalReady = $state(false);
+	
+	// Typing speeds
+	const SPEED = {
+		fast: 15,      // Computer output: 15ms per char (very fast, 90s terminal style)
+		human: 80      // User input: 80ms per char (fast coder speed)
+	};
+	
+	// Type text character by character
+	async function typeText(text, speed = 'fast') {
+		const delay = SPEED[speed];
+		let result = '';
+		for (let i = 0; i < text.length; i++) {
+			result += text[i];
+			await new Promise(resolve => setTimeout(resolve, delay));
+		}
+		return result;
+	}
+	
+	// Main terminal animation sequence
+	onMount(async () => {
+		// Wait 2 seconds before starting
+		await new Promise(resolve => setTimeout(resolve, 2000));
+		
+		// Execute terminal scenario
+		for (let i = 0; i < terminalScenario.length; i++) {
+			const line = terminalScenario[i];
+			
+			// Add empty line with typing state
+			terminalLines = [...terminalLines, { 
+				type: line.type,
+				text: '',
+				typing: true,
+				isUserInput: line.isUserInput
+			}];
+			
+			const currentLineIndex = terminalLines.length - 1;
+			
+			// Type the text character by character
+			for (let j = 0; j < line.text.length; j++) {
+				await new Promise(resolve => setTimeout(resolve, SPEED[line.speed]));
+				terminalLines = terminalLines.map((l, idx) => 
+					idx === currentLineIndex 
+						? { ...l, text: line.text.substring(0, j + 1) }
+						: l
+				);
+			}
+			
+			// Mark line as complete (stop cursor)
+			terminalLines = terminalLines.map((l, idx) => 
+				idx === currentLineIndex 
+					? { ...l, typing: false }
+					: l
+			);
+			
+			// Wait after line completes (if specified)
+			if (line.delayAfter > 0) {
+				await new Promise(resolve => setTimeout(resolve, line.delayAfter));
+			}
+		}
+		
+		// Terminal ready - show contact options
+		await new Promise(resolve => setTimeout(resolve, 300));
+		terminalReady = true;
+	});
 	
 	async function copyToClipboard(text, label) {
 		try {
 			await navigator.clipboard.writeText(text);
-			terminalLines = [
-				...terminalLines,
-				{ type: 'success', text: `> ${label} copied to clipboard` }
-			];
+			const newLine = { type: 'success', text: `> ${label} copied to clipboard`, typing: false };
+			terminalLines = [...terminalLines, newLine];
 			showCopiedMessage = true;
 			setTimeout(() => {
 				showCopiedMessage = false;
 			}, 2000);
 		} catch (err) {
-			terminalLines = [
-				...terminalLines,
-				{ type: 'error', text: `> Failed to copy ${label}` }
-			];
+			const errorLine = { type: 'error', text: `> Failed to copy ${label}`, typing: false };
+			terminalLines = [...terminalLines, errorLine];
 		}
 	}
 	
 	function handleDownloadResume() {
-		terminalLines = [
-			...terminalLines,
-			{ type: 'info', text: '> Downloading resume.pdf...' },
-			{ type: 'success', text: '> Download initiated' }
-		];
+		const infoLine = { type: 'info', text: '> Downloading resume.pdf...', typing: false };
+		terminalLines = [...terminalLines, infoLine];
+		
+		// Add success message after a short delay
+		setTimeout(() => {
+			const successLine = { type: 'success', text: '> Download initiated', typing: false };
+			terminalLines = [...terminalLines, successLine];
+		}, 300);
 	}
 	
 	const socialPlatforms = {
@@ -74,25 +145,28 @@
 	<div class="terminal-body">
 		<div class="terminal-output">
 			{#each terminalLines as line}
-				<div class="terminal-line {line.type}">
-					{#if line.type === 'prompt'}
+				<div class="terminal-line {line.type} {line.isUserInput ? 'user-input' : ''}">
+					{#if line.isUserInput}
+						<span class="prompt-symbol">$</span>
+					{:else if line.type === 'prompt'}
 						<span class="prompt-symbol">$</span>
 					{:else if line.type === 'system'}
 						<span class="system-symbol">[SYS]</span>
 					{:else if line.type === 'success'}
 						<span class="success-symbol">[OK]</span>
 					{:else if line.type === 'error'}
-						<span class="error-symbol">[ERR]</span>
+						<span class="error-symbol">[FAIL]</span>
 					{:else if line.type === 'info'}
 						<span class="info-symbol">[INF]</span>
 					{/if}
-					<span class="line-text">{line.text}</span>
+					<span class="line-text">{line.text}{#if line.typing}<span class="typing-cursor">█</span>{/if}</span>
 				</div>
 			{/each}
 		</div>
 		
-		<div class="contact-options">
-			{#if email}
+		{#if terminalReady}
+			<div class="contact-options" style="animation: fadeIn 0.5s ease-out;">
+				{#if email}
 				<div class="contact-option">
 					<button 
 						class="terminal-button" 
@@ -158,7 +232,7 @@
 		</div>
 		
 		{#if Object.keys(social).length > 0}
-			<div class="social-links">
+			<div class="social-links" style="animation: fadeIn 0.5s ease-out;">
 				<div class="terminal-line prompt">
 					<span class="prompt-symbol">$</span>
 					<span class="line-text">Social networks:</span>
@@ -180,6 +254,7 @@
 				</div>
 			</div>
 		{/if}
+	{/if}
 		
 		{#if showCopiedMessage}
 			<div class="copied-message">
@@ -188,7 +263,9 @@
 			</div>
 		{/if}
 		
-		<div class="terminal-cursor">█</div>
+		{#if terminalReady}
+			<div class="terminal-cursor">█</div>
+		{/if}
 	</div>
 </div>
 
@@ -260,6 +337,15 @@
 		margin-bottom: 0.5rem;
 		font-size: 0.938rem;
 		line-height: 1.5;
+	}
+	
+	.terminal-line.user-input {
+		color: var(--color-text);
+	}
+	
+	.terminal-line.user-input .line-text {
+		color: #00ff88; /* Green color for user commands */
+		font-weight: 500;
 	}
 	
 	.prompt-symbol,
@@ -402,12 +488,39 @@
 		line-height: 1;
 	}
 	
+	.typing-cursor {
+		display: inline-block;
+		color: var(--color-neon-cyan);
+		animation: blink 0.5s infinite;
+		margin-left: 2px;
+	}
+	
 	@keyframes blink {
 		0%, 49% {
 			opacity: 1;
 		}
 		50%, 100% {
 			opacity: 0;
+		}
+	}
+	
+	@keyframes typeIn {
+		from {
+			opacity: 0;
+			transform: translateX(-10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateX(0);
+		}
+	}
+	
+	@keyframes fadeIn {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
 		}
 	}
 	

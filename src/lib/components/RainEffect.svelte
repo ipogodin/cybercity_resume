@@ -14,6 +14,20 @@
 	let ctx;
 	let animationId;
 	let drops = [];
+	let isMobile = false;
+	
+	// Detect mobile device
+	function detectMobile() {
+		return window.innerWidth < 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+	}
+	
+	// Adjust intensity for mobile performance
+	function getAdjustedIntensity() {
+		if (isMobile) {
+			return Math.floor(intensity * 0.3); // Reduce to 30% on mobile
+		}
+		return intensity;
+	}
 	
 	class RainDrop {
 		constructor(canvasWidth, canvasHeight) {
@@ -49,11 +63,13 @@
 		if (!canvas || !enabled) return;
 		
 		ctx = canvas.getContext('2d');
+		isMobile = detectMobile();
 		resizeCanvas();
 		
-		// Create rain drops
+		// Create rain drops (fewer on mobile)
 		drops = [];
-		for (let i = 0; i < intensity; i++) {
+		const adjustedIntensity = getAdjustedIntensity();
+		for (let i = 0; i < adjustedIntensity; i++) {
 			drops.push(new RainDrop(canvas.width, canvas.height));
 		}
 		
@@ -65,10 +81,15 @@
 		
 		canvas.width = window.innerWidth;
 		canvas.height = window.innerHeight;
+		isMobile = detectMobile();
 		
-		// Recreate drops with new dimensions
+		// Recreate drops with new dimensions (adjust count for mobile)
 		if (drops.length > 0) {
-			drops = drops.map(() => new RainDrop(canvas.width, canvas.height));
+			const adjustedIntensity = getAdjustedIntensity();
+			drops = [];
+			for (let i = 0; i < adjustedIntensity; i++) {
+				drops.push(new RainDrop(canvas.width, canvas.height));
+			}
 		}
 	}
 	
