@@ -1,6 +1,18 @@
 /* Animation Utilities */
 
-/* Fade Animations */
+/* Performance optimization: Use will-change for animated elements */
+.will-animate {
+	will-change: transform, opacity;
+}
+
+/* Smooth animations with hardware acceleration */
+.gpu-accelerated {
+	transform: translateZ(0);
+	backface-visibility: hidden;
+	perspective: 1000px;
+}
+
+/* Fade Animations - Optimized with cubic-bezier */
 @keyframes fadeIn {
 	from {
 		opacity: 0;
@@ -22,66 +34,66 @@
 @keyframes fadeInUp {
 	from {
 		opacity: 0;
-		transform: translateY(30px);
+		transform: translateY(30px) translateZ(0);
 	}
 	to {
 		opacity: 1;
-		transform: translateY(0);
+		transform: translateY(0) translateZ(0);
 	}
 }
 
 @keyframes fadeInDown {
 	from {
 		opacity: 0;
-		transform: translateY(-30px);
+		transform: translateY(-30px) translateZ(0);
 	}
 	to {
 		opacity: 1;
-		transform: translateY(0);
+		transform: translateY(0) translateZ(0);
 	}
 }
 
-/* Slide Animations */
+/* Slide Animations - Hardware accelerated */
 @keyframes slideInLeft {
 	from {
-		transform: translateX(-100%);
+		transform: translateX(-100%) translateZ(0);
 		opacity: 0;
 	}
 	to {
-		transform: translateX(0);
+		transform: translateX(0) translateZ(0);
 		opacity: 1;
 	}
 }
 
 @keyframes slideInRight {
 	from {
-		transform: translateX(100%);
+		transform: translateX(100%) translateZ(0);
 		opacity: 0;
 	}
 	to {
-		transform: translateX(0);
+		transform: translateX(0) translateZ(0);
 		opacity: 1;
 	}
 }
 
 @keyframes slideOutLeft {
 	from {
-		transform: translateX(0);
+		transform: translateX(0) translateZ(0);
 		opacity: 1;
 	}
 	to {
-		transform: translateX(-100%);
+		transform: translateX(-100%) translateZ(0);
 		opacity: 0;
 	}
 }
 
 @keyframes slideOutRight {
 	from {
-		transform: translateX(0);
+		transform: translateX(0) translateZ(0);
 		opacity: 1;
 	}
 	to {
-		transform: translateX(100%);
+		transform: translateX(100%) translateZ(0);
 		opacity: 0;
 	}
 }
@@ -183,29 +195,29 @@
 	}
 }
 
-/* Utility Classes for Animations */
+/* Utility Classes for Animations - Optimized with easing */
 .animate-fadeIn {
-	animation: fadeIn 0.5s ease-in;
+	animation: fadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-fadeOut {
-	animation: fadeOut 0.5s ease-out;
+	animation: fadeOut 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-fadeInUp {
-	animation: fadeInUp 0.6s ease-out;
+	animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-slideInLeft {
-	animation: slideInLeft 0.6s ease-out;
+	animation: slideInLeft 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-slideInRight {
-	animation: slideInRight 0.6s ease-out;
+	animation: slideInRight 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-scaleIn {
-	animation: scaleIn 0.5s ease-out;
+	animation: scaleIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .animate-float {
@@ -213,7 +225,7 @@
 }
 
 .animate-bounce {
-	animation: bounce 1s ease-in-out infinite;
+	animation: bounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
 }
 
 .animate-rotate {
@@ -254,15 +266,17 @@
 	animation-duration: 1s;
 }
 
-/* Scene Transition Animations */
+/* Scene Transition Animations - Optimized */
 @keyframes sceneTransitionOut {
 	0% {
 		opacity: 1;
 		filter: blur(0);
+		transform: scale(1) translateZ(0);
 	}
 	100% {
 		opacity: 0;
 		filter: blur(10px);
+		transform: scale(0.95) translateZ(0);
 	}
 }
 
@@ -270,58 +284,60 @@
 	0% {
 		opacity: 0;
 		filter: blur(10px);
+		transform: scale(1.05) translateZ(0);
 	}
 	100% {
 		opacity: 1;
 		filter: blur(0);
+		transform: scale(1) translateZ(0);
 	}
 }
 
 .scene-transition-out {
-	animation: sceneTransitionOut var(--transition-scene) ease-in-out;
+	animation: sceneTransitionOut var(--transition-scene) cubic-bezier(0.4, 0, 0.6, 1);
 }
 
 .scene-transition-in {
-	animation: sceneTransitionIn var(--transition-scene) ease-in-out;
+	animation: sceneTransitionIn var(--transition-scene) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Character Walk Animation */
+/* Character Walk Animation - Smooth */
 @keyframes characterWalkLeft {
 	0% {
-		transform: translateX(0);
+		transform: translateX(0) translateZ(0);
 	}
 	100% {
-		transform: translateX(-100px);
+		transform: translateX(-100px) translateZ(0);
 	}
 }
 
 @keyframes characterWalkRight {
 	0% {
-		transform: translateX(0);
+		transform: translateX(0) translateZ(0);
 	}
 	100% {
-		transform: translateX(100px);
+		transform: translateX(100px) translateZ(0);
 	}
 }
 
 .character-walk-left {
-	animation: characterWalkLeft 1s ease-in-out;
+	animation: characterWalkLeft 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .character-walk-right {
-	animation: characterWalkRight 1s ease-in-out;
+	animation: characterWalkRight 1s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Idle Sway Animation */
+/* Idle Sway Animation - Subtle and smooth */
 @keyframes idleSway {
 	0%, 100% {
-		transform: translateX(0) rotate(0deg);
+		transform: translateX(0) rotate(0deg) translateZ(0);
 	}
 	25% {
-		transform: translateX(-2px) rotate(-0.5deg);
+		transform: translateX(-2px) rotate(-0.5deg) translateZ(0);
 	}
 	75% {
-		transform: translateX(2px) rotate(0.5deg);
+		transform: translateX(2px) rotate(0.5deg) translateZ(0);
 	}
 }
 
@@ -329,7 +345,7 @@
 	animation: idleSway 4s ease-in-out infinite;
 }
 
-/* Typing Effect */
+/* Typing Effect - Smooth */
 @keyframes typing {
 	from {
 		width: 0;
@@ -355,4 +371,59 @@
 	animation: 
 		typing 3.5s steps(40, end),
 		blink-caret 0.75s step-end infinite;
+}
+
+/* Neon pulse animation - Optimized */
+@keyframes neonPulse {
+	0%, 100% {
+		text-shadow: 
+			0 0 10px currentColor,
+			0 0 20px currentColor,
+			0 0 30px currentColor;
+	}
+	50% {
+		text-shadow: 
+			0 0 20px currentColor,
+			0 0 30px currentColor,
+			0 0 40px currentColor,
+			0 0 50px currentColor;
+	}
+}
+
+.neon-pulse {
+	animation: neonPulse 2s ease-in-out infinite;
+}
+
+/* Shimmer animation for skill bars */
+@keyframes shimmer {
+	0% {
+		background-position: -100% 0;
+	}
+	100% {
+		background-position: 200% 0;
+	}
+}
+
+.shimmer {
+	animation: shimmer 2s linear infinite;
+}
+
+/* Reduced motion support - Respect user preferences */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+	}
+	
+	.animate-float,
+	.animate-bounce,
+	.animate-flicker,
+	.idle-sway,
+	.neon-pulse,
+	.shimmer {
+		animation: none !important;
+	}
 }

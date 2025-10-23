@@ -8,13 +8,18 @@
 	 * @prop {boolean} [enabled=true] - Enable/disable rain effect
 	 */
 	
-	let { intensity = 100, speed = 2, enabled = true } = $props();
+	let { intensity = 100, speed = 2, enabled = $bindable(true) } = $props();
 	
 	let canvas;
 	let ctx;
 	let animationId;
 	let drops = [];
 	let isMobile = false;
+	
+	// Listen for rain toggle events
+	function handleRainToggle(event) {
+		enabled = event.detail.enabled;
+	}
 	
 	// Detect mobile device
 	function detectMobile() {
@@ -118,9 +123,11 @@
 	onMount(() => {
 		initRain();
 		window.addEventListener('resize', resizeCanvas);
+		window.addEventListener('rainToggle', handleRainToggle);
 		
 		return () => {
 			window.removeEventListener('resize', resizeCanvas);
+			window.removeEventListener('rainToggle', handleRainToggle);
 		};
 	});
 	

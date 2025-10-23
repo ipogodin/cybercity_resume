@@ -172,3 +172,73 @@ export function slideIn(node, { delay = 0, duration = 400 } = {}) {
 		}
 	};
 }
+
+/**
+ * Page transition - slide and fade with direction
+ * @param {HTMLElement} node 
+ * @param {Object} params 
+ * @returns {Object} Transition configuration
+ */
+export function pageTransition(node, { delay = 0, duration = 600, direction = 'in' } = {}) {
+	return {
+		delay,
+		duration,
+		css: (t, u) => {
+			const progress = direction === 'out' ? u : t;
+			const translateX = direction === 'out' ? t * -100 : (1 - t) * 100;
+			const opacity = progress;
+			
+			return `
+				opacity: ${opacity};
+				transform: translateX(${translateX}px);
+			`;
+		}
+	};
+}
+
+/**
+ * Cyberspace warp transition
+ * @param {HTMLElement} node 
+ * @param {Object} params 
+ * @returns {Object} Transition configuration
+ */
+export function warpTransition(node, { delay = 0, duration = 800 } = {}) {
+	return {
+		delay,
+		duration,
+		css: (t) => {
+			const scale = 0.5 + (t * 0.5);
+			const blur = (1 - t) * 20;
+			const brightness = 0.5 + (t * 0.5);
+			
+			return `
+				opacity: ${t};
+				transform: scale(${scale}) perspective(1000px) rotateX(${(1 - t) * 20}deg);
+				filter: blur(${blur}px) brightness(${brightness});
+			`;
+		}
+	};
+}
+
+/**
+ * Digital dissolve transition
+ * @param {HTMLElement} node 
+ * @param {Object} params 
+ * @returns {Object} Transition configuration
+ */
+export function digitalDissolve(node, { delay = 0, duration = 700 } = {}) {
+	return {
+		delay,
+		duration,
+		css: (t) => {
+			const pixelSize = (1 - t) * 10;
+			const opacity = t;
+			
+			return `
+				opacity: ${opacity};
+				filter: blur(${(1 - t) * 5}px);
+				image-rendering: ${pixelSize > 5 ? 'pixelated' : 'auto'};
+			`;
+		}
+	};
+}

@@ -11,6 +11,7 @@
 	let rainEnabled = $state(true);
 	let showTutorial = $state(false);
 	let isLoaded = $state(false);
+	let showSigns = $state(false); // Delay signs until after tutorial
 	let cleanup;
 	
 	// Initialize keyboard navigation on mount
@@ -25,10 +26,16 @@
 			showTutorial = true;
 			sessionStorage.setItem('tutorialShown', 'true');
 			
-			// Hide tutorial after some time
+			// Hide tutorial after some time and show signs
 			setTimeout(() => {
 				showTutorial = false;
+				setTimeout(() => {
+					showSigns = true;
+				}, 500); // Show signs 0.5s after tutorial dismisses
 			}, 8000);
+		} else {
+			// If tutorial was already shown, show signs immediately
+			showSigns = true;
 		}
 		
 		// Intro animation
@@ -58,6 +65,10 @@
 	
 	function dismissTutorial() {
 		showTutorial = false;
+		// Show signs after dismissing tutorial
+		setTimeout(() => {
+			showSigns = true;
+		}, 500);
 	}
 	
 	// Handle any keypress to dismiss tutorial
@@ -83,21 +94,23 @@
 		<Character position="right" scale={1} entrance="right" />
 	</div>
 	
-	<!-- Hub Neon Signs (only show at hub) -->
-	<div class="neon-signs">
-			{#each getHubSigns() as sign}
-				<div 
-					class="sign-container sign-{sign.position}"
-				>
-					<NeonSign 
-						text={sign.text}
-						direction={sign.direction}
-						color={sign.color}
-						onclick={() => navigateToSign(sign.route)}
-					/>
-				</div>
-			{/each}
-		</div>
+	<!-- Hub Neon Signs (only show at hub, delayed after tutorial) -->
+	{#if showSigns}
+		<div class="neon-signs">
+				{#each getHubSigns() as sign}
+					<div 
+						class="sign-container sign-{sign.position}"
+					>
+						<NeonSign 
+							text={sign.text}
+							direction={sign.direction}
+							color={sign.color}
+							onclick={() => navigateToSign(sign.route)}
+						/>
+					</div>
+				{/each}
+			</div>
+	{/if}
 	
 	<!-- UI Overlay -->
 	<div class="ui-overlay">
@@ -137,15 +150,8 @@
 			</div>
 		{/if}
 		
-		<!-- Settings & Controls -->
-		<div class="settings">
-			<button 
-				class="btn-neon" 
-				onclick={() => rainEnabled = !rainEnabled}
-			>
-				Rain: {rainEnabled ? 'ON' : 'OFF'}
-			</button>
-		</div>
+		<!-- Audio and Rain Controls (Unified design in bottom-right) -->
+		<!-- Moved to AudioToggle component -->
 		
 		<!-- Navigation Component (Mobile D-pad / Desktop Minimap) -->
 		<Navigation />
@@ -355,20 +361,6 @@
 		font-size: 1rem;
 	}
 	
-	/* Settings */
-	.settings {
-		position: fixed;
-		bottom: 1.5rem;
-		right: 3rem; /* Moved left from 1.5rem */
-		animation: fadeInUp 0.6s ease-out 0.3s backwards;
-		z-index: 100;
-	}
-	
-	.settings button {
-		padding: 0.625rem 1.25rem;
-		font-size: 0.875rem;
-	}
-	
 	/* Stage Info */
 	.stage-info {
 		position: fixed;
@@ -458,11 +450,6 @@
 			padding: 0.375rem 0.625rem;
 			font-size: 0.75rem;
 			min-width: 2rem;
-		}
-		
-		.settings {
-			bottom: 1rem;
-			right: 1rem;
 		}
 		
 		.stage-info {
