@@ -52,6 +52,10 @@
 		cursor: pointer;
 		overflow: hidden;
 		transition: all var(--transition-normal);
+		pointer-events: auto;
+		-webkit-tap-highlight-color: rgba(0, 255, 240, 0.2);
+		touch-action: manipulation;
+		z-index: 10;
 	}
 	
 	.sign-text {
@@ -139,9 +143,13 @@
 	/* Mobile adjustments */
 	@media (max-width: 768px) {
 		.neon-sign {
-			padding: 0.75rem 1.5rem;
+			padding: 1rem 1.5rem;
 			font-size: 1rem;
 			letter-spacing: 2px;
+			min-height: 48px; /* Minimum touch target size */
+			display: flex;
+			align-items: center;
+			justify-content: center;
 		}
 	}
 </style>

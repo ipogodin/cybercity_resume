@@ -103,8 +103,8 @@
 	<div class="ui-overlay">
 		<!-- Location Display -->
 		<div class="location-display glass-card">
-			<h2 class="neon-text">CyberCity Hub</h2>
-			<p class="tech-font">Select your destination</p>
+			<h2 class="neon-text">Illia Pogodin</h2>
+			<p class="tech-font">Walk the streets to know me better</p>
 		</div>
 		
 		<!-- Tutorial Hint -->
@@ -197,7 +197,7 @@
 		width: 100%;
 		height: 100%;
 		pointer-events: none;
-		z-index: 25; /* Above character (20), below UI (40) */
+		z-index: 250; /* Higher than Navigation (200) to ensure signs are clickable on mobile */
 	}
 	
 	.neon-signs > * {
@@ -207,6 +207,7 @@
 	.sign-container {
 		position: absolute;
 		animation: fadeIn 1s ease-out backwards;
+		z-index: 250;
 	}
 	
 	.sign-top {
@@ -384,31 +385,46 @@
 
     .character-wrapper {
 		position: absolute;
-		bottom: 15%; /* Lower than default 15% */
-		right: 15rem;
+		bottom: 10%;
+		right: 20%;
 		z-index: 2;
+		pointer-events: none;
 	}
 	
 	/* Mobile adjustments */
 	@media (max-width: 768px) {
+		/* Stack signs vertically to avoid overlap */
 		.sign-top {
-			top: 12%;
-			font-size: 0.875rem;
-		}
-		
-		.sign-right {
-			right: 5%;
-			font-size: 0.875rem;
-		}
-		
-		.sign-bottom {
-			bottom: 25%;
+			top: 18%;
+			left: 50%;
+			transform: translateX(-50%);
 			font-size: 0.875rem;
 		}
 		
 		.sign-left {
-			left: 5%;
+			top: 32%;
+			left: 50%;
+			transform: translateX(-50%);
 			font-size: 0.875rem;
+		}
+		
+		.sign-bottom {
+			top: 46%;
+			left: 50%;
+			transform: translateX(-50%);
+			font-size: 0.875rem;
+		}
+		
+		.sign-right {
+			top: 60%;
+			left: 50%;
+			transform: translateX(-50%);
+			font-size: 0.875rem;
+		}
+		
+		.character-wrapper {
+			right: 8%; 
+            bottom: 15%;
 		}
 		
 		.location-display {

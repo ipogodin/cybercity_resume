@@ -55,6 +55,20 @@
 		<div class="avenue-title">
 			<h1 class="neon-text-pink">Experience Avenue</h1>
 			<p class="tech-font">15 Years of Building at Scale</p>
+			
+			<!-- Download Resume Button -->
+			<a 
+				href="/resume.pdf" 
+				download 
+				class="resume-download-btn"
+			>
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+					<polyline points="7 10 12 15 17 10"></polyline>
+					<line x1="12" y1="15" x2="12" y2="3"></line>
+				</svg>
+				<span>Download Full Resume</span>
+			</a>
 		</div>
 		
 		<!-- Featured Companies - Large Buildings -->
@@ -119,6 +133,7 @@
 		flex-direction: column;
 		gap: 2rem;
 		overflow-y: auto;
+		padding-bottom: 12rem; /* Extra space at bottom for mobile navigation */
 	}
 	
 	.avenue-title {
@@ -139,6 +154,45 @@
 		margin: 0.5rem 0 0 0;
 		font-size: 1.25rem;
 		color: var(--color-text-secondary);
+	}
+	
+	/* Resume Download Button */
+	.resume-download-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-top: 1.5rem;
+		padding: 0.875rem 1.75rem;
+		background: rgba(185, 0, 255, 0.1);
+		border: 2px solid var(--color-neon-purple);
+		border-radius: 6px;
+		color: var(--color-neon-purple);
+		font-family: 'Orbitron', sans-serif;
+		font-size: 1rem;
+		font-weight: 600;
+		text-decoration: none;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		cursor: pointer;
+		transition: all var(--transition-fast);
+		box-shadow: 0 0 15px rgba(185, 0, 255, 0.3);
+		animation: fadeIn 1s ease-out 0.5s backwards;
+	}
+	
+	.resume-download-btn:hover {
+		background: rgba(185, 0, 255, 0.2);
+		box-shadow: 0 0 25px rgba(185, 0, 255, 0.6);
+		transform: translateY(-2px);
+		border-color: var(--color-neon-cyan);
+		color: var(--color-neon-cyan);
+	}
+	
+	.resume-download-btn:active {
+		transform: translateY(0);
+	}
+	
+	.resume-download-btn svg {
+		flex-shrink: 0;
 	}
 	
 	/* Featured Buildings - Meta & Google */
@@ -335,29 +389,83 @@
 	@media (max-width: 768px) {
 		.experience-content {
 			padding: 1rem;
+			padding-bottom: 14rem; /* Extra bottom padding on mobile for navigation */
+		}
+		
+		.avenue-title {
+			margin-top: 1rem;
 		}
 		
 		.avenue-title h1 {
-			font-size: 2rem;
+			font-size: 1.75rem;
+			letter-spacing: 2px;
 		}
 		
 		.avenue-title p {
-			font-size: 1rem;
+			font-size: 0.9rem;
+		}
+		
+		.resume-download-btn {
+			font-size: 0.875rem;
+			padding: 0.75rem 1.25rem;
+			margin-top: 1rem;
+			gap: 0.5rem;
+			min-height: 48px; /* Touch target */
+		}
+		
+		.resume-download-btn svg {
+			width: 18px;
+			height: 18px;
 		}
 		
 		.featured-buildings {
 			flex-direction: column;
 			align-items: center;
 			gap: 2rem;
+			margin: 1rem 0;
 		}
 		
 		.featured-building {
 			width: 100%;
-			max-width: 300px;
+			max-width: 280px;
+		}
+		
+		.featured-building .company-name {
+			font-size: 1.25rem;
+			letter-spacing: 1px;
+			line-height: 1.3;
+		}
+		
+		.featured-building .company-role {
+			font-size: 0.875rem;
+		}
+		
+		.other-buildings {
+			gap: 1rem;
+			margin-bottom: 2rem;
 		}
 		
 		.small-building {
-			width: 150px;
+			width: 140px;
+			min-height: 100px;
+		}
+		
+		.small-building .building-facade {
+			padding: 1rem 0.75rem;
+			min-height: 100px;
+		}
+		
+		.small-building .company-name {
+			font-size: 0.75rem;
+			letter-spacing: 0.5px;
+			line-height: 1.2;
+			word-break: keep-all; /* Try to keep words together */
+			overflow-wrap: anywhere; /* Break long words if needed */
+			hyphens: none; /* Disable hyphenation for cleaner look */
+		}
+		
+		.small-building .company-period {
+			font-size: 0.65rem;
 		}
 	}
 </style>

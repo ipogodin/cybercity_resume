@@ -103,6 +103,12 @@
 		margin: 0 auto;
 	}
 	
+	@media (max-width: 768px) {
+		.projects-container {
+			max-width: 100%; /* Full width on mobile */
+		}
+	}
+	
 	/* Header Styles */
 	.projects-header {
 		text-align: center;
@@ -226,11 +232,15 @@
 	/* Mobile adjustments */
 	@media (max-width: 768px) {
 		.projects-content {
-			padding: 2rem 1rem 5rem 1rem;
+			left: 0; /* Full width on mobile */
+			width: 100%; /* Full width on mobile */
+			padding: 2rem 0.5rem 5rem 0.5rem; /* Minimal horizontal padding for full width */
+			animation: fadeIn 0.8s ease-out; /* Much faster fade-in on mobile */
 		}
 		
 		.projects-header {
 			margin-bottom: 2rem;
+			animation: slideDown 0.4s ease-out; /* Faster header animation */
 		}
 		
 		.title-main {
@@ -244,11 +254,13 @@
 		
 		.header-divider {
 			width: 150px;
+			animation: pulse 2s ease-in-out infinite; /* Keep pulse but start immediately */
 		}
 		
 		.projects-grid {
 			grid-template-columns: 1fr;
 			gap: 1.5rem;
+			animation: fadeInUp 0.5s ease-out 0.1s both; /* Much faster grid animation with shorter delay */
 		}
 	}
 </style>

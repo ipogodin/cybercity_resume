@@ -279,6 +279,8 @@
 			inset 0 0 60px rgba(0, 255, 240, 0.05);
 		overflow: hidden;
 		font-family: 'Share Tech Mono', monospace;
+		position: relative;
+		z-index: 10;
 	}
 	
 	.terminal-header {
@@ -414,6 +416,11 @@
 		transition: all var(--transition-fast);
 		text-decoration: none;
 		white-space: nowrap;
+		position: relative;
+		z-index: 20;
+		pointer-events: auto;
+		-webkit-tap-highlight-color: rgba(0, 255, 240, 0.2);
+		touch-action: manipulation;
 	}
 	
 	.terminal-button:hover {
@@ -570,6 +577,9 @@
 		.terminal-button {
 			width: 100%;
 			justify-content: center;
+			padding: 1rem 1.5rem; /* Larger touch target */
+			font-size: 1rem; /* Bigger text */
+			min-height: 48px; /* Minimum touch target size */
 		}
 		
 		.contact-value {
@@ -584,6 +594,8 @@
 		.social-button {
 			width: 100%;
 			text-align: center;
+			min-height: 48px; /* Minimum touch target size */
+			padding: 1rem;
 		}
 		
 		.copied-message {

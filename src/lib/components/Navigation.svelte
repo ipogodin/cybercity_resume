@@ -157,16 +157,16 @@
 	
 	/* Mobile D-Pad */
 	.navigation.mobile {
-		bottom: 2rem;
+		bottom: 1rem;
 		left: 50%;
 		transform: translateX(-50%);
 	}
 	
 	.dpad {
 		display: grid;
-		grid-template-columns: 60px 60px 60px;
-		grid-template-rows: 60px 60px 60px;
-		gap: 8px;
+		grid-template-columns: 45px 45px 45px;
+		grid-template-rows: 45px 45px 45px;
+		gap: 6px;
 		position: relative;
 	}
 	
@@ -174,13 +174,15 @@
 		background: rgba(26, 29, 63, 0.9);
 		border: 2px solid var(--color-neon-cyan);
 		color: var(--color-neon-cyan);
-		font-size: 1.5rem;
+		font-size: 1.2rem;
 		cursor: pointer;
 		transition: all var(--transition-fast);
 		box-shadow: 0 0 10px var(--color-glow-cyan);
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		min-height: 45px;
+		min-width: 45px;
 	}
 	
 	.dpad-btn:not(.disabled):hover {
@@ -227,7 +229,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 0.7rem;
+		font-size: 0.6rem;
 		background: rgba(10, 14, 39, 0.9);
 		border: 2px solid var(--color-neon-purple);
 		box-shadow: inset 0 0 10px var(--color-glow-purple);

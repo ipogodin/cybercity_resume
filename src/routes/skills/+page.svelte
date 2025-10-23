@@ -209,6 +209,11 @@
 	
 	/* Mobile adjustments */
 	@media (max-width: 768px) {
+		.character-wrapper {
+			right: -65%; /* Push character halfway off-screen to the right */
+			bottom: -60%;
+		}
+		
 		.skills-content {
 			padding: 2rem 1rem 5rem 1rem;
 		}
