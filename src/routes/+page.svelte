@@ -158,8 +158,8 @@
 		
 		<!-- Stage Info -->
 		<div class="stage-info">
-			<p class="tech-font neon-text-purple">Stage 13: Education & Contact ✅</p>
-			<p class="tech-font neon-text-cyan" style="font-size: 0.75rem; margin-top: 0.25rem;">81% Complete • Next: Mobile & Polish</p>
+			<p class="tech-font neon-text-purple">v 1.0.0</p>
+			<p class="tech-font neon-text-cyan" style="font-size: 0.65rem; margin-top: 0.25rem;">All rights reserved, I guess. Enjoy the sound of rain my friend.</p>
 		</div>
 	</div>
 </Scene>
@@ -365,7 +365,7 @@
 	.stage-info {
 		position: fixed;
 		bottom: 1.5rem;
-		left: 1.5rem;
+		left: 3rem;
 		animation: fadeInUp 0.6s ease-out 0.4s backwards;
 		z-index: 100;
 	}
