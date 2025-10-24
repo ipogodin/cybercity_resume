@@ -9,10 +9,10 @@ export const skillCategories = [
 		name: 'Languages',
 		skills: [
 			{ name: 'Java', proficiency: 'expert' },
-			{ name: 'Python', proficiency: 'expert' },
+			{ name: 'Python', proficiency: 'familiar' },
 			{ name: 'Scala', proficiency: 'intermediate' },
-            { name: 'CPP', proficiency: 'intermediate' },
-            { name: 'Golang', proficiency: 'intermediate' },
+            { name: 'CPP', proficiency: 'advanced' },
+            { name: 'Golang', proficiency: 'advanced' },
 			{ name: 'JavaScript', proficiency: 'advanced' },
 			{ name: 'SQL', proficiency: 'advanced' },
 			{ name: 'Bash/Shell', proficiency: 'intermediate' }
@@ -57,10 +57,10 @@ export const skillCategories = [
 		name: 'DevOps & Tools',
 		skills: [
 			{ name: 'Git', proficiency: 'expert' },
-			{ name: 'CI/CD', proficiency: 'expert' },
-			{ name: 'Maven', proficiency: 'advanced' },
-			{ name: 'Gradle', proficiency: 'advanced' },
-			{ name: 'Jenkins', proficiency: 'advanced' },
+			{ name: 'CI/CD', proficiency: 'advanced' },
+			{ name: 'Maven', proficiency: 'expert' },
+			{ name: 'Gradle', proficiency: 'intermediate' },
+			{ name: 'Jenkins', proficiency: 'intermediate' },
 			{ name: 'Monitoring & Metrics', proficiency: 'expert' },
 			{ name: 'Profiling', proficiency: 'advanced' }
 		]
@@ -70,7 +70,7 @@ export const skillCategories = [
 		skills: [
 			{ name: 'JUnit', proficiency: 'expert' },
 			{ name: 'Mockito', proficiency: 'expert' },
-			{ name: 'TDD', proficiency: 'expert' },
+			{ name: 'TDD', proficiency: 'advanced' },
 			{ name: 'Integration Testing', proficiency: 'expert' },
 			{ name: 'JBehave', proficiency: 'advanced' },
 			{ name: 'Load Testing', proficiency: 'advanced' }
@@ -81,9 +81,9 @@ export const skillCategories = [
 		skills: [
 			{ name: 'System Design', proficiency: 'expert' },
 			{ name: 'Design Patterns', proficiency: 'expert' },
-			{ name: 'Event-Driven Architecture', proficiency: 'expert' },
+			{ name: 'Event-Driven Architecture', proficiency: 'advanced' },
 			{ name: 'High-Scale Systems', proficiency: 'expert' },
-			{ name: 'Low-Latency Systems', proficiency: 'expert' },
+			{ name: 'Low-Latency Systems', proficiency: 'advanced' },
 			{ name: 'API Design', proficiency: 'expert' },
 			{ name: 'Security', proficiency: 'advanced' }
 		]
@@ -94,7 +94,7 @@ export const skillCategories = [
 			{ name: 'Algorithms', proficiency: 'expert' },
 			{ name: 'Data Structures', proficiency: 'expert' },
 			{ name: 'Concurrent Programming', proficiency: 'expert' },
-			{ name: 'Performance Optimization', proficiency: 'expert' }
+			{ name: 'Performance Optimization', proficiency: 'advanced' }
 		]
 	},
 	{
@@ -110,44 +110,12 @@ export const skillCategories = [
 		name: 'Web Technologies',
 		skills: [
 			{ name: 'HTML/CSS', proficiency: 'intermediate' },
-			{ name: 'jQuery', proficiency: 'intermediate' },
+			{ name: 'jQuery', proficiency: 'familiar' },
 			{ name: 'Tomcat', proficiency: 'advanced' },
 			{ name: 'Jetty', proficiency: 'advanced' },
-			{ name: 'JSP', proficiency: 'intermediate' }
+			{ name: 'JSP', proficiency: 'intermediate' },
+			{ name: 'Svelte', proficiency: 'intermediate' }
 		]
 	}
 ];
 
-/**
- * Get all skills flattened (without categories)
- */
-export function getAllSkills() {
-	return skillCategories.flatMap(category => 
-		category.skills.map(skill => ({
-			...skill,
-			category: category.name
-		}))
-	);
-}
-
-/**
- * Get skills by proficiency level
- */
-export function getSkillsByProficiency(proficiency) {
-	return getAllSkills().filter(skill => skill.proficiency === proficiency);
-}
-
-/**
- * Get skills by category name
- */
-export function getSkillsByCategory(categoryName) {
-	const category = skillCategories.find(cat => cat.name === categoryName);
-	return category ? category.skills : [];
-}
-
-/**
- * Get expert level skills
- */
-export function getExpertSkills() {
-	return getSkillsByProficiency('expert');
-}

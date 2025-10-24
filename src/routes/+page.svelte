@@ -159,7 +159,7 @@
 		<!-- Stage Info -->
 		<div class="stage-info">
 			<p class="tech-font neon-text-purple">v 1.0.0</p>
-			<p class="tech-font neon-text-cyan" style="font-size: 0.65rem; margin-top: 0.25rem;">All rights reserved, I guess. Enjoy the sound of rain my friend.</p>
+			<p class="tech-font neon-text-cyan" style="font-size: 0.65rem; margin-top: 0.25rem;">All rights reserved, I guess. Enjoy the sound of a rain, my friend.</p>
 		</div>
 	</div>
 </Scene>
