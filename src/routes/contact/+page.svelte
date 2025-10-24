@@ -1,7 +1,7 @@
 <script>
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { initKeyboardNavigation } from '$lib/utils/keyboard.js';
+	import { initKeyboardNavigation, setTerminalFocused } from '$lib/utils/keyboard.js';
 	import Scene from '$lib/components/Scene.svelte';
 	import Character from '$lib/components/Character.svelte';
 	import RainEffect from '$lib/components/RainEffect.svelte';
@@ -12,12 +12,19 @@
 	let cleanup;
 	const socialLinks = getSocialLinks();
 	
+	// Handle terminal focus changes
+	function handleTerminalFocusChange(focused) {
+		setTerminalFocused(focused);
+	}
+	
 	onMount(() => {
 		cleanup = initKeyboardNavigation();
 	});
 	
 	onDestroy(() => {
 		if (cleanup) cleanup();
+		// Reset terminal focus state on unmount
+		setTerminalFocused(false);
 	});
 </script>
 
@@ -41,7 +48,7 @@
 			
 			<!-- Terminal Interface -->
 			<div class="terminal-wrapper">
-				<ContactTerminal {contact} />
+				<ContactTerminal {contact} onFocusChange={handleTerminalFocusChange} />
 			</div>
 			
 			<!-- Tagline Section -->

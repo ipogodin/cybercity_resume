@@ -53,10 +53,34 @@ function getCurrentLocationFromURL() {
 }
 
 /**
+ * Global flag to track if terminal is focused
+ * This is set by the terminal component when input gains/loses focus
+ */
+let isTerminalFocused = false;
+
+/**
+ * Set terminal focus state
+ * @param {boolean} focused - Whether terminal input is focused
+ */
+export function setTerminalFocused(focused) {
+	isTerminalFocused = focused;
+}
+
+/**
  * Handle keyboard navigation
  * @param {KeyboardEvent} event 
  */
 function handleKeyboardNavigation(event) {
+	// If terminal is focused, don't handle any keyboard navigation
+	// except for Escape to unfocus
+	if (isTerminalFocused) {
+		if (event.key === 'Escape') {
+			// Blur any active input to exit terminal mode
+			document.activeElement?.blur();
+		}
+		return; // Terminal handles its own keys
+	}
+	
 	// Check if a modal is open (modal backdrop exists in DOM)
 	const isModalOpen = document.querySelector('.modal-backdrop') !== null;
 	

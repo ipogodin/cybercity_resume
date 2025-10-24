@@ -1,13 +1,16 @@
 <script>
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
+	import { goto } from '$app/navigation';
 	
 	/**
-	 * ContactTerminal Component - Terminal-style contact interface
+	 * ContactTerminal Component - Interactive terminal-style contact interface
 	 * @prop {Object} contact - Contact data object
+	 * @prop {Function} onFocusChange - Callback when terminal input focus changes
 	 */
 	
 	let { 
-		contact = {}
+		contact = {},
+		onFocusChange = null
 	} = $props();
 	
 	const { 
@@ -32,6 +35,13 @@
 	let terminalLines = $state([]);
 	let showCopiedMessage = $state(false);
 	let terminalReady = $state(false);
+	let showContactInfo = $state(false); // Show contact as separate block initially
+	let userInput = $state('');
+	let commandHistory = $state([]);
+	let historyIndex = $state(-1);
+	let terminalBodyRef;
+	let inputRef;
+	let isProcessingCommand = $state(false);
 	
 	// Typing speeds
 	const SPEED = {
@@ -48,6 +58,126 @@
 			await new Promise(resolve => setTimeout(resolve, delay));
 		}
 		return result;
+	}
+	
+	// Scroll terminal to bottom
+	async function scrollToBottom() {
+		await tick();
+		if (terminalBodyRef) {
+			terminalBodyRef.scrollTop = terminalBodyRef.scrollHeight;
+		}
+	}
+	
+	// Execute terminal command via API
+	async function executeCommand(command) {
+		if (!command.trim()) return;
+		
+		// Add user command to terminal
+		terminalLines = [...terminalLines, {
+			type: 'prompt',
+			text: command,
+			typing: false,
+			isUserInput: true
+		}];
+		
+		isProcessingCommand = true;
+		await scrollToBottom();
+		
+		try {
+			// Call server-side API
+			const response = await fetch('/api/terminal', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ command })
+			});
+			
+			const data = await response.json();
+			
+			// Handle clear command
+			if (data.clear) {
+				terminalLines = [];
+			} else if (data.response && data.response.length > 0) {
+				// Add response lines
+				terminalLines = [...terminalLines, ...data.response];
+			}
+			
+			// Handle navigation
+			if (data.navigate) {
+				setTimeout(() => {
+					goto(data.navigate);
+				}, 2000);
+			}
+			
+			await scrollToBottom();
+		} catch (error) {
+			console.error('Command execution error:', error);
+			terminalLines = [...terminalLines, {
+				type: 'error',
+				text: 'Error: Could not execute command',
+				typing: false
+			}];
+		} finally {
+			isProcessingCommand = false;
+			// Restore focus to input after command execution
+			await tick();
+			if (inputRef) {
+				inputRef.focus();
+			}
+		}
+	}
+	
+	// Handle keyboard input
+	function handleKeyDown(event) {
+		if (event.key === 'Enter') {
+			event.preventDefault();
+			if (userInput.trim() && !isProcessingCommand) {
+				// Add to history
+				commandHistory = [...commandHistory, userInput];
+				historyIndex = commandHistory.length;
+				
+				// Execute command
+				executeCommand(userInput);
+				userInput = '';
+			}
+		} else if (event.key === 'ArrowUp') {
+			event.preventDefault();
+			if (historyIndex > 0) {
+				historyIndex--;
+				userInput = commandHistory[historyIndex];
+			}
+		} else if (event.key === 'ArrowDown') {
+			event.preventDefault();
+			if (historyIndex < commandHistory.length - 1) {
+				historyIndex++;
+				userInput = commandHistory[historyIndex];
+			} else {
+				historyIndex = commandHistory.length;
+				userInput = '';
+			}
+		} else if (event.key === 'Tab') {
+			event.preventDefault();
+			// Could implement tab completion here
+		}
+	}
+	
+	// Handle focus change for keyboard navigation
+	function handleInputFocus() {
+		if (onFocusChange) {
+			onFocusChange(true); // Terminal is focused
+		}
+	}
+	
+	function handleInputBlur() {
+		if (onFocusChange) {
+			onFocusChange(false); // Terminal is not focused
+		}
+	}
+	
+	// Focus terminal input when clicking on terminal body
+	function handleTerminalClick() {
+		if (terminalReady && inputRef) {
+			inputRef.focus();
+		}
 	}
 	
 	// Main terminal animation sequence
@@ -92,9 +222,22 @@
 			}
 		}
 		
-		// Terminal ready - show contact options
+		// Terminal ready - add contact info as special terminal line type
 		await new Promise(resolve => setTimeout(resolve, 300));
+		
+		// Add a special "contact-info" line type that will render the buttons
+		terminalLines = [...terminalLines, { 
+			type: 'contact-info', 
+			typing: false 
+		}];
+		
 		terminalReady = true;
+		await scrollToBottom();
+		
+		// Auto-focus input after terminal is ready
+		if (inputRef) {
+			setTimeout(() => inputRef.focus(), 100);
+		}
 	});
 	
 	async function copyToClipboard(text, label) {
@@ -106,21 +249,45 @@
 			setTimeout(() => {
 				showCopiedMessage = false;
 			}, 2000);
+			
+			// Restore focus to input after copying
+			await tick();
+			if (inputRef) {
+				inputRef.focus();
+			}
 		} catch (err) {
 			const errorLine = { type: 'error', text: `> Failed to copy ${label}`, typing: false };
 			terminalLines = [...terminalLines, errorLine];
+			
+			// Restore focus even on error
+			await tick();
+			if (inputRef) {
+				inputRef.focus();
+			}
 		}
 	}
 	
-	function handleDownloadResume() {
+	async function handleDownloadResume() {
 		const infoLine = { type: 'info', text: '> Downloading resume.pdf...', typing: false };
 		terminalLines = [...terminalLines, infoLine];
 		
 		// Add success message after a short delay
-		setTimeout(() => {
+		setTimeout(async () => {
 			const successLine = { type: 'success', text: '> Download initiated', typing: false };
 			terminalLines = [...terminalLines, successLine];
+			
+			// Restore focus after download message
+			await tick();
+			if (inputRef) {
+				inputRef.focus();
+			}
 		}, 300);
+		
+		// Immediately restore focus
+		await tick();
+		if (inputRef) {
+			inputRef.focus();
+		}
 	}
 	
 	const socialPlatforms = {
@@ -142,9 +309,111 @@
 		<div class="terminal-title">contact_terminal.sh</div>
 	</div>
 	
-	<div class="terminal-body">
-		<div class="terminal-output">
-			{#each terminalLines as line}
+	<div 
+		class="terminal-body" 
+		bind:this={terminalBodyRef}
+		onclick={handleTerminalClick}
+		role="button"
+		tabindex="-1"
+	>
+		<!-- 1. Terminal output lines (command history at top) -->
+		{#each terminalLines as line}
+			{#if line.type === 'contact-info'}
+				<!-- Contact info block as part of terminal history -->
+				<div class="contact-info-block">
+					<div class="contact-options">
+						{#if email}
+						<div class="contact-option">
+							<button 
+								class="terminal-button" 
+								onclick={() => copyToClipboard(email, 'Email')}
+								type="button"
+							>
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+									<polyline points="22,6 12,13 2,6"></polyline>
+								</svg>
+								<span class="button-label">Email</span>
+							</button>
+							<code class="contact-value">{email}</code>
+						</div>
+					{/if}
+				
+					
+					{#if phone}
+						<div class="contact-option">
+							<button 
+								class="terminal-button" 
+								onclick={() => copyToClipboard(phone, 'Phone')}
+								type="button"
+							>
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+								</svg>
+								<span class="button-label">Phone</span>
+							</button>
+							<code class="contact-value">{phone}</code>
+						</div>
+					{/if}
+					
+					{#if location}
+						<div class="contact-option">
+							<div class="terminal-button static">
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+									<circle cx="12" cy="10" r="3"></circle>
+								</svg>
+								<span class="button-label">Location</span>
+							</div>
+							<code class="contact-value">{location}</code>
+						</div>
+					{/if}
+					
+					{#if resumeUrl}
+						<div class="contact-option download">
+							<a 
+								href={resumeUrl} 
+								download 
+								class="terminal-button download-button"
+								onclick={handleDownloadResume}
+							>
+								<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+									<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+									<polyline points="7 10 12 15 17 10"></polyline>
+									<line x1="12" y1="15" x2="12" y2="3"></line>
+								</svg>
+								<span class="button-label">Download Resume</span>
+							</a>
+						</div>
+					{/if}
+				</div>
+				
+				{#if Object.keys(social).length > 0}
+					<div class="social-links">
+						<div class="terminal-line prompt">
+							<span class="prompt-symbol">$</span>
+							<span class="line-text">Social networks:</span>
+						</div>
+						<div class="social-buttons">
+							{#each Object.entries(social) as [platform, url]}
+								{#if url}
+									<a 
+										href={url} 
+										target="_blank" 
+										rel="noopener noreferrer"
+										class="social-button"
+										title={socialPlatforms[platform]?.name || platform}
+									>
+										<span class="social-label">{socialPlatforms[platform]?.name || platform}</span>
+									</a>
+								{/if}
+							{/each}
+						</div>
+					</div>
+				{/if}
+				</div>
+			{:else}
+				<!-- Regular terminal line -->
 				<div class="terminal-line {line.type} {line.isUserInput ? 'user-input' : ''}">
 					{#if line.isUserInput}
 						<span class="prompt-symbol">$</span>
@@ -161,110 +430,37 @@
 					{/if}
 					<span class="line-text">{line.text}{#if line.typing}<span class="typing-cursor">█</span>{/if}</span>
 				</div>
-			{/each}
-		</div>
-		
+			{/if}
+		{/each}		<!-- 3. Interactive input line (ALWAYS at very bottom, like real terminal) -->
 		{#if terminalReady}
-			<div class="contact-options" style="animation: fadeIn 0.5s ease-out;">
-				{#if email}
-				<div class="contact-option">
-					<button 
-						class="terminal-button" 
-						onclick={() => copyToClipboard(email, 'Email')}
-						type="button"
-					>
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-							<polyline points="22,6 12,13 2,6"></polyline>
-						</svg>
-						<span class="button-label">Email</span>
-					</button>
-					<code class="contact-value">{email}</code>
-				</div>
-			{/if}
-			
-			{#if phone}
-				<div class="contact-option">
-					<button 
-						class="terminal-button" 
-						onclick={() => copyToClipboard(phone, 'Phone')}
-						type="button"
-					>
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-						</svg>
-						<span class="button-label">Phone</span>
-					</button>
-					<code class="contact-value">{phone}</code>
-				</div>
-			{/if}
-			
-			{#if location}
-				<div class="contact-option">
-					<div class="terminal-button static">
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-							<circle cx="12" cy="10" r="3"></circle>
-						</svg>
-						<span class="button-label">Location</span>
-					</div>
-					<code class="contact-value">{location}</code>
-				</div>
-			{/if}
-			
-			{#if resumeUrl}
-				<div class="contact-option download">
-					<a 
-						href={resumeUrl} 
-						download 
-						class="terminal-button download-button"
-						onclick={handleDownloadResume}
-					>
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-							<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-							<polyline points="7 10 12 15 17 10"></polyline>
-							<line x1="12" y1="15" x2="12" y2="3"></line>
-						</svg>
-						<span class="button-label">Download Resume</span>
-					</a>
-				</div>
-			{/if}
-		</div>
-		
-		{#if Object.keys(social).length > 0}
-			<div class="social-links" style="animation: fadeIn 0.5s ease-out;">
-				<div class="terminal-line prompt">
-					<span class="prompt-symbol">$</span>
-					<span class="line-text">Social networks:</span>
-				</div>
-				<div class="social-buttons">
-					{#each Object.entries(social) as [platform, url]}
-						{#if url}
-							<a 
-								href={url} 
-								target="_blank" 
-								rel="noopener noreferrer"
-								class="social-button"
-								title={socialPlatforms[platform]?.name || platform}
-							>
-								<span class="social-label">{socialPlatforms[platform]?.name || platform}</span>
-							</a>
-						{/if}
-					{/each}
-				</div>
+			<div class="terminal-input-line">
+				<input
+					bind:this={inputRef}
+					bind:value={userInput}
+					onkeydown={handleKeyDown}
+					onfocus={handleInputFocus}
+					onblur={handleInputBlur}
+					class="terminal-input"
+					type="text"
+					autocomplete="off"
+					autocorrect="off"
+					autocapitalize="off"
+					spellcheck="false"
+					placeholder=""
+					disabled={isProcessingCommand}
+				/>
+				{#if !userInput}<span class="terminal-cursor">█</span>{/if}
+				<span class="user-text">{userInput}</span>
+				{#if userInput}<span class="terminal-cursor">█</span>{/if}
 			</div>
 		{/if}
-	{/if}
 		
+		<!-- Copied message (fixed position outside scroll) -->
 		{#if showCopiedMessage}
 			<div class="copied-message">
 				<span class="success-symbol">[OK]</span>
 				Copied to clipboard
 			</div>
-		{/if}
-		
-		{#if terminalReady}
-			<div class="terminal-cursor">█</div>
 		{/if}
 	</div>
 </div>
@@ -325,11 +521,35 @@
 	.terminal-body {
 		padding: 1.5rem;
 		min-height: 400px;
+		max-height: 600px;
 		position: relative;
+		overflow-y: auto;
+		overflow-x: hidden;
+		cursor: text;
+		
+		/* Custom scrollbar */
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-neon-cyan) rgba(0, 0, 0, 0.3);
 	}
 	
-	.terminal-output {
-		margin-bottom: 2rem;
+	.terminal-body::-webkit-scrollbar {
+		width: 8px;
+	}
+	
+	.terminal-body::-webkit-scrollbar-track {
+		background: rgba(0, 0, 0, 0.3);
+		border-radius: 4px;
+	}
+	
+	.terminal-body::-webkit-scrollbar-thumb {
+		background: var(--color-neon-cyan);
+		border-radius: 4px;
+		box-shadow: 0 0 10px var(--color-glow-cyan);
+	}
+	
+	.terminal-body::-webkit-scrollbar-thumb:hover {
+		background: var(--color-neon-pink);
+		box-shadow: 0 0 15px var(--color-glow-pink);
 	}
 	
 	.terminal-line {
@@ -383,11 +603,15 @@
 		color: var(--color-text);
 	}
 	
+	.contact-info-block {
+		margin: 2rem 0;
+		animation: fadeIn 0.5s ease-out;
+	}
+	
 	.contact-options {
 		display: flex;
 		flex-direction: column;
 		gap: 1rem;
-		margin-bottom: 2rem;
 	}
 	
 	.contact-option {
@@ -457,7 +681,7 @@
 	}
 	
 	.social-links {
-		margin-top: 2rem;
+		margin-top: 1.5rem;
 		padding-top: 1.5rem;
 		border-top: 1px solid rgba(0, 255, 240, 0.2);
 	}
@@ -487,12 +711,47 @@
 		transform: translateY(-2px);
 	}
 	
+	.terminal-input-line {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+		margin-top: 1rem;
+		padding-top: 0.5rem;
+	}
+	
+	.terminal-input {
+		position: absolute;
+		left: -9999px;
+		opacity: 0;
+		pointer-events: none;
+		width: 1px;
+		height: 1px;
+	}
+	
+	.user-text {
+		color: #00ff88;
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 0.938rem;
+		font-weight: 500;
+		white-space: pre;
+	}
+	
+	.terminal-input::placeholder {
+		color: transparent; /* Completely hide placeholder */
+	}
+	
+	.terminal-input:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+	
 	.terminal-cursor {
 		display: inline-block;
 		color: var(--color-neon-cyan);
 		animation: blink 1s infinite;
 		font-size: 1rem;
 		line-height: 1;
+		flex-shrink: 0;
 	}
 	
 	.typing-cursor {
