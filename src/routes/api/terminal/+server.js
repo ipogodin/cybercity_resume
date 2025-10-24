@@ -136,6 +136,13 @@ const COMMANDS = {
         ],
     },
 
+    zhenya: {
+        description: 'Easter egg',
+        response: [
+            { type: 'info', text: 'Zaebav spellingom, but often responds to my messages.' }
+        ],
+    },
+
     matrix: {
         description: 'Enter the Matrix',
         response: [
