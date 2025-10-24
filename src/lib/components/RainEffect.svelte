@@ -15,10 +15,22 @@
 	let animationId;
 	let drops = [];
 	let isMobile = false;
+	let initialLoad = true;
 	
 	// Listen for rain toggle events
 	function handleRainToggle(event) {
 		enabled = event.detail.enabled;
+	}
+	
+	// Check localStorage for saved rain preference on mount
+	function checkSavedPreference() {
+		if (typeof window !== 'undefined' && initialLoad) {
+			const savedRain = localStorage.getItem('rainEnabled');
+			if (savedRain !== null) {
+				enabled = savedRain === 'true';
+			}
+			initialLoad = false;
+		}
 	}
 	
 	// Detect mobile device
@@ -121,6 +133,9 @@
 	}
 	
 	onMount(() => {
+		// Check saved preference first
+		checkSavedPreference();
+		
 		initRain();
 		window.addEventListener('resize', resizeCanvas);
 		window.addEventListener('rainToggle', handleRainToggle);

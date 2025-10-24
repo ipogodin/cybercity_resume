@@ -5,21 +5,23 @@
   let rainEnabled = $state(true);
   let rainAudio;
   let uiClickAudio;
-  let volume = $state(0.3); // Default to 30% volume
+  let volume = $state(0.15); // Default to 15% volume
   let showVolumeSlider = $state(false);
+  let autoplayBlocked = $state(false); // Track if autoplay was blocked
   
   // Initialize audio elements
   onMount(() => {
     // Check if user previously enabled audio
     const savedPreference = localStorage.getItem('audioEnabled');
-    if (savedPreference === 'true') {
-      audioEnabled = true;
-    }
+    const wasAudioEnabled = savedPreference === 'true';
     
-    // Check rain preference
+    // Check rain preference and dispatch event to RainEffect
     const savedRain = localStorage.getItem('rainEnabled');
+    const wasRainEnabled = savedRain === 'true';
     if (savedRain !== null) {
-      rainEnabled = savedRain === 'true';
+      rainEnabled = wasRainEnabled;
+      // Dispatch event immediately to sync with RainEffect
+      window.dispatchEvent(new CustomEvent('rainToggle', { detail: { enabled: rainEnabled } }));
     }
     
     // Create audio elements
@@ -31,8 +33,46 @@
     uiClickAudio.volume = volume * 0.5; // UI sounds quieter
     
     // Note: Audio files would need to be added to /static/sounds/
-    rainAudio.src = '/sounds/rain_ambiance.mp3';
+    rainAudio.src = '/sounds/rain_n_music.mp3';
     // uiClickAudio.src = '/sounds/ui-click.mp3';
+    
+    console.log('🎵 Audio initialized:', {
+      src: rainAudio.src,
+      wasAudioEnabled,
+      wasRainEnabled,
+      readyState: rainAudio.readyState
+    });
+    
+    // Load the audio file
+    rainAudio.load();
+    
+    rainAudio.addEventListener('canplaythrough', () => {
+      console.log('✅ Audio file loaded and ready to play');
+    });
+    
+    rainAudio.addEventListener('error', (e) => {
+      console.error('❌ Audio loading error:', e);
+      console.error('Audio error details:', rainAudio.error?.code, rainAudio.error?.message);
+    });
+    
+    // If audio was previously enabled, try to resume playback
+    if (wasAudioEnabled) {
+      // Attempt to play (may be blocked by browser autoplay policy)
+      console.log('Attempting autoplay on mount...');
+      rainAudio.play()
+        .then(() => {
+          console.log('✅ Autoplay successful');
+          audioEnabled = true;
+          autoplayBlocked = false;
+        })
+        .catch(e => {
+          console.log('⚠️ Audio autoplay blocked by browser. Muting audio on reload.');
+          // If autoplay is blocked, turn audio OFF instead of showing blocked state
+          audioEnabled = false;
+          localStorage.setItem('audioEnabled', 'false');
+          autoplayBlocked = false;
+        });
+    }
     
     return () => {
       if (rainAudio) {
@@ -52,12 +92,23 @@
     
     if (audioEnabled && rainAudio) {
       // Play rain ambiance when enabled
-      rainAudio.play().catch(e => {
-        console.log('Audio autoplay prevented:', e);
-        // Browser might block autoplay, user needs to interact first
-      });
+      console.log('Attempting to play audio...');
+      autoplayBlocked = false; // Clear the blocked state when user interacts
+      const playPromise = rainAudio.play();
+      
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            console.log('✅ Audio playing successfully');
+          })
+          .catch(e => {
+            console.error('❌ Audio play failed:', e);
+            console.log('Try interacting with the page (click anywhere) to start audio');
+          });
+      }
     } else if (rainAudio) {
       rainAudio.pause();
+      console.log('Audio paused');
     }
     
     // Play UI click sound
@@ -121,9 +172,10 @@
   <!-- Audio Toggle Button -->
   <button 
     class="control-btn audio-btn"
+    class:autoplay-blocked={autoplayBlocked && audioEnabled}
     onclick={toggleAudio}
     aria-label={audioEnabled ? 'Disable audio' : 'Enable audio'}
-    title={audioEnabled ? 'Audio: ON' : 'Audio: OFF'}
+    title={autoplayBlocked && audioEnabled ? 'Click to start audio' : (audioEnabled ? 'Audio: ON' : 'Audio: OFF')}
   >
     {#if audioEnabled}
       <!-- Volume On Icon -->
@@ -166,16 +218,21 @@
     <!-- Volume Slider -->
     {#if showVolumeSlider}
       <div class="volume-slider-container">
-        <input 
-          type="range" 
-          min="0" 
-          max="1" 
-          step="0.1" 
-          value={volume}
-          oninput={updateVolume}
-          class="volume-slider"
-          aria-label="Volume level"
-        />
+        <div class="slider-wrapper">
+          <div class="slider-track">
+            <div class="slider-fill" style="width: {volume * 100}%"></div>
+          </div>
+          <input 
+            type="range" 
+            min="0" 
+            max="1" 
+            step="0.01" 
+            value={volume}
+            oninput={updateVolume}
+            class="volume-slider"
+            aria-label="Volume level"
+          />
+        </div>
         <span class="volume-label">{Math.round(volume * 100)}%</span>
       </div>
     {/if}
@@ -239,6 +296,26 @@
     transform: translateY(0);
   }
   
+  /* Autoplay blocked indicator - pulsing animation */
+  .control-btn.autoplay-blocked {
+    animation: pulse-attention 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-attention {
+    0%, 100% {
+      box-shadow: 
+        0 0 20px rgba(255, 200, 0, 0.5),
+        inset 0 0 10px rgba(255, 200, 0, 0.2);
+      border-color: #ffc800;
+    }
+    50% {
+      box-shadow: 
+        0 0 40px rgba(255, 200, 0, 0.8),
+        inset 0 0 20px rgba(255, 200, 0, 0.3);
+      border-color: #ffdd00;
+    }
+  }
+  
   /* Volume button - smaller, circular */
   .volume-btn {
     min-width: 40px;
@@ -257,7 +334,7 @@
     color: var(--cyan);
     box-shadow: 
       0 0 25px rgba(0, 255, 255, 0.5),
-      inset 0 0 15px rgba(0, 255, 255, 0.2);
+      inset 0 0 15px rgba(0, 255, 255, 0.815);
   }
   
   .volume-btn svg {
@@ -276,8 +353,8 @@
     border-radius: 25px;
     border: 1px solid var(--purple);
     box-shadow: 
-      0 0 20px rgba(185, 0, 255, 0.3),
-      inset 0 0 10px rgba(185, 0, 255, 0.1);
+      0 0 20px rgba(187, 0, 255, 0.788),
+      inset 0 0 10px rgba(149, 207, 150, 0.705);
     animation: slideInRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
@@ -292,21 +369,53 @@
     }
   }
   
-  .volume-slider {
+  /* Slider wrapper for visual progress */
+  .slider-wrapper {
+    position: relative;
     width: 100px;
-    height: 4px;
-    border-radius: 2px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .slider-track {
+    position: absolute;
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    border: 1px solid rgba(0, 255, 255, 0.3);
+    pointer-events: none;
+    overflow: hidden;
+  }
+  
+  .slider-fill {
+    position: absolute;
+    height: 100%;
+    background: var(--cyan);
+    border-radius: 3px;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+    transition: width 0.1s ease-out;
+    pointer-events: none;
+  }
+  
+  .volume-slider {
+    width: 100%;
+    height: 20px;
     outline: none;
-    background: linear-gradient(
-      to right,
-      var(--cyan) 0%,
-      var(--cyan) var(--volume-percent, 30%),
-      rgba(255, 255, 255, 0.2) var(--volume-percent, 30%),
-      rgba(255, 255, 255, 0.2) 100%
-    );
+    background: transparent;
     -webkit-appearance: none;
     appearance: none;
     cursor: pointer;
+    position: relative;
+    z-index: 1;
+    margin: 0;
+  }
+  
+  /* WebKit browsers (Chrome, Safari, Edge) */
+  .volume-slider::-webkit-slider-track {
+    background: transparent;
+    border: none;
   }
   
   .volume-slider::-webkit-slider-thumb {
@@ -317,13 +426,26 @@
     border-radius: 50%;
     background: var(--cyan);
     cursor: pointer;
-    box-shadow: 0 0 10px var(--cyan);
+    box-shadow: 
+      0 0 10px var(--cyan),
+      0 0 20px rgba(0, 255, 255, 0.5),
+      inset 0 0 5px rgba(255, 255, 255, 0.5);
     transition: all 0.2s ease;
+    border: 2px solid rgba(255, 255, 255, 0.3);
   }
   
   .volume-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
-    box-shadow: 0 0 15px var(--cyan);
+    transform: scale(1.3);
+    box-shadow: 
+      0 0 15px var(--cyan),
+      0 0 30px rgba(0, 255, 255, 0.8),
+      inset 0 0 8px rgba(255, 255, 255, 0.7);
+  }
+  
+  /* Firefox */
+  .volume-slider::-moz-range-track {
+    background: transparent;
+    border: none;
   }
   
   .volume-slider::-moz-range-thumb {
@@ -332,14 +454,25 @@
     border-radius: 50%;
     background: var(--cyan);
     cursor: pointer;
-    border: none;
-    box-shadow: 0 0 10px var(--cyan);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+      0 0 10px var(--cyan),
+      0 0 20px rgba(0, 255, 255, 0.5),
+      inset 0 0 5px rgba(255, 255, 255, 0.5);
     transition: all 0.2s ease;
   }
   
   .volume-slider::-moz-range-thumb:hover {
-    transform: scale(1.2);
-    box-shadow: 0 0 15px var(--cyan);
+    transform: scale(1.3);
+    box-shadow: 
+      0 0 15px var(--cyan),
+      0 0 30px rgba(0, 255, 255, 0.8),
+      inset 0 0 8px rgba(255, 255, 255, 0.7);
+  }
+  
+  /* Progress fill effect for Firefox */
+  .volume-slider::-moz-range-progress {
+    background: transparent;
   }
   
   .volume-label {
