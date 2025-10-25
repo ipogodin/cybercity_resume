@@ -42,6 +42,8 @@
 	let terminalBodyRef;
 	let inputRef;
 	let isProcessingCommand = $state(false);
+	let isInitialAnimation = $state(true); // Track if we're in initial animation
+	let isInputFocused = $state(false); // Track if input is actually focused
 	
 	// Typing speeds
 	const SPEED = {
@@ -104,7 +106,13 @@
 			// Handle navigation
 			if (data.navigate) {
 				setTimeout(() => {
-					goto(data.navigate);
+					if (data.external) {
+						// Open external link in new tab
+						window.open(data.navigate, '_blank', 'noopener,noreferrer');
+					} else {
+						// Internal navigation
+						goto(data.navigate);
+					}
 				}, 2000);
 			}
 			
@@ -162,12 +170,14 @@
 	
 	// Handle focus change for keyboard navigation
 	function handleInputFocus() {
+		isInputFocused = true;
 		if (onFocusChange) {
 			onFocusChange(true); // Terminal is focused
 		}
 	}
 	
 	function handleInputBlur() {
+		isInputFocused = false;
 		if (onFocusChange) {
 			onFocusChange(false); // Terminal is not focused
 		}
@@ -232,12 +242,10 @@
 		}];
 		
 		terminalReady = true;
-		await scrollToBottom();
 		
-		// Auto-focus input after terminal is ready
-		if (inputRef) {
-			setTimeout(() => inputRef.focus(), 100);
-		}
+		// Unlock scrolling after a brief delay to ensure content is rendered
+		await new Promise(resolve => setTimeout(resolve, 100));
+		isInitialAnimation = false; // Animation complete, allow scrolling
 	});
 	
 	async function copyToClipboard(text, label) {
@@ -249,21 +257,9 @@
 			setTimeout(() => {
 				showCopiedMessage = false;
 			}, 2000);
-			
-			// Restore focus to input after copying
-			await tick();
-			if (inputRef) {
-				inputRef.focus();
-			}
 		} catch (err) {
 			const errorLine = { type: 'error', text: `> Failed to copy ${label}`, typing: false };
 			terminalLines = [...terminalLines, errorLine];
-			
-			// Restore focus even on error
-			await tick();
-			if (inputRef) {
-				inputRef.focus();
-			}
 		}
 	}
 	
@@ -275,19 +271,7 @@
 		setTimeout(async () => {
 			const successLine = { type: 'success', text: '> Download initiated', typing: false };
 			terminalLines = [...terminalLines, successLine];
-			
-			// Restore focus after download message
-			await tick();
-			if (inputRef) {
-				inputRef.focus();
-			}
 		}, 300);
-		
-		// Immediately restore focus
-		await tick();
-		if (inputRef) {
-			inputRef.focus();
-		}
 	}
 	
 	const socialPlatforms = {
@@ -310,7 +294,7 @@
 	</div>
 	
 	<div 
-		class="terminal-body" 
+		class="terminal-body {isInitialAnimation ? 'locked' : ''}" 
 		bind:this={terminalBodyRef}
 		onclick={handleTerminalClick}
 		role="button"
@@ -412,6 +396,26 @@
 					</div>
 				{/if}
 				</div>
+			{:else if line.type === 'donate-button'}
+				<!-- Donate button -->
+				<div class="donate-button-container">
+					<a 
+						href={line.url} 
+						target="_blank"
+						rel="noopener noreferrer"
+						class="terminal-donate-button"
+					>
+						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+						</svg>
+						<span class="button-label">Open Donation Page</span>
+						<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-left: 0.5rem;">
+							<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+							<polyline points="15 3 21 3 21 9"></polyline>
+							<line x1="10" y1="14" x2="21" y2="3"></line>
+						</svg>
+					</a>
+				</div>
 			{:else}
 				<!-- Regular terminal line -->
 				<div class="terminal-line {line.type} {line.isUserInput ? 'user-input' : ''}">
@@ -449,9 +453,9 @@
 					placeholder=""
 					disabled={isProcessingCommand}
 				/>
-				{#if !userInput}<span class="terminal-cursor">█</span>{/if}
+				{#if isInputFocused && !userInput}<span class="terminal-cursor">█</span>{/if}
 				<span class="user-text">{userInput}</span>
-				{#if userInput}<span class="terminal-cursor">█</span>{/if}
+				{#if isInputFocused && userInput}<span class="terminal-cursor">█</span>{/if}
 			</div>
 		{/if}
 		
@@ -520,8 +524,7 @@
 	
 	.terminal-body {
 		padding: 1.5rem;
-		min-height: 400px;
-		max-height: 600px;
+		height: 600px; /* Fixed height instead of max-height */
 		position: relative;
 		overflow-y: auto;
 		overflow-x: hidden;
@@ -530,6 +533,11 @@
 		/* Custom scrollbar */
 		scrollbar-width: thin;
 		scrollbar-color: var(--color-neon-cyan) rgba(0, 0, 0, 0.3);
+	}
+	
+	/* Lock scroll during initial animation */
+	.terminal-body.locked {
+		overflow-y: hidden;
 	}
 	
 	.terminal-body::-webkit-scrollbar {
@@ -669,6 +677,46 @@
 	
 	.download-button:hover {
 		box-shadow: 0 0 15px var(--color-glow-purple);
+	}
+	
+	.donate-button-container {
+		margin: 1rem 0;
+		display: flex;
+		justify-content: center;
+	}
+	
+	.terminal-donate-button {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.75rem;
+		padding: 1rem 2rem;
+		background: rgba(255, 0, 110, 0.1);
+		border: 2px solid var(--color-neon-pink);
+		border-radius: 6px;
+		color: var(--color-neon-pink);
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 1rem;
+		font-weight: 600;
+		text-decoration: none;
+		cursor: pointer;
+		transition: all var(--transition-fast);
+		box-shadow: 0 0 10px var(--color-glow-pink);
+		animation: pulse-pink 2s infinite;
+	}
+	
+	.terminal-donate-button:hover {
+		background: rgba(255, 0, 110, 0.2);
+		box-shadow: 0 0 25px var(--color-glow-pink);
+		transform: translateY(-2px) scale(1.05);
+	}
+	
+	@keyframes pulse-pink {
+		0%, 100% {
+			box-shadow: 0 0 10px var(--color-glow-pink);
+		}
+		50% {
+			box-shadow: 0 0 20px var(--color-glow-pink), 0 0 30px var(--color-glow-pink);
+		}
 	}
 	
 	.contact-value {
@@ -824,7 +872,7 @@
 	@media (max-width: 768px) {
 		.terminal-body {
 			padding: 1rem;
-			min-height: 300px;
+			height: 500px; /* Fixed height on mobile too */
 		}
 		
 		.contact-option {

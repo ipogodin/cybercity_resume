@@ -25,7 +25,8 @@ const COMMANDS = {
             { type: 'system', text: '  coffee                         - ☕' },
             { type: 'system', text: '  quote                          - Random tech quote' },
             { type: 'system', text: '  hack                           - Try to hack the mainframe' },
-            { type: 'system', text: '  konami                         - Easter egg!' }
+            { type: 'system', text: '  konami                         - Easter egg!' },
+            { type: 'system', text: '  donate                         - Best ROI donation in the world so far' }
         ]
     },
 
@@ -112,6 +113,17 @@ const COMMANDS = {
             { type: 'info', text: 'Redirecting in 2 seconds...' }
         ],
         navigate: '/'
+    },
+
+    donate: {
+        description: 'Support Ukraine - Donate to Sternenko Fund',
+        response: [
+            { type: 'success', text: '💙💛 Thank you for your interest in supporting Ukraine! 💛💙' },
+            { type: 'system', text: '' },
+            { type: 'info', text: 'Sternenko Fund - Best ROI donation in the world' },
+            { type: 'system', text: '' },
+            { type: 'donate-button', url: 'https://www.sternenkofund.org/en/donate' }
+        ]
     },
 
     clear: {
@@ -296,6 +308,7 @@ export async function POST({ request }) {
                 success: true,
                 response,
                 navigate: commandData.navigate || null,
+                external: commandData.external || false,
                 clear: commandData.clear || false
             });
         }
