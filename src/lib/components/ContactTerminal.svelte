@@ -44,6 +44,52 @@
 	let isProcessingCommand = $state(false);
 	let isInitialAnimation = $state(true); // Track if we're in initial animation
 	let isInputFocused = $state(false); // Track if input is actually focused
+	let hasLoadedFromSession = $state(false); // Track if we loaded from session
+	
+	const TERMINAL_STORAGE_KEY = 'contact-terminal-state';
+	const TERMINAL_HISTORY_KEY = 'contact-terminal-history';
+	
+	// Load terminal state from sessionStorage
+	function loadTerminalState() {
+		if (typeof window === 'undefined') return null;
+		
+		try {
+			const savedState = sessionStorage.getItem(TERMINAL_STORAGE_KEY);
+			const savedHistory = sessionStorage.getItem(TERMINAL_HISTORY_KEY);
+			
+			return {
+				lines: savedState ? JSON.parse(savedState) : null,
+				history: savedHistory ? JSON.parse(savedHistory) : null
+			};
+		} catch (error) {
+			console.error('Error loading terminal state:', error);
+			return null;
+		}
+	}
+	
+	// Save terminal state to sessionStorage
+	function saveTerminalState() {
+		if (typeof window === 'undefined') return;
+		
+		try {
+			sessionStorage.setItem(TERMINAL_STORAGE_KEY, JSON.stringify(terminalLines));
+			sessionStorage.setItem(TERMINAL_HISTORY_KEY, JSON.stringify(commandHistory));
+		} catch (error) {
+			console.error('Error saving terminal state:', error);
+		}
+	}
+	
+	// Clear terminal state from sessionStorage
+	function clearTerminalState() {
+		if (typeof window === 'undefined') return;
+		
+		try {
+			sessionStorage.removeItem(TERMINAL_STORAGE_KEY);
+			sessionStorage.removeItem(TERMINAL_HISTORY_KEY);
+		} catch (error) {
+			console.error('Error clearing terminal state:', error);
+		}
+	}
 	
 	// Typing speeds
 	const SPEED = {
@@ -126,6 +172,8 @@
 			}];
 		} finally {
 			isProcessingCommand = false;
+			// Save terminal state after command execution
+			saveTerminalState();
 			// Restore focus to input after command execution
 			await tick();
 			if (inputRef) {
@@ -192,6 +240,25 @@
 	
 	// Main terminal animation sequence
 	onMount(async () => {
+		// Check if we have saved state from this session
+		const savedState = loadTerminalState();
+		
+		if (savedState && savedState.lines && savedState.lines.length > 0) {
+			// Restore saved state
+			terminalLines = savedState.lines;
+			commandHistory = savedState.history || [];
+			historyIndex = commandHistory.length;
+			terminalReady = true;
+			isInitialAnimation = false;
+			hasLoadedFromSession = true;
+			
+			// Scroll to bottom to show latest content
+			await tick();
+			await scrollToBottom();
+			return;
+		}
+		
+		// No saved state - run initial animation
 		// Wait 2 seconds before starting
 		await new Promise(resolve => setTimeout(resolve, 2000));
 		
@@ -243,6 +310,9 @@
 		
 		terminalReady = true;
 		
+		// Save initial state
+		saveTerminalState();
+		
 		// Unlock scrolling after a brief delay to ensure content is rendered
 		await new Promise(resolve => setTimeout(resolve, 100));
 		isInitialAnimation = false; // Animation complete, allow scrolling
@@ -257,20 +327,26 @@
 			setTimeout(() => {
 				showCopiedMessage = false;
 			}, 2000);
+			// Save state after adding message
+			saveTerminalState();
 		} catch (err) {
 			const errorLine = { type: 'error', text: `> Failed to copy ${label}`, typing: false };
 			terminalLines = [...terminalLines, errorLine];
+			// Save state even on error
+			saveTerminalState();
 		}
 	}
 	
 	async function handleDownloadResume() {
 		const infoLine = { type: 'info', text: '> Downloading resume.pdf...', typing: false };
 		terminalLines = [...terminalLines, infoLine];
+		saveTerminalState();
 		
 		// Add success message after a short delay
 		setTimeout(async () => {
 			const successLine = { type: 'success', text: '> Download initiated', typing: false };
 			terminalLines = [...terminalLines, successLine];
+			saveTerminalState();
 		}, 300);
 	}
 	

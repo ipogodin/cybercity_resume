@@ -2,7 +2,6 @@
 	import '../app.css';
 	import '../styles/cyberpunk.css';
 	import '../styles/animations.css';
-	import favicon from '$lib/assets/favicon.svg';
 	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
 	import AudioToggle from '$lib/components/AudioToggle.svelte';
 	import { onMount } from 'svelte';
@@ -12,6 +11,19 @@
 	let contentReady = $state(false);
 
 	onMount(() => {
+		// Check if user has seen the loading screen in this session
+		const hasSeenLoading = sessionStorage.getItem('hasSeenLoading');
+		
+		if (hasSeenLoading) {
+			// Skip loading screen - show content immediately
+			isLoading = false;
+			contentReady = true;
+			return;
+		}
+		
+		// First time visit - show loading screen
+		sessionStorage.setItem('hasSeenLoading', 'true');
+		
 		// Simulate initial load time to show loading screen
 		const minLoadTime = 2000; // Minimum 2 seconds to appreciate the loading screen
 		const startTime = Date.now();
@@ -46,7 +58,13 @@
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<!-- Favicon - organized in /static/icons/ -->
+	<link rel="icon" type="image/png" href="/images/icons/favicon.png" />
+	<link rel="icon" type="image/png" sizes="32x32" href="/images/icons/favicon-32x32.png" />
+	<link rel="icon" type="image/png" sizes="16x16" href="/images/icons/favicon-16x16.png" />
+	<link rel="icon" type="image/png" sizes="192x192" href="/images/icons/android-chrome-192x192.png" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/icons/apple-touch-icon.png" />
+	
 	<!-- Google Fonts - Cyberpunk Typography -->
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />

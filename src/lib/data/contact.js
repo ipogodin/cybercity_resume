@@ -16,9 +16,9 @@ export const contact = {
 		twitter: '', // Add if you have Twitter
 		website: '' // Add if you have a personal website
 	},
-	
-	tagline: 'Experienced Software Development Engineer and Architect with a 15 years track record of delivering Distributed and Mission-critical Systems in high-agility development environments.',
-	
+
+	tagline: 'Google me. Then call me.',
+
 	availability: 'Currently employed at Meta',
 	
 	preferredContactMethod: 'email'

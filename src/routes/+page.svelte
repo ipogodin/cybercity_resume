@@ -20,28 +20,39 @@
 		console.log('🎮 Keyboard navigation initialized!');
 		console.log('🌆 Welcome to CyberCity Resume');
 		
-		// Check if tutorial has been shown this session
+		// Check if user has visited before in this session
+		const hasVisited = sessionStorage.getItem('hasVisited');
 		const tutorialShown = sessionStorage.getItem('tutorialShown');
+		
+		// Timing configuration: first visit vs subsequent visits
+		const tutorialDuration = hasVisited ? 1600 : 4000; // 5x faster: 8000ms / 5 = 1600ms
+		const introDelay = hasVisited ? 20 : 100; // 5x faster
+		
 		if (!tutorialShown) {
 			showTutorial = true;
 			sessionStorage.setItem('tutorialShown', 'true');
 			
-			// Hide tutorial after some time and show signs
+			// Hide tutorial after time (faster on subsequent loads)
 			setTimeout(() => {
 				showTutorial = false;
 				setTimeout(() => {
 					showSigns = true;
-				}, 500); // Show signs 0.5s after tutorial dismisses
-			}, 8000);
+				}, hasVisited ? 100 : 500); // 5x faster sign appearance
+			}, tutorialDuration);
 		} else {
 			// If tutorial was already shown, show signs immediately
 			showSigns = true;
 		}
 		
-		// Intro animation
+		// Mark as visited for future loads
+		if (!hasVisited) {
+			sessionStorage.setItem('hasVisited', 'true');
+		}
+		
+		// Intro animation (faster on subsequent loads)
 		setTimeout(() => {
 			isLoaded = true;
-		}, 100);
+		}, introDelay);
 	});
 	
 	// Cleanup on unmount
