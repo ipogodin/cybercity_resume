@@ -146,10 +146,20 @@
 			padding: 1rem 1.5rem;
 			font-size: 1rem;
 			letter-spacing: 2px;
-			min-height: 48px; /* Minimum touch target size */
+			min-height: 52px; /* Increased for better touch targets */
+			min-width: 280px; /* Consistent width for all buttons */
+			width: 100%; /* Take full available width in mobile layout */
+			max-width: 320px; /* But don't get too wide */
 			display: flex;
 			align-items: center;
 			justify-content: center;
+			box-sizing: border-box;
+		}
+		
+		.sign-text {
+			white-space: nowrap; /* Keep text on one line */
+			overflow: hidden;
+			text-overflow: ellipsis; /* Add ellipsis if text is too long */
 		}
 	}
 </style>

@@ -731,6 +731,15 @@
 		touch-action: manipulation;
 	}
 	
+	.button-label {
+		flex: 1;
+		text-align: left;
+	}
+	
+	.terminal-button svg {
+		flex-shrink: 0;
+	}
+	
 	.terminal-button:hover {
 		background: rgba(0, 255, 240, 0.15);
 		box-shadow: 0 0 15px var(--color-glow-cyan);
@@ -959,15 +968,27 @@
 		
 		.terminal-button {
 			width: 100%;
-			justify-content: center;
+			justify-content: flex-start; /* Changed from center for better layout */
 			padding: 1rem 1.5rem; /* Larger touch target */
-			font-size: 1rem; /* Bigger text */
-			min-height: 48px; /* Minimum touch target size */
+			font-size: 1rem !important; /* Bigger text - override any parent styles */
+			min-height: 52px; /* Increased from 48px for even better touch targets */
+			gap: 0.75rem; /* More space between icon and text */
+		}
+		
+		.terminal-button svg {
+			width: 24px !important; /* Ensure icons are visible */
+			height: 24px !important;
+		}
+		
+		.button-label {
+			font-size: 1rem !important; /* Ensure label text is readable */
+			font-weight: 500;
 		}
 		
 		.contact-value {
 			width: 100%;
 			text-align: center;
+			font-size: 0.938rem; /* Slightly larger on mobile */
 		}
 		
 		.social-buttons {
@@ -977,8 +998,9 @@
 		.social-button {
 			width: 100%;
 			text-align: center;
-			min-height: 48px; /* Minimum touch target size */
+			min-height: 52px; /* Increased touch target */
 			padding: 1rem;
+			font-size: 1rem !important;
 		}
 		
 		.copied-message {

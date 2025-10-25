@@ -66,7 +66,7 @@
 			{ text: 'Projects Alley', direction: 'north', color: 'cyan', position: 'top', route: '/projects' },
 			{ text: 'Contact Terminal', direction: 'east', color: 'purple', position: 'right', route: '/contact' },
 			{ text: 'Experience Avenue', direction: 'south', color: 'pink', position: 'bottom', route: '/experience' },
-			{ text: 'Skills District', direction: 'west', color: 'cyan', position: 'left', route: '/skills' }
+			{ text: 'Skills District', direction: 'west', color: 'purple', position: 'left', route: '/skills' }
 		];
 	}
 	
@@ -396,32 +396,53 @@
 	
 	/* Mobile adjustments */
 	@media (max-width: 768px) {
-		/* Stack signs vertically to avoid overlap */
-		.sign-top {
-			top: 18%;
+		/* Stack signs vertically to avoid overlap - explicit positioning */
+		.sign-container {
+			position: absolute;
 			left: 50%;
 			transform: translateX(-50%);
+			width: auto;
+			height: auto;
+			margin: 0;
+			padding: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+		}
+		
+		.sign-top {
+			top: 18%;
+			right: auto;
+			bottom: auto;
+			left: 50%;
+			transform: translateX(-50%) translateY(0);
 			font-size: 0.875rem;
 		}
 		
-		.sign-left {
+		.sign-right {
 			top: 32%;
+			right: auto;
+			bottom: auto;
 			left: 50%;
-			transform: translateX(-50%);
+			transform: translateX(-50%) translateY(0);
 			font-size: 0.875rem;
 		}
 		
 		.sign-bottom {
 			top: 46%;
+			right: auto;
+			bottom: auto;
 			left: 50%;
-			transform: translateX(-50%);
+			transform: translateX(-50%) translateY(0);
 			font-size: 0.875rem;
 		}
 		
-		.sign-right {
+		.sign-left {
 			top: 60%;
+			right: auto;
+			bottom: auto;
 			left: 50%;
-			transform: translateX(-50%);
+			transform: translateX(-50%) translateY(0);
 			font-size: 0.875rem;
 		}
 		
