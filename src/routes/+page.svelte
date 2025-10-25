@@ -2,6 +2,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { initKeyboardNavigation } from '$lib/utils/keyboard.js';
+	import { config } from '$lib/data/config.js';
 	import Scene from '$lib/components/Scene.svelte';
 	import Character from '$lib/components/Character.svelte';
 	import RainEffect from '$lib/components/RainEffect.svelte';
@@ -169,7 +170,7 @@
 		
 		<!-- Stage Info -->
 		<div class="stage-info">
-			<p class="tech-font neon-text-purple">v 1.0.0</p>
+			<p class="tech-font neon-text-purple">v {config.version}</p>
 			<p class="tech-font neon-text-cyan" style="font-size: 0.65rem; margin-top: 0.25rem;">All rights reserved, I guess. Enjoy the sound of a rain, my friend.</p>
 		</div>
 	</div>
