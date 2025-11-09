@@ -129,7 +129,20 @@
 		<!-- Location Display -->
 		<div class="location-display glass-card">
 			<h2 class="neon-text">Illia Pogodin</h2>
-			<p class="tech-font">Walk the streets to know me better</p>
+			<!-- Download Resume Button -->
+			<a 
+				href="/resume.pdf" 
+				download="Illia_Pogodin_Resume.pdf"
+				class="resume-download-btn"
+			>
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+					<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+					<polyline points="7 10 12 15 17 10"></polyline>
+					<line x1="12" y1="15" x2="12" y2="3"></line>
+				</svg>
+				<span>Download Resume</span>
+			</a>
+			<p class="tech-font">Or navigate to discover more</p>
 		</div>
 		
 		<!-- Tutorial Hint -->
@@ -291,6 +304,45 @@
 		margin: 0.5rem 0 0 0;
 		font-size: 0.9rem;
 		color: var(--color-text-secondary);
+	}
+	
+	/* Resume Download Button */
+	.resume-download-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.625rem;
+		margin-top: 1rem;
+		padding: 0.75rem 1.5rem;
+		background: rgba(185, 0, 255, 0.1);
+		border: 2px solid var(--color-neon-purple);
+		border-radius: 6px;
+		color: var(--color-neon-purple);
+		font-family: 'Orbitron', sans-serif;
+		font-size: 0.875rem;
+		font-weight: 600;
+		text-decoration: none;
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		cursor: pointer;
+		transition: all var(--transition-fast);
+		box-shadow: 0 0 15px rgba(185, 0, 255, 0.3);
+		animation: fadeIn 0.8s ease-out 0.6s backwards;
+	}
+	
+	.resume-download-btn:hover {
+		background: rgba(185, 0, 255, 0.2);
+		box-shadow: 0 0 25px rgba(185, 0, 255, 0.6);
+		transform: translateY(-2px);
+		border-color: var(--color-neon-cyan);
+		color: var(--color-neon-cyan);
+	}
+	
+	.resume-download-btn:active {
+		transform: translateY(0);
+	}
+	
+	.resume-download-btn svg {
+		flex-shrink: 0;
 	}
 	
 	.transitioning {
@@ -460,6 +512,19 @@
 		
 		.location-display h2 {
 			font-size: 1.5rem;
+		}
+		
+		.resume-download-btn {
+			font-size: 0.75rem;
+			padding: 0.625rem 1.125rem;
+			gap: 0.5rem;
+			margin-top: 0.75rem;
+			min-height: 44px; /* Touch target */
+		}
+		
+		.resume-download-btn svg {
+			width: 16px;
+			height: 16px;
 		}
 		
 		.tutorial-box {

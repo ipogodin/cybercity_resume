@@ -59,7 +59,7 @@
 			<!-- Download Resume Button -->
 			<a 
 				href="/resume.pdf" 
-				download 
+				download="Illia_Pogodin_Resume.pdf"
 				class="resume-download-btn"
 			>
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -268,7 +268,7 @@
 		margin: 0;
 		font-size: 1.75rem;
 		color: var(--neon-color, var(--color-neon-cyan));
-		text-shadow: 0 0 10px var(--neon-color, var(--color-neon-cyan));
+		text-shadow: 0 0 10px var(--neon-color, var,--color-neon-cyan));
 		font-family: 'Orbitron', sans-serif;
 		text-transform: uppercase;
 		letter-spacing: 2px;
