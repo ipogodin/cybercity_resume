@@ -12,7 +12,7 @@
 	
 	let { 
 		position = 'left', 
-		image = '/images/character/character.png',
+		image = '/images/character/character_animated.webm',
 		scale = 1,
 		delay = 1000,
 		entrance = 'bottom'
@@ -29,6 +29,9 @@
 	// Calculate scaled dimensions
 	const scaledWidth = $derived(100 * scale);
 	const scaledHeight = $derived(200 * scale);
+
+	// Detect if the source is a video file
+	const isVideo = $derived(image?.match(/\.(webm|mp4|ogg)$/i) !== null);
 	
 	onMount(() => {
 		const timer = setTimeout(() => {
@@ -44,7 +47,17 @@
 	class:visible
 	style="width: {scaledWidth}px; height: {scaledHeight}px;"
 >
-	{#if image}
+	{#if image && isVideo}
+		<video
+			class="character-image"
+			autoplay
+			loop
+			muted
+			playsinline
+		>
+			<source src={image} type="video/webm" />
+		</video>
+	{:else if image}
 		<img src={image} alt="Character" class="character-image" />
 	{:else}
 		<div class="character-placeholder">
@@ -128,6 +141,10 @@
 		height: 100%;
 		object-fit: contain;
 		object-position: bottom;
+	}
+
+	video.character-image {
+		background: transparent;
 	}
 	
 	/* Placeholder styling */
