@@ -184,7 +184,7 @@
 		<!-- Stage Info -->
 		<div class="stage-info">
 			<p class="tech-font neon-text-purple">v {config.version}</p>
-			<p class="tech-font neon-text-cyan" style="font-size: 0.65rem; margin-top: 0.25rem;">All rights reserved, I guess. Enjoy the sound of a rain, my friend.</p>
+			<p class="tech-font neon-text-cyan" style="font-size: 0.65rem; margin-top: 0.25rem;">WARNING: Smoking causes lung and stomach cancer. All rights either reserved or not. Created by Illia Pogodin, who never smoke cigarettes.</p>
 		</div>
 	</div>
 </Scene>

@@ -23,7 +23,7 @@
 
 <Scene background="/images/scenes/education_quarter.png" location="education" enableParallax={true}>
 	<div class="character-wrapper">
-		<Character position="right" scale={1} entrance="right" delay={2500} />
+		<Character position="right" scale={1} entrance="" delay={1500} />
 	</div>
 	
 	<div class="education-content">
@@ -127,7 +127,7 @@
 	.character-wrapper {
 		position: absolute;
 		bottom: 10%;
-		right: 13%;
+		right: 11%;
 		z-index: 2;
 		pointer-events: none; /* Allow clicks to pass through */
 	}

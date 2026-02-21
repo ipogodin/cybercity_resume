@@ -53,8 +53,10 @@
 	.character-wrapper {
 		position: absolute;
 		bottom: -60%; /* Lower than default 15% */
-		right: 0;
+		right: -50px;
 		z-index: 2;
+		user-select: none;
+		pointer-events: none;
 	}
 	
 	.skills-content {
@@ -210,7 +212,7 @@
 	/* Mobile adjustments */
 	@media (max-width: 768px) {
 		.character-wrapper {
-			right: -65%; /* Push character halfway off-screen to the right */
+			right: -75%; /* Push character halfway off-screen to the right */
 			bottom: -60%;
 		}
 		

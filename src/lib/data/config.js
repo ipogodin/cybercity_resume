@@ -4,7 +4,7 @@
  */
 
 export const config = {
-	version: '1.0.7',
+	version: '1.0.9',
 	appName: 'CyberCity Resume',
 	author: 'Illia Pogodin',
 	tagline: 'Walk the streets to know me better',
