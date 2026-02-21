@@ -101,9 +101,9 @@
 
 <!-- Main Scene -->
 <Scene background="/images/scenes/main_hub_scene.png" location="hub" enableParallax={true}>
-	<!-- Character - dynamic position and size per scene, fades in smoothly -->
+	<!-- Character - static position, no entrance animation -->
     <div class="character-wrapper">
-		<Character position="right" scale={1} entrance="right" />
+		<Character position="right" scale={1.5} entrance="" />
 	</div>
 	
 	<!-- Hub Neon Signs (only show at hub, delayed after tutorial) -->
@@ -440,11 +440,12 @@
 	}
 
     .character-wrapper {
-		position: absolute;
+		position: fixed;
 		bottom: 10%;
 		right: 20%;
 		z-index: 2;
 		pointer-events: none;
+		transform: translateX(150px);
 	}
 	
 	/* Mobile adjustments */
@@ -500,8 +501,10 @@
 		}
 		
 		.character-wrapper {
+			position: fixed;
 			right: 8%; 
             bottom: 15%;
+			transform: translateX(50px);
 		}
 		
 		.location-display {
