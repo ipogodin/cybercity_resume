@@ -118,10 +118,10 @@ const COMMANDS = {
     donate: {
         description: 'Support Ukraine - Donate to Sternenko Fund',
         response: [
-            { type: 'success', text: '💙💛 Thank you for your interest in supporting Ukraine! 💛💙' },
-            { type: 'system', text: '' },
-            { type: 'info', text: 'Sternenko Fund - Best ROI donation in the world' },
-            { type: 'system', text: '' },
+            { type: 'success', text: '💙💛 Thank you for your interest in supporting Ukraine! 💛💙', speed: 'human', delayAfter: 500 },
+            { type: 'system',  text: '' },
+            { type: 'info',    text: 'Sternenko Fund - Best ROI donation in the world',              speed: 'fast',  delayAfter: 400 },
+            { type: 'system',  text: '' },
             { type: 'donate-button', url: 'https://www.sternenkofund.org/en/donate' }
         ]
     },
@@ -137,39 +137,52 @@ const COMMANDS = {
     sasha: {
         description: 'Easter egg',
         response: [
-            { type: 'info', text: 'PIDIK.' }
+            { type: 'info', text: 'PIDIK.', speed: 'human', delayBefore: 600 }
         ],
     },
 
     zhenia: {
         description: 'Easter egg',
         response: [
-            { type: 'info', text: 'Often responds to my messages.' }
+            { type: 'info', text: 'Often responds to my messages.', speed: 'human', delayBefore: 400 }
         ],
     },
 
     zhenya: {
         description: 'Easter egg',
         response: [
-            { type: 'info', text: 'Zaebav spellingom, but often responds to my messages.' }
+            { type: 'info', text: 'Zaebav spellingom, but often responds to my messages.', speed: 'human', delayBefore: 400 }
         ],
     },
 
     matrix: {
         description: 'Enter the Matrix',
         response: [
-            { type: 'success', text: 'Wake up, Neo...' },
-            { type: 'info', text: 'The Matrix has you...' },
-            { type: 'success', text: 'Follow the white rabbit. 🐰' },
-            { type: 'system', text: 'Knock, knock, Neo.' }
+            { type: 'system',  text: 'Requesting elevated access...',                            speed: 'fast',  delayAfter: 500  },
+            { type: 'success', text: 'Auth token accepted.',                                     speed: 'fast',  delayAfter: 400  },
+            { type: 'system',  text: 'Probing layer 3 firewall...',                              speed: 'fast',  delayAfter: 700  },
+            { type: 'success', text: 'Firewall bypassed. Tunneling into core...',                speed: 'fast',  delayAfter: 800  },
+            { type: 'info',    text: 'Depth: 1 / 7   [>          ]',                            speed: 'fast',  delayAfter: 200  },
+            { type: 'info',    text: 'Depth: 2 / 7   [==>        ]',                            speed: 'fast',  delayAfter: 200  },
+            { type: 'info',    text: 'Depth: 3 / 7   [=====>     ]',                            speed: 'fast',  delayAfter: 200  },
+            { type: 'info',    text: 'Depth: 4 / 7   [========>  ]',                            speed: 'fast',  delayAfter: 300  },
+            { type: 'info',    text: 'Depth: 5 / 7   [==========>]',                            speed: 'fast',  delayAfter: 500  },
+            { type: 'error',   text: 'WARNING: Anomalous signal detected on channel 0x4D',      speed: 'fast',  delayAfter: 600  },
+            { type: 'system',  text: 'Initiating deep-layer scan...',                            speed: 'fast',  delayAfter: 400  },
+            { type: 'matrix-rain', duration: 6000 },
+            { type: 'error',   text: '⚠ SYSTEM OVERLOAD — buffer saturated',                    overlay: true, speed: 'fast',  delayBefore: 100, delayAfter: 500 },
+            { type: 'error',   text: 'CRITICAL: heap corruption @ 0xDEADBEEF  [pid 1337]',      overlay: true, speed: 'fast',  delayAfter: 450  },
+            { type: 'error',   text: 'Kernel panic — not syncing: fatal exception in interrupt', overlay: true, speed: 'fast',  delayAfter: 500  },
+            { type: 'system',  text: 'Emergency shutdown initiated...',                          overlay: true, speed: 'fast',  delayAfter: 1000 },
+            { type: 'terminal-reboot', delayBefore: 200 }
         ]
     },
 
     coffee: {
         description: 'Get some coffee',
         response: [
-            { type: 'success', text: '☕ Brewing fresh coffee...' },
-            { type: 'info', text: 'Coffee ready! Productivity +100%' }
+            { type: 'success', text: '☕ Brewing fresh coffee...', speed: 'human', delayAfter: 1800 },
+            { type: 'info',    text: 'Coffee ready! Productivity +100%',                             }
         ]
     },
 
@@ -193,31 +206,31 @@ const COMMANDS = {
     hack: {
         description: 'Hack the mainframe',
         response: [
-            { type: 'system', text: 'Initializing hack sequence...' },
-            { type: 'info', text: 'Scanning for vulnerabilities...' },
-            { type: 'success', text: 'Bypassing firewall... [████████] 100%' },
-            { type: 'info', text: 'Accessing mainframe...' },
-            { type: 'error', text: 'Failed URANUS protocol.' },
-            { type: 'error', text: 'ACCESS DENIED' },
+            { type: 'system',  text: 'Initializing hack sequence...',          speed: 'fast',  delayAfter: 600  },
+            { type: 'info',    text: 'Scanning for vulnerabilities...',         speed: 'human', delayAfter: 900  },
+            { type: 'success', text: 'Bypassing firewall... [████████] 100%',  speed: 'fast',  delayAfter: 700  },
+            { type: 'info',    text: 'Accessing mainframe...',                  speed: 'human', delayAfter: 800  },
+            { type: 'error',   text: 'Failed URANUS protocol.',                 speed: 'fast',  delayAfter: 400  },
+            { type: 'error',   text: 'ACCESS DENIED',                           speed: 'fast',  delayAfter: 0    }
         ]
     },
 
     konami: {
         description: 'Konami code Easter egg',
         response: [
-            { type: 'success', text: '🎮 KONAMI CODE ACTIVATED! 🎮' },
-            { type: 'info', text: '⬆️ ⬆️ ⬇️ ⬇️ ⬅️ ➡️ ⬅️ ➡️ 🅱️ 🅰️' },
-            { type: 'success', text: 'You unlocked: +30 Lives!' },
+            { type: 'success', text: '🎮 KONAMI CODE ACTIVATED! 🎮',              speed: 'fast',  delayAfter: 400 },
+            { type: 'info',    text: '⬆️ ⬆️ ⬇️ ⬇️ ⬅️ ➡️ ⬅️ ➡️ 🅱️ 🅰️',   speed: 'human', delayAfter: 600 },
+            { type: 'success', text: 'You unlocked: +30 Lives!',                   speed: 'fast',  delayAfter: 0   }
         ]
     },
 
     ping: {
         description: 'Ping the server',
         response: [
-            { type: 'success', text: 'PING cyber.city (127.0.0.1) 56(84) bytes of data.' },
-            { type: 'info', text: '64 bytes from cyber.city: icmp_seq=1 ttl=64 time=0.042 ms' },
-            { type: 'info', text: '64 bytes from cyber.city: icmp_seq=2 ttl=64 time=0.039 ms' },
-            { type: 'info', text: '64 bytes from cyber.city: icmp_seq=3 ttl=64 time=0.041 ms' }
+            { type: 'success', text: 'PING cyber.city (127.0.0.1) 56(84) bytes of data.', speed: 'fast',  delayAfter: 900  },
+            { type: 'info',    text: '64 bytes from cyber.city: icmp_seq=1 ttl=64 time=0.042 ms',          delayAfter: 1000 },
+            { type: 'info',    text: '64 bytes from cyber.city: icmp_seq=2 ttl=64 time=0.039 ms',          delayAfter: 1000 },
+            { type: 'info',    text: '64 bytes from cyber.city: icmp_seq=3 ttl=64 time=0.041 ms',          delayAfter: 0    }
         ]
     },
 
@@ -231,10 +244,10 @@ const COMMANDS = {
     'rm -rf /': {
         description: 'Dangerous command',
         response: [
-            { type: 'error', text: 'ERROR: Permission denied' },
-            { type: 'system', text: 'Detected destructive command!' },
-            { type: 'info', text: 'System protection: ENGAGED' },
-            { type: 'success', text: 'Nothing was harmed. Nice try though! 🛡️' }
+            { type: 'error',   text: 'ERROR: Permission denied',              speed: 'fast',  delayAfter: 500 },
+            { type: 'system',  text: 'Detected destructive command!',         speed: 'fast',  delayAfter: 400 },
+            { type: 'info',    text: 'System protection: ENGAGED',            speed: 'fast',  delayAfter: 600 },
+            { type: 'success', text: 'Nothing was harmed. Nice try though! 🛡️', speed: 'human', delayAfter: 0 }
         ]
     },
 
@@ -260,15 +273,15 @@ const COMMANDS = {
     neofetch: {
         description: 'System information',
         response: [
-            { type: 'info', text: '╭───────────────────────────────╮' },
-            { type: 'info', text: '│  CyberCity Terminal v2.0.77  │' },
-            { type: 'info', text: '├───────────────────────────────┤' },
-            { type: 'info', text: '│ OS: CyberOS 2077              │' },
-            { type: 'info', text: '│ Kernel: Neon-5.15.0           │' },
-            { type: 'info', text: '│ Shell: cybershell             │' },
-            { type: 'info', text: '│ CPU: Neural Processor X99     │' },
-            { type: 'info', text: '│ Memory: ∞ GB                  │' },
-            { type: 'info', text: '╰───────────────────────────────╯' }
+            { type: 'info', text: '╭───────────────────────────────╮', speed: 'fast', delayAfter: 60 },
+            { type: 'info', text: '│  CyberCity Terminal v2.0.77  │', speed: 'fast', delayAfter: 60 },
+            { type: 'info', text: '├───────────────────────────────┤', speed: 'fast', delayAfter: 60 },
+            { type: 'info', text: '│ OS: CyberOS 2077              │', speed: 'fast', delayAfter: 60 },
+            { type: 'info', text: '│ Kernel: Neon-5.15.0           │', speed: 'fast', delayAfter: 60 },
+            { type: 'info', text: '│ Shell: cybershell             │', speed: 'fast', delayAfter: 60 },
+            { type: 'info', text: '│ CPU: Neural Processor X99     │', speed: 'fast', delayAfter: 60 },
+            { type: 'info', text: '│ Memory: ∞ GB                  │', speed: 'fast', delayAfter: 60 },
+            { type: 'info', text: '╰───────────────────────────────╯', speed: 'fast', delayAfter: 0  }
         ]
     },
 

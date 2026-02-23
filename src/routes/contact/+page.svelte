@@ -11,6 +11,11 @@
 	
 	let cleanup;
 	const socialLinks = getSocialLinks();
+	let matrixActive = $state(false);
+	
+	function handleMatrixActive(active) {
+		matrixActive = active;
+	}
 	
 	// Handle terminal focus changes
 	function handleTerminalFocusChange(focused) {
@@ -31,7 +36,7 @@
 <RainEffect enabled={true} intensity={120} speed={2.5} />
 
 <Scene background="/images/scenes/contact_terminal.png" location="contact" enableParallax={true}>
-	<div class="character-wrapper">
+	<div class="character-wrapper" class:matrix-active={matrixActive}>
 		<Character position="center" scale={10} entrance="right" delay={150} />
 	</div>
 	
@@ -48,7 +53,7 @@
 			
 			<!-- Terminal Interface -->
 			<div class="terminal-wrapper">
-				<ContactTerminal {contact} onFocusChange={handleTerminalFocusChange} />
+				<ContactTerminal {contact} onFocusChange={handleTerminalFocusChange} onMatrixActive={handleMatrixActive} />
 			</div>
 			
 			<!-- Tagline Section -->
@@ -85,7 +90,13 @@
 		right: 10%;
 		transform: translateX(-50%);
 		z-index: 2;
-		pointer-events: none; /* Allow clicks to pass through */
+		pointer-events: none;
+		transition: opacity 1.2s ease, filter 1.2s ease;
+	}
+
+	.character-wrapper.matrix-active {
+		opacity: 0;
+		filter: blur(8px) brightness(0);
 	}
 	
 	.contact-content {

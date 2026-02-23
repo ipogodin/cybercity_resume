@@ -10,7 +10,8 @@
 	
 	let { 
 		contact = {},
-		onFocusChange = null
+		onFocusChange = null,
+		onMatrixActive = null
 	} = $props();
 	
 	const { 
@@ -45,6 +46,10 @@
 	let isInitialAnimation = $state(true); // Track if we're in initial animation
 	let isInputFocused = $state(false); // Track if input is actually focused
 	let hasLoadedFromSession = $state(false); // Track if we loaded from session
+	let showMatrixRain = $state(false); // Matrix rain effect overlay
+	let matrixCanvasRef = $state(null); // Canvas ref for matrix rain
+	let showCrashOverlay = $state(false); // Centered crash message overlay
+	let crashLines = $state([]); // Lines rendered in crash overlay
 	
 	const TERMINAL_STORAGE_KEY = 'contact-terminal-state';
 	const TERMINAL_HISTORY_KEY = 'contact-terminal-history';
@@ -119,7 +124,7 @@
 	// Execute terminal command via API
 	async function executeCommand(command) {
 		if (!command.trim()) return;
-		
+
 		// Add user command to terminal
 		terminalLines = [...terminalLines, {
 			type: 'prompt',
@@ -127,41 +132,133 @@
 			typing: false,
 			isUserInput: true
 		}];
-		
+
 		isProcessingCommand = true;
 		await scrollToBottom();
-		
+
 		try {
-			// Call server-side API
 			const response = await fetch('/api/terminal', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ command })
 			});
-			
+
 			const data = await response.json();
-			
-			// Handle clear command
+
 			if (data.clear) {
 				terminalLines = [];
 			} else if (data.response && data.response.length > 0) {
-				// Add response lines
-				terminalLines = [...terminalLines, ...data.response];
+				for (const line of data.response) {
+					// Optional pre-line pause
+					if (line.delayBefore > 0) {
+						await new Promise(resolve => setTimeout(resolve, line.delayBefore));
+					}
+
+					// — Matrix rain —
+					if (line.type === 'matrix-rain') {
+						if (onMatrixActive) onMatrixActive(true);
+						crashLines = [];
+						showCrashOverlay = false;
+						showMatrixRain = true;
+						await tick();
+						await tick();
+						const rainDuration = line.duration || 5000;
+						const stopRain = startMatrixRain(matrixCanvasRef, rainDuration);
+						await new Promise(resolve => setTimeout(resolve, rainDuration + 300));
+						stopRain();
+						showMatrixRain = false;
+						await tick();
+						await new Promise(resolve => setTimeout(resolve, 350));
+						continue;
+					}
+
+					// — Crash overlay line (rendered centered, not in scroll) —
+					if (line.overlay) {
+						showCrashOverlay = true;
+						crashLines = [...crashLines, { ...line, text: '', typing: true }];
+						const crashIdx = crashLines.length - 1;
+						const cSpeed = line.speed || 'fast';
+						for (let i = 0; i < line.text.length; i++) {
+							await new Promise(resolve => setTimeout(resolve, SPEED[cSpeed]));
+							crashLines = crashLines.map((l, idx) =>
+								idx === crashIdx ? { ...l, text: line.text.substring(0, i + 1) } : l
+							);
+						}
+						crashLines = crashLines.map((l, idx) =>
+							idx === crashIdx ? { ...l, typing: false } : l
+						);
+						if (line.delayAfter > 0) {
+							await new Promise(resolve => setTimeout(resolve, line.delayAfter));
+						}
+						continue;
+					}
+
+					// — Terminal reboot —
+					if (line.type === 'terminal-reboot') {
+						showCrashOverlay = false;
+						crashLines = [];
+						terminalReady = false;
+						isInitialAnimation = true;
+						await new Promise(resolve => setTimeout(resolve, 600));
+						terminalLines = [];
+						clearTerminalState();
+						await scrollToBottom();
+						await runBootAnimation(400);
+						if (onMatrixActive) onMatrixActive(false);
+						continue;
+					}
+
+					// — Special block lines (contact-info, donate-button, spacers) —
+					if (!line.text || line.type === 'contact-info' || line.type === 'donate-button') {
+						terminalLines = [...terminalLines, { ...line, typing: false }];
+						await scrollToBottom();
+						if (line.delayAfter > 0) {
+							await new Promise(resolve => setTimeout(resolve, line.delayAfter));
+						}
+						continue;
+					}
+
+					if (line.text === '') {
+						terminalLines = [...terminalLines, { ...line, typing: false }];
+						await scrollToBottom();
+						continue;
+					}
+
+					// — Animated text line —
+					const speed = line.speed || 'fast';
+					terminalLines = [...terminalLines, { ...line, text: '', typing: true }];
+					const lineIndex = terminalLines.length - 1;
+					await scrollToBottom();
+
+					for (let i = 0; i < line.text.length; i++) {
+						await new Promise(resolve => setTimeout(resolve, SPEED[speed]));
+						terminalLines = terminalLines.map((l, idx) =>
+							idx === lineIndex ? { ...l, text: line.text.substring(0, i + 1) } : l
+						);
+					}
+
+					terminalLines = terminalLines.map((l, idx) =>
+						idx === lineIndex ? { ...l, typing: false } : l
+					);
+
+					if (line.delayAfter > 0) {
+						await new Promise(resolve => setTimeout(resolve, line.delayAfter));
+					}
+
+					await scrollToBottom();
+				}
 			}
-			
-			// Handle navigation
+
 			if (data.navigate) {
 				setTimeout(() => {
 					if (data.external) {
-						// Open external link in new tab
 						window.open(data.navigate, '_blank', 'noopener,noreferrer');
 					} else {
-						// Internal navigation
 						goto(data.navigate);
 					}
 				}, 2000);
 			}
-			
+
 			await scrollToBottom();
 		} catch (error) {
 			console.error('Command execution error:', error);
@@ -172,9 +269,7 @@
 			}];
 		} finally {
 			isProcessingCommand = false;
-			// Save terminal state after command execution
 			saveTerminalState();
-			// Restore focus to input after command execution
 			await tick();
 			if (inputRef) {
 				inputRef.focus();
@@ -237,85 +332,147 @@
 			inputRef.focus();
 		}
 	}
-	
-	// Main terminal animation sequence
+
+	// Matrix rain canvas animation
+	function startMatrixRain(canvas, duration) {
+		if (!canvas) return () => {};
+
+		const ctx = canvas.getContext('2d');
+		canvas.width  = canvas.offsetWidth  || 580;
+		canvas.height = canvas.offsetHeight || 300;
+
+		const fontSize = 14;
+		const cols = Math.floor(canvas.width / fontSize);
+		// Stagger column starts so the rain doesn't all begin at the same time
+		const drops = Array.from({ length: cols }, () => -(Math.random() * 20));
+		const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEFabcdef!@#$%^&*<>{}[]';
+
+		const startTime = Date.now();
+		let rafId;
+		let frameCount = 0;
+
+		function draw() {
+			const elapsed  = Date.now() - startTime;
+			const progress = elapsed / duration;
+			const isOverload = progress > 0.78; // last ~22% = overload chaos
+
+			if (elapsed >= duration) {
+				// Red flash on exit
+				ctx.fillStyle = 'rgba(255, 0, 64, 0.25)';
+				ctx.fillRect(0, 0, canvas.width, canvas.height);
+				cancelAnimationFrame(rafId);
+				return;
+			}
+
+			frameCount++;
+
+			// Semi-transparent black overlay — thinner during overload for more glow buildup
+			ctx.fillStyle = isOverload ? 'rgba(0,0,0,0.03)' : 'rgba(0,0,0,0.06)';
+			ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+			ctx.font = `${fontSize}px "Share Tech Mono", monospace`;
+
+			for (let i = 0; i < drops.length; i++) {
+				// Vary per-column speed with modulo patterns for organic look
+				if (!isOverload) {
+					if (i % 4 === 0 && frameCount % 2 !== 0) continue;
+					if (i % 7 === 3 && frameCount % 3 !== 0) continue;
+				}
+
+				const char = chars[Math.floor(Math.random() * chars.length)];
+				const x = i * fontSize;
+				const y = drops[i] * fontSize;
+
+				if (isOverload) {
+					// Overload phase: red / white / orange chaos
+					const rnd = Math.random();
+					if      (rnd < 0.25) ctx.fillStyle = '#ff0040';
+					else if (rnd < 0.45) ctx.fillStyle = '#ffffff';
+					else if (rnd < 0.60) ctx.fillStyle = '#ffaa00';
+					else                 ctx.fillStyle = '#00ff41';
+				} else {
+					// Normal phase: white tip, bright green body
+					ctx.fillStyle = (y > 0 && y < fontSize * 2) ? '#ffffff' : '#00ff41';
+				}
+
+				ctx.fillText(char, x, y);
+
+				// Reset column to top with some randomness
+				if (y > canvas.height && Math.random() > 0.975) drops[i] = 0;
+				drops[i] += isOverload ? 1.8 : 0.6;
+			}
+
+			rafId = requestAnimationFrame(draw);
+		}
+
+		draw();
+		return () => cancelAnimationFrame(rafId);
+	}
+
+	// Main boot animation sequence — extracted so it can be replayed after a matrix reboot
+	async function runBootAnimation(initialDelay = 2000) {
+		await new Promise(resolve => setTimeout(resolve, initialDelay));
+
+		for (let i = 0; i < terminalScenario.length; i++) {
+			const line = terminalScenario[i];
+
+			terminalLines = [...terminalLines, {
+				type: line.type,
+				text: '',
+				typing: true,
+				isUserInput: line.isUserInput
+			}];
+
+			const currentLineIndex = terminalLines.length - 1;
+
+			for (let j = 0; j < line.text.length; j++) {
+				await new Promise(resolve => setTimeout(resolve, SPEED[line.speed]));
+				terminalLines = terminalLines.map((l, idx) =>
+					idx === currentLineIndex ? { ...l, text: line.text.substring(0, j + 1) } : l
+				);
+			}
+
+			terminalLines = terminalLines.map((l, idx) =>
+				idx === currentLineIndex ? { ...l, typing: false } : l
+			);
+
+			if (line.delayAfter > 0) {
+				await new Promise(resolve => setTimeout(resolve, line.delayAfter));
+			}
+		}
+
+		await new Promise(resolve => setTimeout(resolve, 300));
+		terminalLines = [...terminalLines, { type: 'contact-info', typing: false }];
+
+		await new Promise(resolve => setTimeout(resolve, 600));
+		terminalLines = [...terminalLines, {
+			type: 'info',
+			text: "Type 'help' for available commands",
+			typing: false
+		}];
+
+		terminalReady = true;
+		saveTerminalState();
+		await new Promise(resolve => setTimeout(resolve, 100));
+		isInitialAnimation = false;
+	}
+
 	onMount(async () => {
-		// Check if we have saved state from this session
 		const savedState = loadTerminalState();
-		
+
 		if (savedState && savedState.lines && savedState.lines.length > 0) {
-			// Restore saved state
 			terminalLines = savedState.lines;
 			commandHistory = savedState.history || [];
 			historyIndex = commandHistory.length;
 			terminalReady = true;
 			isInitialAnimation = false;
 			hasLoadedFromSession = true;
-			
-			// Scroll to bottom to show latest content
 			await tick();
 			await scrollToBottom();
 			return;
 		}
-		
-		// No saved state - run initial animation
-		// Wait 2 seconds before starting
-		await new Promise(resolve => setTimeout(resolve, 2000));
-		
-		// Execute terminal scenario
-		for (let i = 0; i < terminalScenario.length; i++) {
-			const line = terminalScenario[i];
-			
-			// Add empty line with typing state
-			terminalLines = [...terminalLines, { 
-				type: line.type,
-				text: '',
-				typing: true,
-				isUserInput: line.isUserInput
-			}];
-			
-			const currentLineIndex = terminalLines.length - 1;
-			
-			// Type the text character by character
-			for (let j = 0; j < line.text.length; j++) {
-				await new Promise(resolve => setTimeout(resolve, SPEED[line.speed]));
-				terminalLines = terminalLines.map((l, idx) => 
-					idx === currentLineIndex 
-						? { ...l, text: line.text.substring(0, j + 1) }
-						: l
-				);
-			}
-			
-			// Mark line as complete (stop cursor)
-			terminalLines = terminalLines.map((l, idx) => 
-				idx === currentLineIndex 
-					? { ...l, typing: false }
-					: l
-			);
-			
-			// Wait after line completes (if specified)
-			if (line.delayAfter > 0) {
-				await new Promise(resolve => setTimeout(resolve, line.delayAfter));
-			}
-		}
-		
-		// Terminal ready - add contact info as special terminal line type
-		await new Promise(resolve => setTimeout(resolve, 300));
-		
-		// Add a special "contact-info" line type that will render the buttons
-		terminalLines = [...terminalLines, { 
-			type: 'contact-info', 
-			typing: false 
-		}];
-		
-		terminalReady = true;
-		
-		// Save initial state
-		saveTerminalState();
-		
-		// Unlock scrolling after a brief delay to ensure content is rendered
-		await new Promise(resolve => setTimeout(resolve, 100));
-		isInitialAnimation = false; // Animation complete, allow scrolling
+
+		await runBootAnimation(2000);
 	});
 	
 	async function copyToClipboard(text, label) {
@@ -511,9 +668,12 @@
 					<span class="line-text">{line.text}{#if line.typing}<span class="typing-cursor">█</span>{/if}</span>
 				</div>
 			{/if}
-		{/each}		<!-- 3. Interactive input line (ALWAYS at very bottom, like real terminal) -->
+		{/each}
+
+		<!-- 3. Interactive input line (ALWAYS at very bottom, like real terminal) -->
 		{#if terminalReady}
-			<div class="terminal-input-line">
+			<div class="terminal-input-line" onclick={handleTerminalClick} role="presentation">
+				<span class="prompt-symbol input-prompt">$</span>
 				<input
 					bind:this={inputRef}
 					bind:value={userInput}
@@ -529,9 +689,9 @@
 					placeholder=""
 					disabled={isProcessingCommand}
 				/>
-				{#if isInputFocused && !userInput}<span class="terminal-cursor">█</span>{/if}
+				{#if !userInput}<span class="terminal-cursor" class:cursor-idle={!isInputFocused}>█</span>{/if}
 				<span class="user-text">{userInput}</span>
-				{#if isInputFocused && userInput}<span class="terminal-cursor">█</span>{/if}
+				{#if userInput}<span class="terminal-cursor" class:cursor-idle={!isInputFocused}>█</span>{/if}
 			</div>
 		{/if}
 		
@@ -543,6 +703,31 @@
 			</div>
 		{/if}
 	</div>
+
+	<!-- Matrix rain — sibling of terminal-body so it covers the visible box regardless of scroll -->
+	{#if showMatrixRain}
+		<div class="matrix-rain-overlay">
+			<canvas class="matrix-canvas" bind:this={matrixCanvasRef}></canvas>
+		</div>
+	{/if}
+
+	<!-- Crash overlay — centered over the terminal widget -->
+	{#if showCrashOverlay}
+		<div class="crash-overlay">
+			<div class="crash-content">
+				{#each crashLines as line}
+					<div class="crash-line {line.type}">
+						{#if line.type === 'error'}
+							<span class="error-symbol">[FAIL]</span>
+						{:else if line.type === 'system'}
+							<span class="system-symbol">[SYS]</span>
+						{/if}
+						<span>{line.text}{#if line.typing}<span class="typing-cursor">█</span>{/if}</span>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
 </div>
 
 <style>
@@ -850,6 +1035,12 @@
 		gap: 2px;
 		margin-top: 1rem;
 		padding-top: 0.5rem;
+		cursor: text;
+	}
+
+	.input-prompt {
+		margin-right: 6px;
+		flex-shrink: 0;
 	}
 	
 	.terminal-input {
@@ -878,6 +1069,77 @@
 		cursor: not-allowed;
 	}
 	
+	/* Matrix rain overlay — covers the full .contact-terminal widget */
+	.matrix-rain-overlay {
+		position: absolute;
+		inset: 0;
+		z-index: 50;
+		background: #000;
+		overflow: hidden;
+		animation: matrixFadeIn 0.3s ease-out;
+		border-radius: 8px;
+	}
+
+	.matrix-canvas {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	/* Crash overlay — centered over the terminal widget */
+	.crash-overlay {
+		position: absolute;
+		inset: 0;
+		z-index: 60;
+		background: rgba(0, 0, 0, 0.88);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 8px;
+		animation: matrixFadeIn 0.2s ease-out;
+	}
+
+	.crash-content {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		padding: 2rem;
+		text-align: center;
+		max-width: 90%;
+	}
+
+	.crash-line {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.6rem;
+		font-family: 'Share Tech Mono', monospace;
+		font-size: 1rem;
+		line-height: 1.6;
+		animation: crashLineIn 0.2s ease-out;
+	}
+
+	.crash-line.error {
+		color: var(--color-neon-pink);
+		text-shadow: 0 0 12px var(--color-glow-pink);
+		font-size: 1.05rem;
+		font-weight: 600;
+	}
+
+	.crash-line.system {
+		color: rgba(200, 200, 220, 0.75);
+	}
+
+	@keyframes matrixFadeIn {
+		from { opacity: 0; }
+		to   { opacity: 1; }
+	}
+
+	@keyframes crashLineIn {
+		from { opacity: 0; transform: translateY(6px); }
+		to   { opacity: 1; transform: translateY(0); }
+	}
+
 	.terminal-cursor {
 		display: inline-block;
 		color: var(--color-neon-cyan);
@@ -885,6 +1147,17 @@
 		font-size: 1rem;
 		line-height: 1;
 		flex-shrink: 0;
+	}
+
+	/* Dimmer, slower blink when the terminal hasn't been focused yet */
+	.terminal-cursor.cursor-idle {
+		color: rgba(0, 255, 240, 0.45);
+		animation: blink-idle 1.6s infinite;
+	}
+
+	@keyframes blink-idle {
+		0%, 59% { opacity: 1; }
+		60%, 100% { opacity: 0; }
 	}
 	
 	.typing-cursor {
