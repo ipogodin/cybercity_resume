@@ -198,17 +198,26 @@
 						showCrashOverlay = false;
 						crashLines = [];
 						terminalReady = false;
-						isInitialAnimation = true;
 						await new Promise(resolve => setTimeout(resolve, 600));
 						terminalLines = [];
-						clearTerminalState();
 						await scrollToBottom();
-						await runBootAnimation(400);
+						await new Promise(resolve => setTimeout(resolve, 400));
+						// Instantly restore terminal — no re-typing after matrix effect
+						terminalLines = [
+							{ type: 'system',  text: 'CONTACT TERMINAL v2.0.77',         typing: false },
+							{ type: 'success', text: 'Connection established.',            typing: false },
+							{ type: 'contact-info',                                        typing: false },
+							{ type: 'info',    text: "Type 'help' for available commands", typing: false }
+						];
+						terminalReady = true;
+						isInitialAnimation = false;
+						clearTerminalState();
+						saveTerminalState();
+						await scrollToBottom();
 						if (onMatrixActive) onMatrixActive(false);
 						continue;
 					}
 
-					// — Special block lines (contact-info, donate-button, spacers) —
 					if (!line.text || line.type === 'contact-info' || line.type === 'donate-button') {
 						terminalLines = [...terminalLines, { ...line, typing: false }];
 						await scrollToBottom();
@@ -226,6 +235,14 @@
 
 					// — Animated text line —
 					const speed = line.speed || 'fast';
+
+					if (line.instant) {
+						// Instant render — no typing animation
+						terminalLines = [...terminalLines, { ...line, typing: false }];
+						await scrollToBottom();
+						continue;
+					}
+
 					terminalLines = [...terminalLines, { ...line, text: '', typing: true }];
 					const lineIndex = terminalLines.length - 1;
 					await scrollToBottom();
