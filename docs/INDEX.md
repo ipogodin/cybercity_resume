@@ -4,6 +4,8 @@
 > When starting a new AI session, point to this file first to understand what reference material is available.
 >
 > **Usage hint:** "Read `docs/INDEX.md` to find the right doc before starting work."
+>
+> **Last verified:** February 22, 2026 — all 15 stages complete, animated character implemented.
 
 ---
 
@@ -13,7 +15,7 @@
 |---|---|
 | [PROJECT_PLAN.md](PROJECT_PLAN.md) | High-level project overview, goals, and implementation stages for the CyberCity cyberpunk resume website |
 | [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) | Full project structure reference — all files, components, routes, data files and their purposes. **Start here for new sessions.** |
-| [STAGE_CHECKLIST.md](STAGE_CHECKLIST.md) | Stage-by-stage implementation checklist tracking completed and pending work across all feature stages |
+| [STAGE_CHECKLIST.md](STAGE_CHECKLIST.md) | Stage-by-stage implementation checklist — all 15 stages completed ✅. Reference for understanding what was built and when |
 | [REVIEW_PLAN.md](REVIEW_PLAN.md) | Code review findings — list of vulnerabilities, code style issues, and improvement suggestions with completion status |
 
 ---
@@ -26,7 +28,7 @@
 | [NAVIGATION_REDESIGN_OPTIONS.md](NAVIGATION_REDESIGN_OPTIONS.md) | Options and analysis for redesigning the navigation system (mobile D-pad, minimap, z-index conflicts) |
 | [TERMINAL_UX_IMPROVEMENTS.md](TERMINAL_UX_IMPROVEMENTS.md) | UX improvements made to the terminal component — changes log from October 2025 |
 | [AUDIO_SETUP.md](AUDIO_SETUP.md) | Instructions for adding audio files to `/static/sounds/` to enable rain and ambient sound features |
-| [animated-character-plan.md](animated-character-plan.md) | Step-by-step plan for animating the static character PNG using Kling/Pika AI → rembg background removal → WebM output |
+| [animated-character-plan.md](animated-character-plan.md) | Step-by-step plan for animating the static character PNG using Kling/Pika AI → rembg background removal → WebM output. ✅ **Implemented** — `character_animated.webm` is live and used by default in `Character.svelte` |
 
 ---
 
