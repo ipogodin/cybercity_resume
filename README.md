@@ -1,42 +1,47 @@
-# CyberCity Resume 🌃⚡
+# CyberCity Resume
 
 An interactive cyberpunk-themed resume website with game-like navigation through a rainy neon city. Explore different "districts" representing resume sections by navigating with keyboard controls.
 
-**Live Site:** [Coming Soon]  
-**Status:** 🚧 In Development - Stage 11/16 (62.5% Complete)
+**Live Site:** [cybercity.vercel.app](https://cybercity.vercel.app)
+**Status:** Production-ready (v1.0.9)
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
-An immersive, cyberpunk-themed digital resume showcasing 15 years of backend engineering experience (Meta, Google, and more) in an unforgettable interactive format.
+An immersive, cyberpunk-themed digital resume showcasing backend engineering experience (Meta, Google, and more) in an interactive format.
 
 **Key Features:**
-- 🎮 Game-like keyboard navigation (Arrow keys/WASD)
-- 🌧️ Atmospheric rain effects with parallax backgrounds
-- 💼 Interactive work experience with detailed company "buildings"
-- 🛠️ Skills visualization as tech district
-- 🚀 Projects showcase as cyberpunk alley
-- 📱 Mobile-responsive design
-- ✨ Neon-lit cyberpunk aesthetic
+- Game-like keyboard navigation (Arrow keys / WASD)
+- Atmospheric rain effects with parallax backgrounds
+- Interactive work experience with detailed company "buildings"
+- Skills visualization as tech district
+- Projects showcase as cyberpunk alley
+- Interactive terminal with Easter egg commands and canvas effects
+- Animated character with transparent WebM background
+- Ambient audio with user opt-in toggle
+- Mobile-responsive design with holographic radar D-pad
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-- **Framework:** SvelteKit
-- **Styling:** Custom CSS with cyberpunk theme
-- **Effects:** Canvas rain, CSS parallax
-- **Hosting:** Vercel
-- **Fonts:** Orbitron, Rajdhani, Share Tech Mono
+- **Framework:** SvelteKit 2 + Svelte 5 (runes — `$state`, `$derived`, `$props`)
+- **Language:** TypeScript
+- **Build Tool:** Vite 7
+- **Styling:** Custom CSS with cyberpunk theme, no CSS-in-JS
+- **Effects:** Canvas rain, CSS parallax, 17 canvas Easter egg effects
+- **Hosting:** Vercel (`@sveltejs/adapter-vercel`, Node.js 22)
+- **Fonts:** Orbitron, Rajdhani, Share Tech Mono (Google Fonts)
+- **Audio:** MP3 ambient audio with localStorage persistence
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
-- npm/pnpm/yarn
+- Node.js 22+
+- npm
 
 ### Installation
 
@@ -56,165 +61,158 @@ Visit `http://localhost:5173` to explore the cyberpunk city!
 
 ---
 
-## 🎮 Navigation
+## Navigation
 
 **Desktop:**
-- Arrow Keys / WASD - Navigate between districts
-- ESC - Return to hub / Close modals
-- Backspace - Go back
-- Click neon signs - Quick navigation
+- Arrow Keys / WASD — Navigate between districts
+- ESC — Return to hub / unfocus terminal
+- Backspace — Go back
+- Click neon signs — Quick navigation
 
 **Mobile:**
-- On-screen D-pad controls
-- Touch navigation map
+- Holographic radar D-pad (top-right)
 - Tap interactive elements
+
+### Navigation Map
+
+```
+         Projects (/projects)
+              ↑ N
+              |
+Skills (/skills) ←W— Hub (/) —E→ Contact (/contact)
+              |
+              ↓ S
+       Experience (/experience)
+              |
+              ↓ S (from Skills)
+       Education (/education)
+```
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 cyberCity/
 ├── src/
-│   ├── routes/              # SvelteKit routes
-│   │   ├── +page.svelte    # Main hub (home)
-│   │   ├── experience/     # Experience Avenue
-│   │   ├── skills/         # Skills District
-│   │   ├── projects/       # Projects Alley
-│   │   ├── education/      # Education Quarter
-│   │   └── contact/        # Contact Terminal
+│   ├── routes/                  # SvelteKit routes
+│   │   ├── +page.svelte         # Main hub (home)
+│   │   ├── experience/          # Experience Avenue
+│   │   ├── skills/              # Skills District
+│   │   ├── projects/            # Projects Alley
+│   │   ├── education/           # Education Quarter
+│   │   ├── contact/             # Contact Terminal
+│   │   └── api/terminal/        # POST terminal command API
 │   ├── lib/
-│   │   ├── components/     # Svelte components
-│   │   ├── data/          # Resume content
-│   │   ├── stores/        # State management
-│   │   └── utils/         # Utilities
-│   └── styles/            # CSS files
+│   │   ├── components/          # Svelte components
+│   │   ├── data/                # Resume content
+│   │   ├── stores/              # Navigation state
+│   │   └── utils/               # Keyboard nav, transitions, canvas effects
+│   └── styles/                  # CSS files
 ├── static/
-│   └── images/            # AI-generated scenes
-└── PROJECT_PLAN.md        # Detailed implementation plan
+│   ├── resume.pdf               # Downloadable resume
+│   ├── sounds/                  # Ambient audio files
+│   └── images/                  # AI-generated scene backgrounds + character
+└── docs/                        # Developer documentation
 ```
 
 ---
 
-## 🌆 City Districts (Sections)
+## City Districts
 
-### ✅ Main Hub
-The central intersection - your starting point. Navigate to any district from here.
+### Main Hub
+The central intersection — starting point. Navigate to any district from here.
 
-### ✅ Experience Avenue (South)
-Walk through 15 years of professional experience. Click on company "buildings" to see detailed work history:
+### Experience Avenue (South)
+Walk through professional experience. Click company "buildings" for detailed work history:
 - **Featured:** Meta (L5 Engineer), Google (Senior Engineer)
 - **Previous:** Salesforce, Wargaming, IGT, and more
 
-### 🚧 Skills District (West) - Coming Soon
-Tech shop displaying all technical skills, categorized and visualized.
+### Skills District (West)
+10 skill categories with proficiency bars: Languages, Backend & Frameworks, Databases, Infrastructure & Cloud, DevOps & Tools, Testing, Architecture & Design, CS, Methodologies, Web Technologies.
 
-### 🚧 Projects Alley (North) - Coming Soon
-Graffiti-covered alley showcasing notable projects and achievements.
+### Projects Alley (North)
+8 professional career projects with descriptions, tech stacks, and highlights.
 
-### 🚧 Education Quarter (Southwest) - Coming Soon
-Academic credentials and certifications.
+### Education Quarter (South from Skills)
+M.S. Applied Mathematics, National University of Ukraine, Faculty of Cybernetics — plus certifications and additional training.
 
-### 🚧 Contact Terminal (East) - Coming Soon
-Futuristic terminal for reaching out - social links, email, resume download.
-
----
-
-## 📊 Development Progress
-
-**Current Stage:** 11/16 (62.5% Complete)
-
-- ✅ Stage 0-9: Planning, Setup, Core Components, Main Hub
-- ✅ Stage 10: Experience Avenue (Complete with modals)
-- 🚧 Stage 11: Skills District (In Progress)
-- ⚪ Stage 12-16: Projects, Education/Contact, Mobile, Polish, Deploy
-
-See [STAGE_CHECKLIST.md](./STAGE_CHECKLIST.md) for detailed progress.
+### Contact Terminal (East)
+Futuristic interactive terminal — Easter egg commands, canvas effects, contact info, and resume download. Try typing `help`.
 
 ---
 
-## 🎨 Design Philosophy
-
-- **Visual Style:** Blade Runner-inspired cyberpunk with rain-soaked neon streets
-- **Color Palette:** Dark blues, cyan, pink, purple neon accents
-- **Interaction:** Game-like exploration encourages discovery
-- **Content:** Detailed recent roles (Meta/Google), summarized earlier experience
-- **Accessibility:** Keyboard navigation, clear contrast, semantic HTML
-
----
-
-## 🔧 Scripts
+## Scripts
 
 ```bash
-# Development
-npm run dev          # Start dev server
-npm run build        # Build for production
-npm run preview      # Preview production build
-
-# Deployment
-npm run deploy       # Deploy to Vercel (coming soon)
+npm run dev        # Start dev server
+npm run build      # Production build
+npm run preview    # Preview production build
 ```
 
 ---
 
-## 📝 Content Updates
+## Content Updates
 
-Resume data is stored in `/src/lib/data/`:
-- `experience.js` - Work history
-- `skills.js` - Technical skills
-- `projects.js` - Notable projects
-- `education.js` - Degrees & certifications
-- `contact.js` - Contact information
-
-Edit these files to update your resume content!
-
----
-
-## 🚀 Deployment
-
-This project is configured for Vercel deployment:
-
-1. Push to GitHub
-2. Connect repository to Vercel
-3. Auto-deploy on push to main branch
-
-See [PROJECT_PLAN.md](./PROJECT_PLAN.md) Stage 16 for detailed deployment instructions.
+Resume data lives in `src/lib/data/`:
+- `experience.js` — Work history (6 companies)
+- `skills.js` — Technical skills (10 categories)
+- `projects.js` — Projects (8 entries)
+- `education.js` — Degrees, certifications, training
+- `contact.js` — Contact info and social links
+- `config.js` — App config, feature flags, timing constants
 
 ---
 
-## 🤝 Contributing
+## Deployment
 
-This is a personal resume project, but feel free to:
-- Report bugs via issues
-- Suggest improvements
-- Use as inspiration for your own cyberpunk resume!
+Deployed on Vercel with auto-deploy on push to `main`. Configured via `svelte.config.js` (`@sveltejs/adapter-vercel`, `nodejs22.x`).
 
 ---
 
-## 📄 License
+## Performance
 
-MIT License - Feel free to use this as a template for your own resume!
+| Metric | Status |
+|---|---|
+| Total JS (gzipped) | ~131 KB |
+| Total CSS (gzipped) | ~18 KB |
+| Lighthouse Performance | >80 |
+| LCP | <3s |
+| CLS | <0.1 |
+| Reduced motion | Supported |
 
 ---
 
-## 🙏 Credits
+## Design Philosophy
+
+- **Visual Style:** Blade Runner-inspired cyberpunk with rain-soaked neon streets
+- **Color Palette:** Dark navy, cyan `#00fff0`, pink `#ff006e`, purple `#b900ff`
+- **Interaction:** Game-like exploration encourages discovery
+- **Accessibility:** Keyboard navigation, `aria-label` on inputs, `prefers-reduced-motion` support
+
+---
+
+## Credits
 
 - **Design Inspiration:** Blade Runner, Cyberpunk 2077, Ghost in the Shell
-- **AI Images:** Generated for cyberpunk aesthetic
+- **AI Images:** Generated for cyberpunk aesthetic (Midjourney/DALL-E style)
 - **Fonts:** Google Fonts (Orbitron, Rajdhani, Share Tech Mono)
 - **Framework:** SvelteKit team and community
 
 ---
 
-## 📧 Contact
+## License
+
+MIT License — Feel free to use this as a template for your own resume!
+
+---
+
+## Contact
 
 **Illia Pogodin**
-- LinkedIn: [Add your LinkedIn]
-- GitHub: [Add your GitHub]
-- Email: [Add your email]
+- Email: [illia.pogodin@gmail.com](mailto:illia.pogodin@gmail.com)
+- LinkedIn: [linkedin.com/in/ipogodin](https://www.linkedin.com/in/ipogodin/)
 
 ---
 
 *"In the neon-soaked streets of the future, your career is the story worth telling."*
-
-Built with ❤️ and ☕ in the cyberpunk aesthetic.
