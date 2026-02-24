@@ -17,11 +17,16 @@ Added an interactive, fully functional terminal to the Contact page that maintai
 - Visual feedback during command processing
 
 ### 2. **Easter Egg Commands (Server-Side)**
-All commands are handled server-side at `/api/terminal` so users can't inspect them in client code:
+All commands are handled server-side at `/api/terminal` so users can't inspect them in client code.
+
+Each command with a canvas effect follows the **Matrix Blueprint** narrative arc:
+`setup text → escalation → canvas animation climax → resolution text`
+
+Canvas effects are implemented in `src/lib/utils/canvasEffects.js` (2200+ lines, 17 effects).
 
 #### Navigation Commands
 - `skills` - Navigate to Skills District
-- `projects` - Navigate to Projects Alley  
+- `projects` - Navigate to Projects Alley
 - `experience` - Navigate to Experience Avenue
 - `education` - Navigate to Education Quarter
 - `hub` - Return to Main Hub
@@ -34,15 +39,25 @@ All commands are handled server-side at `/api/terminal` so users can't inspect t
 - `pwd` - Print working directory
 - `neofetch` - System information in ASCII art
 
-#### Fun Easter Eggs
-- `matrix` - Enter the Matrix with Neo quotes
-- `coffee` - Get virtual coffee ☕
-- `quote` - Random tech/programming quotes
-- `hack` - Try to hack the mainframe (with funny response)
-- `konami` - Konami code Easter egg 🎮
-- `ping` - Ping the cyber.city server
-- `sudo` - Try to use sudo (denied with humor)
-- `rm -rf /` - Dangerous command (protected with humor)
+#### Fun Easter Eggs (with canvas effects)
+- `matrix` — Enter the Matrix (matrix-rain canvas, crash overlay, terminal reboot)
+- `hack` — Honeypot twist (scan-grid canvas: radar → red alarm)
+- `konami` — Full cheat code ritual (pixel-burst canvas: NES confetti explosion)
+- `coffee` — Brew ceremony (steam-particles canvas: warm particles rising)
+- `quote` — Oracle consultation (circuit-pulse canvas: circuit traces + light pulses)
+- `ping` — Traceroute through CyberCity (network-pulse canvas: packet hop-by-hop)
+- `donate` — Ukraine support (ukraine-wave canvas: flag wave + sunflowers)
+- `rm -rf /` — Fake apocalypse + Guardian rescue (file-rain canvas: paths fall red, fly back green)
+- `sasha` — Profile lookup (glitch-static canvas: RGB split noise)
+- `zhenya` / `zhenia` — Relationship DB query (typing-bubbles canvas: chat bubbles)
+- `vim` — Universal programmer trauma (vim-takeover canvas: full vim buffer sim)
+- `git blame` — All Illia (blame-waterfall canvas: code scrolls, all orange names)
+- `sudo make me a sandwich` — xkcd #149 (sandwich-build canvas: layers slide in)
+- `42` — Deep Thought answer (galaxy-converge canvas: stars form "42")
+- `git log` — Commit history (commit-graph canvas: clean→chaotic graph)
+- `ssh illia@meta.com` — Meta mainframe (packet-flow canvas: SYN/ACK stream + RST slam)
+- `uptime` — 15 years running (heartbeat-monitor canvas: EKG flatline + recovery)
+- `cat /etc/motd` — Message of the day (text-coalesce canvas: particles form haiku)
 
 #### Utility Commands
 - `clear` - Clear terminal screen
@@ -67,14 +82,20 @@ All commands are handled server-side at `/api/terminal` so users can't inspect t
 
 ### Files Modified/Created
 
-#### 1. **`/src/routes/api/terminal/+server.js`** (NEW)
+#### 1. **`/src/routes/api/terminal/+server.js`** (UPDATED)
 Server-side API endpoint that handles all terminal commands:
 - Commands hidden from client-side inspection
 - Returns typed responses with proper formatting
-- Supports navigation redirects
-- Handles clear screen command
+- Supports navigation redirects, canvas effect types, clear screen
+- 17 new canvas effect type strings in response arrays
 
-#### 2. **`/src/lib/components/ContactTerminal.svelte`** (ENHANCED)
+#### 2. **`/src/lib/utils/canvasEffects.js`** (NEW — 2200+ lines)
+All 17 canvas effect functions + dispatcher:
+- `export function startCanvasEffect(canvas, type, duration)` — routes to correct effect
+- Each effect: `startXxx(canvas, duration)` → returns `stopFn`
+- Pure Canvas API, no dependencies
+
+#### 3. **`/src/lib/components/ContactTerminal.svelte`** (ENHANCED)
 Enhanced terminal component:
 - Added interactive input field
 - Command execution via fetch API
@@ -82,6 +103,8 @@ Enhanced terminal component:
 - Auto-scroll to bottom
 - Focus/blur event handlers
 - Terminal click handler for easy focus
+- Generic canvas effects handler (reuses matrix-rain overlay div)
+- Import of `startCanvasEffect` from canvasEffects.js
 
 #### 3. **`/src/lib/utils/keyboard.js`** (ENHANCED)
 Keyboard navigation utility updated:

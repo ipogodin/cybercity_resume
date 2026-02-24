@@ -261,10 +261,12 @@ Accepts `{ command: string }`. Returns:
 **Supported commands:**
 - Navigation: `hub`, `experience`, `skills`, `projects`, `education`
 - Info: `help`, `whoami`, `get contact data [--detailed]`, `sudo get contact data --detailed`, `date`, `ls`, `pwd`, `neofetch`
-- Easter eggs: `matrix`, `coffee`, `quote`, `hack`, `konami`, `ping`, `sudo`, `rm -rf /`, `sasha`, `zhenia`/`zhenya`, `donate`
+- Easter eggs with canvas effects: `matrix` (matrix-rain), `hack` (scan-grid), `konami` (pixel-burst), `coffee` (steam-particles), `quote` (circuit-pulse), `ping` (network-pulse), `donate` (ukraine-wave), `rm -rf /` (file-rain), `sasha` (glitch-static), `zhenia`/`zhenya` (typing-bubbles), `vim` (vim-takeover), `git blame` (blame-waterfall), `sudo make me a sandwich` (sandwich-build), `42` (galaxy-converge), `git log` (commit-graph), `ssh illia@meta.com` (packet-flow), `uptime` (heartbeat-monitor), `cat /etc/motd` (text-coalesce)
 - Utility: `clear`
 
 `donate` returns `type: 'donate-button'` with `url: 'https://www.sternenkofund.org/en/donate'`
+
+Canvas effects: `src/lib/utils/canvasEffects.js` — 17 effects, single export `startCanvasEffect(canvas, type, duration)`
 
 ---
 

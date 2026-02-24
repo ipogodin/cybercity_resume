@@ -1,6 +1,7 @@
 <script>
 	import { onMount, tick } from 'svelte';
 	import { goto } from '$app/navigation';
+	import { startCanvasEffect } from '$lib/utils/canvasEffects.js';
 	
 	/**
 	 * ContactTerminal Component - Interactive terminal-style contact interface
@@ -96,6 +97,44 @@
 		}
 	}
 	
+	// All known commands for autocomplete + "did you mean"
+	const KNOWN_COMMANDS = [
+		'help', 'whoami', 'date', 'ls', 'pwd', 'neofetch', 'clear',
+		'skills', 'projects', 'experience', 'education', 'hub',
+		'get contact data', 'get contact data --detailed', 'sudo get contact data --detailed',
+		'matrix', 'coffee', 'quote', 'hack', 'konami', 'ping', 'donate',
+		'sudo', 'sudo make me a sandwich', 'rm -rf /',
+		'vim', 'git blame', 'git log', '42',
+		'ssh illia@meta.com', 'uptime', 'cat /etc/motd',
+		'sasha', 'zhenia', 'zhenya'
+	];
+
+	function levenshtein(a, b) {
+		const m = a.length, n = b.length;
+		const dp = Array.from({ length: m + 1 }, (_, i) =>
+			Array.from({ length: n + 1 }, (_, j) => i === 0 ? j : j === 0 ? i : 0)
+		);
+		for (let i = 1; i <= m; i++) {
+			for (let j = 1; j <= n; j++) {
+				dp[i][j] = a[i-1] === b[j-1]
+					? dp[i-1][j-1]
+					: 1 + Math.min(dp[i-1][j], dp[i][j-1], dp[i-1][j-1]);
+			}
+		}
+		return dp[m][n];
+	}
+
+	function findClosestCommand(input) {
+		const lower = input.toLowerCase();
+		let best = null, bestDist = Infinity;
+		for (const cmd of KNOWN_COMMANDS) {
+			const d = levenshtein(lower, cmd);
+			if (d < bestDist) { bestDist = d; best = cmd; }
+		}
+		const threshold = Math.max(3, Math.floor(lower.length * 0.5));
+		return bestDist <= threshold ? best : null;
+	}
+
 	// Typing speeds
 	const SPEED = {
 		fast: 15,      // Computer output: 15ms per char (very fast, 90s terminal style)
@@ -169,6 +208,26 @@
 						showMatrixRain = false;
 						await tick();
 						await new Promise(resolve => setTimeout(resolve, 350));
+						continue;
+					}
+
+					// — Generic canvas effects —
+					const CANVAS_EFFECTS = ['scan-grid', 'pixel-burst', 'steam-particles', 'circuit-pulse',
+						'network-pulse', 'glitch-static', 'typing-bubbles', 'ukraine-wave', 'file-rain',
+						'vim-takeover', 'blame-waterfall', 'sandwich-build', 'galaxy-converge',
+						'commit-graph', 'packet-flow', 'heartbeat-monitor', 'text-coalesce'];
+
+					if (CANVAS_EFFECTS.includes(line.type)) {
+						showMatrixRain = true;
+						await tick();
+						await tick();
+						const effectDuration = line.duration || 3000;
+						const stopEffect = startCanvasEffect(matrixCanvasRef, line.type, effectDuration);
+						await new Promise(resolve => setTimeout(resolve, effectDuration + 300));
+						stopEffect();
+						showMatrixRain = false;
+						await tick();
+						await new Promise(resolve => setTimeout(resolve, 200));
 						continue;
 					}
 
@@ -266,6 +325,18 @@
 				}
 			}
 
+			if (!data.success) {
+				const suggestion = findClosestCommand(command);
+				if (suggestion) {
+					terminalLines = [...terminalLines, {
+						type: 'system',
+						text: `Did you mean: "${suggestion}"?`,
+						typing: false
+					}];
+					await scrollToBottom();
+				}
+			}
+
 			if (data.navigate) {
 				setTimeout(() => {
 					if (data.external) {
@@ -324,7 +395,26 @@
 			}
 		} else if (event.key === 'Tab') {
 			event.preventDefault();
-			// Could implement tab completion here
+			const input = userInput.toLowerCase();
+			if (!input) return;
+			const matches = KNOWN_COMMANDS.filter(cmd => cmd.startsWith(input));
+			if (matches.length === 1) {
+				userInput = matches[0];
+			} else if (matches.length > 1) {
+				// Complete to longest common prefix
+				let prefix = matches[0];
+				for (const m of matches) {
+					while (!m.startsWith(prefix)) prefix = prefix.slice(0, -1);
+				}
+				userInput = prefix;
+				// Show available completions if still ambiguous
+				if (prefix === input) {
+					terminalLines = [...terminalLines, {
+						type: 'system', text: matches.join('  '), typing: false
+					}];
+					scrollToBottom();
+				}
+			}
 		}
 	}
 	
