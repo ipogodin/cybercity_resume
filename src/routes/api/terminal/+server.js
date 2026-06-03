@@ -84,7 +84,7 @@ const COMMANDS = {
             { type: 'success', text: 'Initiating navigation to Skills District...' },
             { type: 'info', text: 'Redirecting in 2 seconds...' }
         ],
-        navigate: '/skills'
+        navigate: '/cyberpunk/skills'
     },
 
     projects: {
@@ -93,7 +93,7 @@ const COMMANDS = {
             { type: 'success', text: 'Initiating navigation to Projects Alley...' },
             { type: 'info', text: 'Redirecting in 2 seconds...' }
         ],
-        navigate: '/projects'
+        navigate: '/cyberpunk/projects'
     },
 
     experience: {
@@ -102,7 +102,7 @@ const COMMANDS = {
             { type: 'success', text: 'Initiating navigation to Experience Avenue...' },
             { type: 'info', text: 'Redirecting in 2 seconds...' }
         ],
-        navigate: '/experience'
+        navigate: '/cyberpunk/experience'
     },
 
     education: {
@@ -111,7 +111,7 @@ const COMMANDS = {
             { type: 'success', text: 'Initiating navigation to Education Quarter...' },
             { type: 'info', text: 'Redirecting in 2 seconds...' }
         ],
-        navigate: '/education'
+        navigate: '/cyberpunk/education'
     },
 
     hub: {
@@ -120,7 +120,7 @@ const COMMANDS = {
             { type: 'success', text: 'Returning to Main Hub...' },
             { type: 'info', text: 'Redirecting in 2 seconds...' }
         ],
-        navigate: '/'
+        navigate: '/cyberpunk'
     },
 
     donate: {

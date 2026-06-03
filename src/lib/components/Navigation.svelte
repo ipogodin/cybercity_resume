@@ -31,12 +31,12 @@
 	
 	// Map locations to routes and display names
 	const locationRouteMap = {
-		'hub': '/',
-		'experience': '/experience',
-		'skills': '/skills',
-		'projects': '/projects',
-		'education': '/education',
-		'contact': '/contact'
+		'hub': '/cyberpunk',
+		'experience': '/cyberpunk/experience',
+		'skills': '/cyberpunk/skills',
+		'projects': '/cyberpunk/projects',
+		'education': '/cyberpunk/education',
+		'contact': '/cyberpunk/contact'
 	};
 	
 	const locationDisplayNames = {

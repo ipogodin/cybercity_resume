@@ -1,0 +1,99 @@
+<script lang="ts">
+	import '../../app.css';
+	import '../../styles/cyberpunk.css';
+	import '../../styles/animations.css';
+	import LoadingScreen from '$lib/components/LoadingScreen.svelte';
+	import AudioToggle from '$lib/components/AudioToggle.svelte';
+	import { onMount } from 'svelte';
+
+	let { children } = $props();
+	let isLoading = $state(true);
+	let contentReady = $state(false);
+
+	onMount(() => {
+		// Check if user has seen the loading screen in this session
+		const hasSeenLoading = sessionStorage.getItem('hasSeenLoading');
+		
+		if (hasSeenLoading) {
+			// Skip loading screen - show content immediately
+			isLoading = false;
+			contentReady = true;
+			return;
+		}
+		
+		// First time visit - show loading screen
+		sessionStorage.setItem('hasSeenLoading', 'true');
+		
+		// Simulate initial load time to show loading screen
+		const minLoadTime = 2000; // Minimum 2 seconds to appreciate the loading screen
+		const startTime = Date.now();
+
+		// Wait for DOM to be ready
+		const checkReady = () => {
+			const elapsed = Date.now() - startTime;
+			const remainingTime = minLoadTime - elapsed;
+
+			if (remainingTime > 0) {
+				setTimeout(() => {
+					isLoading = false;
+					setTimeout(() => {
+						contentReady = true;
+					}, 500);
+				}, remainingTime);
+			} else {
+				isLoading = false;
+				setTimeout(() => {
+					contentReady = true;
+				}, 500);
+			}
+		};
+
+		// Check if document is ready
+		if (document.readyState === 'complete') {
+			checkReady();
+		} else {
+			window.addEventListener('load', checkReady);
+		}
+	});
+</script>
+
+<svelte:head>
+	<!-- Favicon - organized in /static/icons/ -->
+	<link rel="icon" type="image/png" href="/images/icons/favicon.png" />
+	<link rel="icon" type="image/png" sizes="32x32" href="/images/icons/favicon-32x32.png" />
+	<link rel="icon" type="image/png" sizes="16x16" href="/images/icons/favicon-16x16.png" />
+	<link rel="icon" type="image/png" sizes="192x192" href="/images/icons/android-chrome-192x192.png" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/images/icons/apple-touch-icon.png" />
+	
+	<!-- Google Fonts - Cyberpunk Typography -->
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&family=Orbitron:wght@400;500;600;700;800;900&display=swap"
+		rel="stylesheet"
+	/>
+	<title>CyberCity Resume</title>
+	<meta name="description" content="Interactive cyberpunk-themed resume portfolio" />
+</svelte:head>
+
+<LoadingScreen {isLoading} />
+
+{#if contentReady}
+	<AudioToggle />
+	{@render children?.()}
+{/if}
+
+<style>
+	:global(html),
+	:global(body) {
+		overflow: hidden;
+		width: 100%;
+		height: 100%;
+	}
+	:global(body) {
+		background-color: var(--color-bg-primary);
+		color: var(--color-text-primary);
+		font-family: 'Rajdhani', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+		position: fixed;
+	}
+</style>

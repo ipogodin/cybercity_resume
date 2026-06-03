@@ -6,12 +6,12 @@ import { goto } from '$app/navigation';
  * Map locations to routes
  */
 const locationRouteMap = {
-	'hub': '/',
-	'experience': '/experience',
-	'skills': '/skills',
-	'projects': '/projects',
-	'education': '/education',
-	'contact': '/contact'
+	'hub': '/cyberpunk',
+	'experience': '/cyberpunk/experience',
+	'skills': '/cyberpunk/skills',
+	'projects': '/cyberpunk/projects',
+	'education': '/cyberpunk/education',
+	'contact': '/cyberpunk/contact'
 };
 
 /**
@@ -110,7 +110,7 @@ function handleKeyboardNavigation(event) {
 	// Handle Escape key - reset to hub (only if no modal is open)
 	if (event.key === 'Escape' && !isModalOpen) {
 		event.preventDefault();
-		goto('/');
+		goto('/cyberpunk');
 	}
 	
 	// Handle Backspace - go back
