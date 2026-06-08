@@ -9,6 +9,7 @@ const mockRedis = {
 };
 
 vi.mock('./redis.js', () => ({ redis: mockRedis }));
+vi.mock('$env/dynamic/private', () => ({ env: { RATE_LIMIT_BYPASS_IPS: '' } }));
 
 describe('runGuard', () => {
 	beforeEach(() => {
