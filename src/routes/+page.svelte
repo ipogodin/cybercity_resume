@@ -1,5 +1,89 @@
 <script>
 	import StarField from '$lib/components/StarField.svelte';
+	import { goto } from '$app/navigation';
+
+	let fitQuery = $state('');
+	let fitPdfError = $state('');
+
+	const PLACEHOLDERS = [
+		'Staff Software Engineer — is Illia a good fit?',
+		'Senior Backend Engineer at a fintech startup…',
+		'What did Illia build at Meta?',
+		'Does Illia have experience with distributed systems?',
+		'Principal Engineer, platform team — check fit',
+	];
+	let placeholderIndex = $state(0);
+	let placeholderText = $state(PLACEHOLDERS[0]);
+	let placeholderFading = $state(false);
+
+	import { onMount } from 'svelte';
+	onMount(() => {
+		const interval = setInterval(() => {
+			placeholderFading = true;
+			setTimeout(() => {
+				placeholderIndex = (placeholderIndex + 1) % PLACEHOLDERS.length;
+				placeholderText = PLACEHOLDERS[placeholderIndex];
+				placeholderFading = false;
+			}, 400);
+		}, 3500);
+		return () => clearInterval(interval);
+	});
+
+	function submitFitCheck() {
+		const q = fitQuery.trim();
+		if (!q) return;
+		goto(`/chat?q=${encodeURIComponent(q)}`);
+	}
+
+	/** @param {KeyboardEvent} e */
+	function handleFitKeydown(e) {
+		if (e.key === 'Enter') submitFitCheck();
+	}
+
+	const ACCEPTED = ['application/pdf', 'image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+
+	/** @param {Event & {currentTarget: HTMLInputElement}} e */
+	async function handleHomePdfUpload(e) {
+		fitPdfError = '';
+		const file = e.currentTarget.files?.[0];
+		if (!file) return;
+		if (!ACCEPTED.includes(file.type)) {
+			fitPdfError = 'Supported: PDF, PNG, JPG, WEBP.';
+			e.currentTarget.value = '';
+			return;
+		}
+		if (file.size > 4 * 1024 * 1024) {
+			fitPdfError = 'File too large — 4 MB max.';
+			e.currentTarget.value = '';
+			return;
+		}
+		try {
+			if (file.type === 'application/pdf') {
+				const { getDocument, GlobalWorkerOptions } = await import('pdfjs-dist');
+				GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.mjs', import.meta.url).href;
+				const arrayBuffer = await file.arrayBuffer();
+				const pdf = await getDocument({ data: arrayBuffer }).promise;
+				let text = '';
+				for (let i = 1; i <= pdf.numPages; i++) {
+					const p = await pdf.getPage(i);
+					const content = await p.getTextContent();
+					text += content.items.map(item => ('str' in item ? item.str : '')).join(' ') + '\n';
+				}
+				sessionStorage.setItem('fit_pdf', text.trim());
+			} else {
+				await new Promise((resolve, reject) => {
+					const reader = new FileReader();
+					reader.onload = () => { sessionStorage.setItem('fit_image', /** @type {string} */ (reader.result)); resolve(null); };
+					reader.onerror = reject;
+					reader.readAsDataURL(file);
+				});
+			}
+			goto('/chat?from=pdf');
+		} catch {
+			fitPdfError = 'Could not read file.';
+		}
+		e.currentTarget.value = '';
+	}
 
 	const experience = [
 		{
@@ -98,8 +182,8 @@
 			<h1>Illia<br>Pogodin</h1>
 			<p class="hero-title">Software Engineer</p>
 			<p class="hero-bio">
-				Principal / Staff engineer with 15+ years building distributed, mission-critical platforms.
-				Meta · Google · Salesforce.
+				L5 Software Engineer at Meta · 15+ years building distributed, mission-critical platforms.
+				Targeting Staff-level roles. Meta · Google · Salesforce.
 			</p>
 			<div class="btns">
 				<a href="/work" class="btn-primary">View Work →</a>
@@ -125,6 +209,44 @@
 			<p class="role">Senior Software Engineer</p>
 			<p class="period muted">2024</p>
 			<p class="card-detail">Google Messages · RCS · 1.6B users</p>
+		</div>
+
+		<!-- AI Chat card — row 3, full width -->
+		<div class="card card-chat">
+			<div class="chat-card-inner">
+				<div class="chat-card-left">
+					<div class="chat-ai-badge">
+						<span class="ai-dot"></span>
+						AI assistant
+					</div>
+					<p class="chat-card-headline">Ask about Illia's experience<br>or check fit for your role</p>
+					<a href="/chat" class="chat-card-link">Open full chat →</a>
+				</div>
+				<div class="chat-card-right">
+					<div class="chat-input-wrap">
+						<input
+							type="text"
+							class="chat-card-input"
+							class:placeholder-fading={placeholderFading}
+							bind:value={fitQuery}
+							placeholder={placeholderText}
+							onkeydown={handleFitKeydown}
+							aria-label="Ask about Illia or check fit"
+						/>
+						<div class="chat-card-actions">
+							<label for="home-pdf-upload" class="chat-attach-btn" title="Attach job description (PDF or screenshot)">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+									<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66L9.64 16.2a2 2 0 01-2.83-2.83l8.49-8.48"/>
+								</svg>
+							</label>
+							<input id="home-pdf-upload" type="file" accept=".pdf,image/png,image/jpeg,image/webp,image/gif" onchange={handleHomePdfUpload} />
+							<button class="chat-send-btn" onclick={submitFitCheck} disabled={!fitQuery.trim()} aria-label="Send">→</button>
+						</div>
+					</div>
+					{#if fitPdfError}<p class="fit-pdf-error">{fitPdfError}</p>{/if}
+					<p class="chat-card-hint">Attach a job description PDF or screenshot for instant fit analysis</p>
+				</div>
+			</div>
 		</div>
 
 		<!-- Career timeline -->
@@ -199,6 +321,7 @@
 				<a href="/resume.pdf" target="_blank" rel="noopener" class="social-btn">Resume</a>
 			</div>
 		</div>
+
 
 	</main>
 </div>
@@ -347,6 +470,42 @@
 	}
 	.btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: #FAFAFA; }
 
+	.fit-bar {
+		display: flex; align-items: center; gap: 0;
+		background: rgba(255,255,255,0.05);
+		border: 1px solid rgba(255,255,255,0.1);
+		border-radius: 10px;
+		overflow: hidden;
+		margin-top: 8px;
+		transition: border-color 0.2s;
+	}
+	.fit-bar:focus-within { border-color: rgba(99,102,241,0.6); }
+	.fit-bar input {
+		flex: 1; background: transparent; border: none;
+		color: #FAFAFA; font-size: 14px; font-family: 'DM Sans', sans-serif;
+		padding: 12px 16px; outline: none;
+	}
+	.fit-bar input::placeholder { color: #52525B; }
+	.fit-bar button {
+		background: #6366F1; border: none;
+		color: #fff; font-size: 16px; font-weight: 600;
+		padding: 0 18px; height: 100%; min-height: 44px;
+		cursor: pointer; transition: background 0.2s;
+		flex-shrink: 0;
+	}
+	.fit-bar button:hover:not(:disabled) { background: #4F46E5; }
+	.fit-bar button:disabled { background: rgba(99,102,241,0.3); cursor: default; }
+	.fit-upload-btn {
+		display: flex; align-items: center; justify-content: center;
+		padding: 0 10px; color: #52525B; cursor: pointer; transition: color 0.2s; flex-shrink: 0;
+	}
+	.fit-upload-btn:hover { color: #A1A1AA; }
+	#home-pdf-upload { display: none; }
+	.fit-pdf-error { margin: 4px 0 0; font-size: 12px; color: #f87171; }
+	.fit-hint { margin: 6px 0 0; font-size: 12px; color: #3F3F46; }
+	.fit-hint a { color: #6366F1; text-decoration: none; }
+	.fit-hint a:hover { text-decoration: underline; }
+
 	/* ── Company cards ── */
 	.card-meta {
 		grid-column: 3; grid-row: 1;
@@ -385,7 +544,7 @@
 	.card-detail { font-size: 12px; color: #52525B; }
 
 	/* ── Timeline ── */
-	.card-timeline { grid-column: 1 / 4; grid-row: 3; padding: 28px 32px; }
+	.card-timeline { grid-column: 1 / 4; grid-row: 4; padding: 28px 32px; }
 	.section-label {
 		font-size: 11px; font-weight: 600;
 		letter-spacing: 0.12em; text-transform: uppercase;
@@ -409,7 +568,7 @@
 
 	/* ── Location ── */
 	.card-location {
-		grid-column: 1 / 3; grid-row: 4;
+		grid-column: 1 / 3; grid-row: 5;
 		display: flex; align-items: center; gap: 18px; padding: 22px 28px;
 	}
 	.loc-icon {
@@ -423,14 +582,14 @@
 	.loc-sub { font-size: 13px; color: #71717A; }
 
 	/* ── Education ── */
-	.card-edu { grid-column: 3; grid-row: 4; padding: 22px 28px; }
+	.card-edu { grid-column: 3; grid-row: 5; padding: 22px 28px; }
 	.edu-degree { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
 	.edu-school { font-size: 12px; color: #71717A; line-height: 1.5; }
 
 	/* ── Bottom row ── */
-	.card-skills   { grid-column: 1; grid-row: 5; }
-	.card-projects { grid-column: 2; grid-row: 5; }
-	.card-contact  { grid-column: 3; grid-row: 5; }
+	.card-skills   { grid-column: 1; grid-row: 6; }
+	.card-projects { grid-column: 2; grid-row: 6; }
+	.card-contact  { grid-column: 3; grid-row: 6; }
 
 	.card-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #71717A; margin-bottom: 14px; }
 	.tag-groups { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -459,6 +618,104 @@
 	}
 	.social-btn:hover { border-color: rgba(255,255,255,0.2); color: #FAFAFA; }
 
+	/* ── AI Chat card ── */
+	.card-chat {
+		grid-column: 1 / -1;
+		grid-row: 3;
+		padding: 28px 32px;
+		position: relative;
+		overflow: hidden;
+		/* Shimmering border via animated gradient background */
+		background:
+			linear-gradient(#111113, #111113) padding-box,
+			linear-gradient(var(--angle, 0deg), rgba(99,102,241,0.7), rgba(139,92,246,0.3), rgba(99,102,241,0.1), rgba(99,102,241,0.7)) border-box;
+		border: 1px solid transparent;
+		animation: border-spin 4s linear infinite;
+	}
+	@property --angle {
+		syntax: '<angle>';
+		initial-value: 0deg;
+		inherits: false;
+	}
+	@keyframes border-spin {
+		to { --angle: 360deg; }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.card-chat {
+			animation: none;
+			border: 1px solid rgba(99,102,241,0.25);
+		}
+	}
+
+	.chat-card-inner {
+		display: flex; align-items: center; gap: 40px;
+	}
+	.chat-card-left {
+		flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; min-width: 220px;
+	}
+	.chat-ai-badge {
+		display: inline-flex; align-items: center; gap: 7px;
+		font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+		color: #818CF8;
+	}
+	.ai-dot {
+		width: 6px; height: 6px; border-radius: 50%; background: #818CF8;
+		box-shadow: 0 0 6px rgba(129,140,248,0.8);
+		animation: ai-pulse 2s ease-in-out infinite;
+	}
+	@keyframes ai-pulse {
+		0%, 100% { opacity: 1; transform: scale(1); }
+		50% { opacity: 0.5; transform: scale(0.8); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.ai-dot { animation: none; }
+	}
+	.chat-card-headline {
+		font-size: 18px; font-weight: 600; font-family: 'Space Grotesk', sans-serif;
+		color: #FAFAFA; line-height: 1.4;
+	}
+	.chat-card-link {
+		font-size: 13px; color: #6366F1; text-decoration: none; transition: color 0.2s;
+	}
+	.chat-card-link:hover { color: #818CF8; }
+
+	.chat-card-right {
+		flex: 1; display: flex; flex-direction: column; gap: 8px;
+	}
+	.chat-input-wrap {
+		display: flex; align-items: center; gap: 0;
+		background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+		border-radius: 10px; overflow: hidden; transition: border-color 0.2s;
+	}
+	.chat-input-wrap:focus-within { border-color: rgba(99,102,241,0.5); }
+	.chat-card-input {
+		flex: 1; background: transparent; border: none; outline: none;
+		color: #FAFAFA; font-size: 14px; font-family: 'DM Sans', sans-serif;
+		padding: 13px 16px;
+		transition: opacity 0.35s ease-out;
+	}
+	.chat-card-input.placeholder-fading::placeholder { opacity: 0; }
+	.chat-card-input::placeholder { color: #52525B; transition: opacity 0.35s ease-in; }
+	.chat-card-actions {
+		display: flex; align-items: center; gap: 0; padding-right: 6px;
+	}
+	.chat-attach-btn {
+		display: flex; align-items: center; justify-content: center;
+		width: 34px; height: 34px; color: #52525B; cursor: pointer;
+		border-radius: 6px; transition: color 0.2s, background 0.2s;
+	}
+	.chat-attach-btn:hover { color: #A1A1AA; background: rgba(255,255,255,0.06); }
+	#home-pdf-upload { display: none; }
+	.chat-send-btn {
+		width: 34px; height: 34px; background: #6366F1; border: none;
+		border-radius: 7px; color: #fff; font-size: 15px; cursor: pointer;
+		transition: background 0.2s; display: flex; align-items: center; justify-content: center;
+	}
+	.chat-send-btn:hover:not(:disabled) { background: #4F46E5; }
+	.chat-send-btn:disabled { background: rgba(99,102,241,0.25); cursor: default; }
+	.fit-pdf-error { font-size: 12px; color: #f87171; }
+	.chat-card-hint { font-size: 12px; color: #3F3F46; }
+
 	/* ── Easter egg ── */
 	.easter-egg {
 		position: fixed; bottom: 22px; right: 28px;
@@ -477,12 +734,16 @@
 		.hero-bio { display: none; }
 		.card-meta { grid-column: 1; grid-row: 2; }
 		.card-google { grid-column: 2; grid-row: 2; }
-		.card-timeline { grid-column: 1 / 3; grid-row: 3; padding: 20px; }
+		.card-chat { grid-column: 1 / 3; grid-row: 3; padding: 22px 20px; }
+		.card-timeline { grid-column: 1 / 3; grid-row: 4; padding: 20px; }
 		.timeline { grid-template-columns: repeat(3, 1fr); }
-		.card-location { grid-column: 1 / 3; grid-row: 4; }
-		.card-edu { grid-column: 1 / 3; grid-row: 5; }
-		.card-skills { grid-column: 1 / 3; grid-row: 6; }
-		.card-projects { grid-column: 1; grid-row: 7; }
-		.card-contact { grid-column: 2; grid-row: 7; }
+		.card-location { grid-column: 1 / 3; grid-row: 5; }
+		.card-edu { grid-column: 1 / 3; grid-row: 6; }
+		.card-skills { grid-column: 1 / 3; grid-row: 7; }
+		.card-projects { grid-column: 1; grid-row: 8; }
+		.card-contact { grid-column: 2; grid-row: 8; }
+		.chat-card-inner { flex-direction: column; gap: 18px; }
+		.chat-card-left { min-width: unset; }
+		.chat-card-headline { font-size: 16px; }
 	}
 </style>

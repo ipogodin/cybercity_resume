@@ -1,4 +1,13 @@
 import { redis } from './redis.js';
+import { env } from '$env/dynamic/private';
+
+// IPs exempt from rate limiting: always includes localhost fallback + any in RATE_LIMIT_BYPASS_IPS env var
+const BYPASS_IPS = new Set([
+	'0.0.0.0',  // npm run dev fallback (no x-forwarded-for header locally)
+	'127.0.0.1',
+	'::1',
+	...((env.RATE_LIMIT_BYPASS_IPS ?? '').split(',').map(s => s.trim()).filter(Boolean))
+]);
 
 const INJECTION_PATTERNS = [
 	/ignore (previous|all|prior) instructions?/i,
@@ -79,7 +88,9 @@ export async function runGuard(ip, lastUserMessage) {
 			};
 		}
 
-		// 3. Rate limit
+		// 3. Rate limit — skipped for bypass IPs (localhost + explicitly whitelisted)
+		if (BYPASS_IPS.has(ip)) return { ok: true };
+
 		const count = await checkRateLimit(ip);
 		if (count > 25) {
 			return {

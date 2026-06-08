@@ -1,6 +1,6 @@
 ## Professional Experience
 
-Illia Pogodin is a software engineer with 15+ years of experience, currently at the Senior / Staff level. He has worked at Meta, Google, Salesforce, Wargaming, IGT, Deutsche Bank, Belleron (DAXX), Alertme (DataArt), Ocado (DataArt), E-Motion, and CubicStudio. He is available for Senior or Staff software engineering roles.
+Illia Pogodin is a software engineer with 15+ years of experience. He is currently an L5 Software Engineer at Meta, targeting Staff-level (L6+) roles. He has worked at Meta, Google, Salesforce, Wargaming, IGT, Deutsche Bank, Belleron (DAXX), Alertme (DataArt), Ocado (DataArt), E-Motion, and CubicStudio. He is open to Senior or Staff software engineering opportunities.
 
 ---
 

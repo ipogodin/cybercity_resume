@@ -1,9 +1,13 @@
 export type ChatMode = 'ask' | 'fit';
-export type RequestType = 'message' | 'pdf_upload' | 'jd_paste';
+export type RequestType = 'message' | 'pdf_upload' | 'image_upload' | 'jd_paste';
+
+export type MessageContentPart =
+	| { type: 'text'; text: string }
+	| { type: 'image_url'; image_url: { url: string } };
 
 export interface ChatMessage {
 	role: 'user' | 'assistant';
-	content: string;
+	content: string | MessageContentPart[];
 }
 
 export interface ChatRequest {
