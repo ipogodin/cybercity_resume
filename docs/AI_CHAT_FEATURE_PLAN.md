@@ -381,6 +381,7 @@ Evaluate how well Illia's background matches it:
 ### `/admin` page
 
 Protected by `ADMIN_TOKEN` — login via password form, token stored in `sessionStorage`.  
+**Intentionally not linked from anywhere on the site** — secret URL only (`/admin`).  
 Same dark aesthetic as the rest of the site, but clearly marked as ops tooling.
 
 ```
@@ -420,34 +421,45 @@ Same dark aesthetic as the rest of the site, but clearly marked as ops tooling.
 ## 8. File Structure
 
 ```
-src/routes/
-  chat/
-    +page.svelte              ← Chat UI
-  admin/
-    +page.svelte              ← Admin dashboard (fetches /api/admin/*)
-  api/
-    chat/
-      +server.js              ← POST handler, guard layer, Claude call, stream
-    admin/
-      stats/+server.js        ← GET stats
-      blocked/+server.js      ← GET list / POST block / POST unblock
-      events/+server.js       ← GET last 100 abuse events
-      log/
-        +server.js            ← GET recent activity across all IPs
-        [ip]/+server.js       ← GET full request+response history for one IP
+src/
+  hooks.server.js             ← UPDATED: remove in-memory rate limiter (replaced by Redis
+                                guard in /api/chat); keep security + CSP headers, update
+                                connect-src to include https://api.anthropic.com
 
-src/lib/
-  server/
-    guard.js                  ← IP block check, rate limit, keyword pre-check
-    prompt.js                 ← System prompt assembly, calls buildResumeContext()
-    redis.js                  ← Upstash Redis client singleton
-    adminAuth.js              ← Constant-time token compare helper
-    knowledge/
-      experience.md           ← Full career narrative, all roles (grows over time)
-      skills.md               ← Skills with context of where/how applied
-      education.md            ← Degrees, courses, self-study
-      philosophy.md           ← Engineering approach, values (optional)
-      index.js                ← buildResumeContext() — assembles markdown into prompt string
+  routes/
+    +page.svelte              ← UPDATED: add "chat" link to navbar
+    work/+page.svelte         ← UPDATED: add "chat" link to navbar
+    contact/+page.svelte      ← UPDATED: add "chat" link to navbar
+    chat/
+      +page.svelte            ← Chat UI (new)
+    admin/
+      +page.svelte            ← Admin dashboard (new, fetches /api/admin/*)
+    api/
+      chat/
+        +server.js            ← POST handler, guard layer, Claude call, stream (new)
+      admin/
+        stats/+server.js      ← GET stats (new)
+        blocked/+server.js    ← GET list / POST block / POST unblock (new)
+        events/+server.js     ← GET last 100 abuse events (new)
+        log/
+          +server.js          ← GET recent activity across all IPs (new)
+          [ip]/+server.js     ← GET full history for one IP (new)
+
+  lib/
+    server/
+      guard.js                ← IP block check, 25/day rate limit, keyword pre-check (new)
+      prompt.js               ← System prompt assembly, calls buildResumeContext() (new)
+      redis.js                ← Upstash Redis client singleton (new)
+      adminAuth.js            ← Constant-time token compare helper (new)
+      knowledge/
+        experience.md         ← Full career narrative, all roles — SEED FROM /temp/ FIRST
+        skills.md             ← Skills with context of where/how applied
+        education.md          ← Degrees, courses, self-study
+        philosophy.md         ← Engineering approach, values (optional, add later)
+        index.js              ← buildResumeContext() assembler
+
+.env.example                  ← NEW: local dev setup reference (committed, no secrets)
+vercel.json                   ← UPDATED: set maxDuration for /api/chat function
 ```
 
 ---
@@ -462,50 +474,98 @@ src/lib/
 
 No Vercel AI SDK needed — Anthropic SDK's native streaming works directly with SvelteKit's `ReadableStream` response.
 
-**Environment variables:**
+**Environment variables (add to Vercel + local `.env`):**
 ```
-ANTHROPIC_API_KEY=           # Anthropic API key
-UPSTASH_REDIS_REST_URL=      # From Vercel Marketplace → Upstash
-UPSTASH_REDIS_REST_TOKEN=    # From Vercel Marketplace → Upstash
-ADMIN_TOKEN=                 # Long random string, generated once
+ANTHROPIC_API_KEY=           # Anthropic console → API keys
+UPSTASH_REDIS_REST_URL=      # Vercel Marketplace → Upstash → connect → copy
+UPSTASH_REDIS_REST_TOKEN=    # same
+ADMIN_TOKEN=                 # generate: openssl rand -hex 32
+```
+
+**`.env.example`** (committed to repo, no secrets):
+```
+ANTHROPIC_API_KEY=sk-ant-...
+UPSTASH_REDIS_REST_URL=https://...upstash.io
+UPSTASH_REDIS_REST_TOKEN=...
+ADMIN_TOKEN=<run: openssl rand -hex 32>
+```
+
+**`vercel.json` update** — set function timeout for `/api/chat` (AI responses can take 30s+):
+```json
+{
+  "functions": {
+    "src/routes/api/chat/+server.js": { "maxDuration": 60 }
+  }
+}
 ```
 
 ---
 
 ## 10. Implementation Phases
 
-### Phase 1 — Core chat
-- `/chat` page with mode toggle and message thread UI
-- `/api/chat` endpoint: system prompt + resume context + Claude streaming
-- Starter prompt chips, streaming cursor
-- No protection yet
+### Phase 0 — Prerequisites (before writing any feature code)
+- Seed `src/lib/server/knowledge/` from resumes in `/temp/` — `experience.md`, `skills.md`, `education.md`
+- Provision Upstash Redis via Vercel Marketplace, copy env vars
+- Add `ANTHROPIC_API_KEY` to Vercel env and local `.env`
+- Generate `ADMIN_TOKEN` (`openssl rand -hex 32`), add to both
+- Create `.env.example` with placeholder values
+- Update `vercel.json` with `maxDuration: 60` for `/api/chat`
+- Remove in-memory rate limiter from `hooks.server.js`; update CSP `connect-src`
+- Add `chat` link to navbar in `+page.svelte`, `work/+page.svelte`, `contact/+page.svelte`
+
+### Phase 1 — Core chat (Ask mode only)
+- `src/lib/server/knowledge/index.js` — `buildResumeContext()`
+- `src/lib/server/prompt.js` — system prompt assembly
+- `/api/chat` endpoint — no guard yet, just Claude streaming
+- `/chat` page — message thread, starter chips, streaming cursor
+- Conversation context: include last **10 messages** max per request (cap to control token cost)
 
 ### Phase 2 — Guard layer
-- Upstash Redis integration (`src/lib/server/redis.js`)
-- IP block check + hourly rate limiting
-- Keyword pre-check (no Claude call for obvious abuse)
-- Auto-block at threshold + event logging
+- `src/lib/server/redis.js` — Upstash client singleton
+- `src/lib/server/guard.js` — keyword pre-check → block check → 25/day rate limit
+- Wire guard into `/api/chat`; add post-response logging to `log:ip:{ip}`
+- Error responses: 400 (abuse), 403 (blocked), 429 (limit) with `resetsAt` timestamp
 
 ### Phase 3 — Admin dashboard
-- `/admin` login (password → sessionStorage token)
-- `/api/admin/*` endpoints (stats, blocked, events)
-- Admin UI: overview cards, blocked IP list + unblock, manual block form, events feed
+- `src/lib/server/adminAuth.js` — constant-time token compare
+- `/api/admin/*` endpoints — stats, blocked, events, log, log/[ip]
+- `/admin` page — login form, overview cards, activity feed, IP drill-down, block/unblock
 
 ### Phase 4 — Job Fit mode
 - JD text area + PDF upload (pdfjs client-side extraction)
-- Fit-analysis system prompt variant
-- Structured verdict card rendering
+- Fit-analysis prompt variant in `prompt.js`
+- Structured verdict card rendered client-side from streamed response
 
 ### Phase 5 — Polish
-- Mobile layout
-- Error states (rate limited, blocked, API error)
-- Max response token cap
-- Conversation history (session-only, cleared on reload)
+- Mobile layout for `/chat`
+- Mid-stream error handling: if Anthropic errors after streaming starts, append an error
+  sentinel token client-side so the UI shows a clean "response interrupted" state
+- Max 800 output tokens per response (cost control, set in API call)
+- Conversation cleared on page reload (session-only, no persistence)
 
 ---
 
-## 11. Security Checklist
+## 11. Known Constraints & Failure Modes
 
+| Scenario | Behaviour |
+|---|---|
+| Redis unreachable | Fail closed — return 503, no AI call made. Never fail open. |
+| Anthropic API down | Return 502 before streaming starts; if mid-stream, append error sentinel |
+| `ANTHROPIC_API_KEY` missing | Server startup logs warning; `/api/chat` returns 500 immediately |
+| Conversation too long | Trim to last 10 messages before sending; oldest messages dropped silently |
+| JD too long | Truncate to 8 000 chars server-side; client shows "JD truncated" notice |
+| IP from unknown proxy | Use `x-forwarded-for` first hop; if absent, use `0.0.0.0` (shared bucket) |
+
+---
+
+## 12. Security Checklist
+
+- [ ] `hooks.server.js` in-memory rate limiter removed; does not conflict with Redis guard
+- [ ] CSP `connect-src` includes `https://api.anthropic.com`
+- [ ] `vercel.json` `maxDuration: 60` set for `/api/chat`
+- [ ] Knowledge base seeded before Phase 1 is deployed
+- [ ] `/admin` not linked anywhere — secret URL only
+- [ ] `.env.example` committed; `.env` in `.gitignore`
 - [ ] System prompt never sent to client
 - [ ] AI knowledge base lives in `src/lib/server/knowledge/` — SvelteKit guarantees it is never bundled to the client
 - [ ] Frontend display data (`src/lib/data/`) and AI knowledge base (`src/lib/server/knowledge/`) are kept strictly separate
