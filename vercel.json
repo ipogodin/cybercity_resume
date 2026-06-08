@@ -2,5 +2,8 @@
   "framework": "sveltekit",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm install"
+  "installCommand": "npm install",
+  "functions": {
+    "src/routes/api/chat/+server.js": { "maxDuration": 60 }
+  }
 }

@@ -4,7 +4,7 @@
 > Each task = one TDD cycle: RED → GREEN → REFACTOR.  
 > Mark tasks `[x]` as completed. Do not skip ahead — respect dependency order.
 
-**Status:** 🔴 Not started
+**Status:** 🟡 Phase 0–3 complete, Phase 4–5 pending env var setup
 
 ---
 
@@ -12,23 +12,20 @@
 
 > No tests required. Configuration and content tasks only.
 
-- [ ] **P0-1** Install dependencies: `@anthropic-ai/sdk`, `@upstash/redis`, `pdfjs-dist`, `vitest`, `@vitest/coverage-v8`
-- [ ] **P0-2** Create `vitest.config.ts` with node environment, coverage provider v8, include pattern `src/**/*.test.{ts,js}`
-- [ ] **P0-3** Add `test`, `test:watch`, `test:coverage` scripts to `package.json`
-- [ ] **P0-4** Create `src/lib/types.ts` — all shared TypeScript contracts (SDD §2)
-- [ ] **P0-5** Seed `src/lib/server/knowledge/experience.md` from `/temp/ILLIA_POGODIN_2026_v4.pdf`
-- [ ] **P0-6** Seed `src/lib/server/knowledge/skills.md` — skills with context of where/how applied
-- [ ] **P0-7** Seed `src/lib/server/knowledge/education.md` — degrees, courses, certifications
-- [ ] **P0-8** Create `.env.example` with all four variable placeholders (no real values)
-- [ ] **P0-9** Update `vercel.json` — add `functions.maxDuration: 60` for `/api/chat`
-- [ ] **P0-10** Update `src/hooks.server.js`:
-  - Remove `apiRateLimiter` handle and in-memory `rateLimit` Map
-  - Add `ipExtractor` handle (sets `event.locals.clientIp`)
-  - Update CSP `connect-src` to include `https://api.anthropic.com`
-- [ ] **P0-11** Update `src/app.d.ts` — add `App.Locals.clientIp: string`
-- [ ] **P0-12** Add `chat` link to navbar in `+page.svelte`, `work/+page.svelte`, `contact/+page.svelte`
-- [ ] **P0-13** Create two Upstash databases in Vercel Marketplace (`cybercity-dev`, `cybercity-prod`)
-- [ ] **P0-14** Set all four env vars in Vercel dashboard (Preview → dev DB, Production → prod DB)
+- [x] **P0-1** Install dependencies: `@anthropic-ai/sdk`, `@upstash/redis`, `pdfjs-dist`, `vitest`, `@vitest/coverage-v8`
+- [x] **P0-2** Create `vitest.config.ts` with node environment, coverage provider v8, include pattern `src/**/*.test.{ts,js}`
+- [x] **P0-3** Add `test`, `test:watch`, `test:coverage` scripts to `package.json`
+- [x] **P0-4** Create `src/lib/types.ts` — all shared TypeScript contracts (SDD §2)
+- [x] **P0-5** Seed `src/lib/server/knowledge/experience.md` from `/docs/resume/`
+- [x] **P0-6** Seed `src/lib/server/knowledge/skills.md` — skills with context of where/how applied
+- [x] **P0-7** Seed `src/lib/server/knowledge/education.md` — degrees, courses, certifications
+- [x] **P0-8** Create `.env.example` with all four variable placeholders (no real values)
+- [x] **P0-9** Update `vercel.json` — add `functions.maxDuration: 60` for `/api/chat`
+- [x] **P0-10** Update `src/hooks.server.js`: removed apiRateLimiter, added ipExtractor, updated CSP
+- [x] **P0-11** Update `src/app.d.ts` — add `App.Locals.clientIp: string`
+- [x] **P0-12** Add `chat` link to navbar in `+page.svelte`, `work/+page.svelte`, `contact/+page.svelte`
+- [ ] **P0-13** Create two Upstash databases in Vercel Marketplace (`cybercity-dev`, `cybercity-prod`) — **manual**
+- [ ] **P0-14** Set all four env vars in Vercel dashboard (Preview → dev DB, Production → prod DB) — **manual**
 
 **Verification:** `npm run build` exits 0. `npm run check` exits 0.
 
@@ -41,16 +38,16 @@
 ### T1-1 `src/lib/server/knowledge/index.js`
 
 **RED** — write test first (`src/lib/server/knowledge/index.test.ts`):
-- [ ] All files present → returns string containing all section headings
-- [ ] Missing `philosophy.md` (optional) → no throw, section absent
-- [ ] Missing `experience.md` (required) → no throw, warning notice in output
-- [ ] Output > 30 000 chars → truncated with `[context truncated]` suffix
+- [x] All files present → returns string containing all section headings
+- [x] Missing `philosophy.md` (optional) → no throw, section absent
+- [x] Missing `experience.md` (required) → no throw, warning notice in output
+- [x] Output > 30 000 chars → truncated with `[context truncated]` suffix
 
 **GREEN** — implement `buildResumeContext()`:
-- [ ] Reads `experience.md`, `skills.md`, `education.md` synchronously
-- [ ] Includes `philosophy.md` only if file exists
-- [ ] Joins sections with `\n\n---\n\n`
-- [ ] Truncates at 30 000 chars with notice
+- [x] Reads `experience.md`, `skills.md`, `education.md` synchronously
+- [x] Includes `philosophy.md` only if file exists
+- [x] Joins sections with `\n\n---\n\n`
+- [x] Truncates at 30 000 chars with notice
 
 **REFACTOR** — named constants for limits; no magic numbers.
 
@@ -59,16 +56,16 @@
 ### T1-2 `src/lib/server/prompt.js`
 
 **RED** — write test first (`src/lib/server/prompt.test.ts`):
-- [ ] `ask` mode → output contains `EXPERIENCE CONTEXT`, no `JOB DESCRIPTION` section
-- [ ] `fit` mode → output contains both `EXPERIENCE CONTEXT` and `JOB DESCRIPTION`
-- [ ] JD with HTML tags → tags stripped in output
-- [ ] JD > 8 000 chars → truncated to 8 000 in output
-- [ ] Empty knowledge base → includes placeholder notice, no throw
+- [x] `ask` mode → output contains `EXPERIENCE CONTEXT`, no `JOB DESCRIPTION` section
+- [x] `fit` mode → output contains both `EXPERIENCE CONTEXT` and `JOB DESCRIPTION`
+- [x] JD with HTML tags → tags stripped in output
+- [x] JD > 8 000 chars → truncated to 8 000 in output
+- [x] Empty knowledge base → includes placeholder notice, no throw
 
 **GREEN** — implement `buildSystemPrompt(mode, jobDescription?)`:
-- [ ] Injects resume context from `buildResumeContext()`
-- [ ] Appends fit instructions + sanitised JD when `mode === 'fit'`
-- [ ] Strips HTML, collapses whitespace, truncates JD
+- [x] Injects resume context from `buildResumeContext()`
+- [x] Appends fit instructions + sanitised JD when `mode === 'fit'`
+- [x] Strips HTML, collapses whitespace, truncates JD
 
 **REFACTOR** — extract `sanitiseJobDescription(text)` as a pure function (testable independently).
 
@@ -77,11 +74,11 @@
 ### T1-3 `src/lib/server/redis.js`
 
 **RED** — write test first (`src/lib/server/redis.test.ts`):
-- [ ] Missing `UPSTASH_REDIS_REST_URL` → throws descriptive error at import
-- [ ] Missing `UPSTASH_REDIS_REST_TOKEN` → throws descriptive error at import
-- [ ] Both present → exports a Redis instance
+- [x] Missing `UPSTASH_REDIS_REST_URL` → throws descriptive error at import
+- [x] Missing `UPSTASH_REDIS_REST_TOKEN` → throws descriptive error at import
+- [x] Both present → exports a Redis instance
 
-**GREEN** — implement singleton with env var validation.
+**GREEN** — implement singleton with env var validation (lazy proxy pattern for build compatibility).
 
 **REFACTOR** — error messages name the exact missing variable.
 
