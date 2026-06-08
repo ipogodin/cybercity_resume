@@ -24,8 +24,8 @@
 - [x] **P0-10** Update `src/hooks.server.js`: removed apiRateLimiter, added ipExtractor, updated CSP
 - [x] **P0-11** Update `src/app.d.ts` — add `App.Locals.clientIp: string`
 - [x] **P0-12** Add `chat` link to navbar in `+page.svelte`, `work/+page.svelte`, `contact/+page.svelte`
-- [ ] **P0-13** Create two Upstash databases in Vercel Marketplace (`cybercity-dev`, `cybercity-prod`) — **manual**
-- [ ] **P0-14** Set all four env vars in Vercel dashboard (Preview → dev DB, Production → prod DB) — **manual**
+- [ ] **P0-13** Create one Upstash database named `cybercity` at upstash.com (free tier) — **manual**
+- [ ] **P0-14** Set all four env vars in Vercel dashboard (same values for Preview + Production) — **manual**
 
 **Verification:** `npm run build` exits 0. `npm run check` exits 0.
 

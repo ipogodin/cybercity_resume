@@ -188,7 +188,7 @@ export function buildResumeContext(): string;
 // Can be updated at any time — no code changes needed.
 ```
 
-**Initial knowledge file content seeded from `/temp/ILLIA_POGODIN_2026_v4.pdf`.**
+**Initial knowledge file content seeded from `private/resumes/ILLIA_POGODIN_2026.pdf`.**
 
 ---
 
@@ -707,35 +707,31 @@ All decisions resolved in `AI_CHAT_FEATURE_PLAN.md`. This document has no unreso
 
 ### 9.1 Environment overview
 
-Three environments, each with their own config:
+Three environments, all sharing one Upstash database:
 
 | Environment | URL | Redis DB | Trigger |
 |---|---|---|---|
-| **Local** | `http://localhost:5174` | Upstash `cybercity-dev` | `npm run dev` |
-| **Preview** | `https://cybercity-{hash}.vercel.app` | Upstash `cybercity-dev` | push to `feature/ai-chat` |
-| **Production** | `https://cybercity.vercel.app` | Upstash `cybercity-prod` | merge to `main` |
+| **Local** | `http://localhost:5174` | Upstash `cybercity` | `npm run dev` |
+| **Preview** | `https://cybercity-{hash}.vercel.app` | Upstash `cybercity` | push to `feature/ai-chat` |
+| **Production** | `https://cybercity.vercel.app` | Upstash `cybercity` | merge to `main` |
 
-**Two Upstash databases** — create both in the Vercel Marketplace:
-- `cybercity-dev` — shared by local and preview. Polluting this with test data is fine.
-- `cybercity-prod` — production only. Never used during development.
-
-This keeps prod rate-limit counters and logs clean from test traffic.
+**One Upstash database** — create a single database named `cybercity` at upstash.com (free tier).  
+All environments share it. For a personal portfolio with low traffic this is fine — local dev traffic will occasionally appear in the admin log but causes no real issues.
 
 ---
 
 ### 9.2 Local setup (one-time)
 
 ```bash
-# 1. Install new dependencies
-npm install @anthropic-ai/sdk @upstash/redis pdfjs-dist
-npm install -D vitest @vitest/coverage-v8
+# 1. Dependencies already installed (done in Phase 0)
 
 # 2. Create local env file (never committed)
 cp .env.example .env
 # Fill in:
-#   ANTHROPIC_API_KEY     → Anthropic console
-#   UPSTASH_REDIS_REST_URL/TOKEN → cybercity-dev database
-#   ADMIN_TOKEN           → openssl rand -hex 32
+#   ANTHROPIC_API_KEY          → console.anthropic.com → API Keys
+#   UPSTASH_REDIS_REST_URL     → upstash.com → cybercity → REST API section
+#   UPSTASH_REDIS_REST_TOKEN   → upstash.com → cybercity → REST API section
+#   ADMIN_TOKEN                → run: openssl rand -hex 32
 
 # 3. Run dev server
 npm run dev
@@ -774,14 +770,14 @@ All 4 gates must be green before pushing to the feature branch.
 
 In the Vercel dashboard → Project → Settings → Environment Variables:
 
-| Variable | Local | Preview | Production |
-|---|---|---|---|
-| `ANTHROPIC_API_KEY` | `.env` | ✅ add | ✅ add |
-| `UPSTASH_REDIS_REST_URL` | `.env` | ✅ `cybercity-dev` URL | ✅ `cybercity-prod` URL |
-| `UPSTASH_REDIS_REST_TOKEN` | `.env` | ✅ `cybercity-dev` token | ✅ `cybercity-prod` token |
-| `ADMIN_TOKEN` | `.env` | ✅ any value (can be same) | ✅ **different** from dev |
+| Variable | Environments | Value |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Preview + Production | from console.anthropic.com |
+| `UPSTASH_REDIS_REST_URL` | Preview + Production | same `cybercity` database URL |
+| `UPSTASH_REDIS_REST_TOKEN` | Preview + Production | same `cybercity` database token |
+| `ADMIN_TOKEN` | Preview + Production | any secret string (can be same for both) |
 
-Vercel automatically scopes variables to environments — set `UPSTASH_*` twice with different values, once for Preview and once for Production.
+When adding each variable, check both **Preview** and **Production** environment checkboxes — same value for both since it's one database.
 
 ---
 
