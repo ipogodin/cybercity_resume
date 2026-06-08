@@ -21,6 +21,7 @@
 
 | File | Description |
 |---|---|
+| [AI_CHAT_FEATURE_PLAN.md](AI_CHAT_FEATURE_PLAN.md) | **Plan (in progress)** — AI chat for exploring Illia's experience + job fit analysis. Covers architecture, guard layer, rate limiting, UI, and implementation phases. |
 | [INTERACTIVE_TERMINAL_FEATURE.md](INTERACTIVE_TERMINAL_FEATURE.md) | Docs for the interactive terminal on the Contact page — commands, Easter eggs, and cyberpunk aesthetic details |
 | [TERMINAL_UX_IMPROVEMENTS.md](TERMINAL_UX_IMPROVEMENTS.md) | UX improvements made to the terminal component |
 | [AUDIO_SETUP.md](AUDIO_SETUP.md) | Instructions for adding audio files to `/static/sounds/` to enable rain and ambient sound features |
