@@ -4,6 +4,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "functions": {
-    "src/routes/api/chat/+server.js": { "maxDuration": 60 }
+    "api/chat.js": { "maxDuration": 60 }
   }
 }
