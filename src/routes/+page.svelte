@@ -82,6 +82,7 @@
 		<div class="nav-links">
 			<a href="/work">work</a>
 			<a href="/contact">contact</a>
+			<a href="/chat">chat</a>
 		</div>
 	</nav>
 

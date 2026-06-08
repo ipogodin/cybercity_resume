@@ -14,6 +14,7 @@
 		<div class="nav-links">
 			<a href="/work">work</a>
 			<a href="/contact" class="active">contact</a>
+			<a href="/chat">chat</a>
 		</div>
 	</nav>
 
