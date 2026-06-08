@@ -84,6 +84,36 @@
 {/if}
 
 <style>
+	/* Cyberpunk CSS variables — scoped to /cyberpunk routes only */
+	:global(html):has(body.cyberpunk-active),
+	:global(.cyberpunk-active) {
+		--color-bg-primary: #0a0e27;
+		--color-bg-secondary: #1a1d3f;
+		--color-bg-overlay: rgba(10, 14, 39, 0.95);
+		--color-neon-cyan: #00fff0;
+		--color-neon-pink: #ff006e;
+		--color-neon-purple: #b900ff;
+		--color-neon-blue: #00d4ff;
+		--color-neon-green: #00ff88;
+		--color-text-primary: #ffffff;
+		--color-text-secondary: #b0b8cc;
+		--color-text-cyan: #00fff0;
+		--color-text-muted: #6a7489;
+		--color-rain: rgba(173, 216, 230, 0.3);
+		--color-glow-cyan: rgba(0, 255, 240, 0.5);
+		--color-glow-pink: rgba(255, 0, 110, 0.5);
+		--color-glow-purple: rgba(185, 0, 255, 0.5);
+		--shadow-neon-cyan: 0 0 10px #00fff0, 0 0 20px rgba(0,255,240,0.5);
+		--shadow-neon-pink: 0 0 10px #ff006e, 0 0 20px rgba(255,0,110,0.5);
+		--shadow-neon-purple: 0 0 10px #b900ff, 0 0 20px rgba(185,0,255,0.5);
+		--spacing-xs: 0.25rem; --spacing-sm: 0.5rem; --spacing-md: 1rem;
+		--spacing-lg: 1.5rem; --spacing-xl: 2rem; --spacing-2xl: 3rem; --spacing-3xl: 4rem;
+		--transition-fast: 0.15s ease; --transition-normal: 0.3s ease;
+		--transition-slow: 0.6s ease; --transition-scene: 1s ease-in-out;
+		--z-background: 0; --z-scene: 10; --z-character: 20;
+		--z-rain: 30; --z-ui: 40; --z-modal: 50; --z-overlay: 60;
+	}
+
 	:global(html),
 	:global(body) {
 		overflow: hidden;
@@ -96,4 +126,14 @@
 		font-family: 'Rajdhani', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 		position: fixed;
 	}
+
+	/* Cyberpunk link + scrollbar + selection styles — only active here */
+	:global(a) { color: var(--color-neon-cyan); text-decoration: none; transition: all 0.15s ease; }
+	:global(a:hover) { color: var(--color-neon-pink); text-shadow: var(--shadow-neon-pink); }
+	:global(button:focus-visible), :global(a:focus-visible) { outline: 2px solid var(--color-neon-cyan); outline-offset: 2px; }
+	:global(::-webkit-scrollbar) { width: 10px; height: 10px; }
+	:global(::-webkit-scrollbar-track) { background: var(--color-bg-secondary); }
+	:global(::-webkit-scrollbar-thumb) { background: var(--color-neon-cyan); border-radius: 5px; }
+	:global(::-webkit-scrollbar-thumb:hover) { background: var(--color-neon-purple); }
+	:global(::selection) { background-color: var(--color-neon-cyan); color: var(--color-bg-primary); }
 </style>
