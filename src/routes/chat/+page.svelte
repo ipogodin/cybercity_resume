@@ -44,11 +44,13 @@
 	const MAX_CLIENT_MESSAGES = 10;
 
 	const STARTER_CHIPS = [
-		'What did Illia build at Meta?',
-		'How did Illia contribute at Google?',
-		'What is Illia\'s strongest technical skill?',
-		'Tell me about Illia\'s distributed systems experience.'
+		'Is Illia a fit for a Staff Backend Engineer role?',
+		'What makes Illia stand out as an engineer?',
+		'I have a distributed systems role — would Illia be interested?',
+		'What did Illia accomplish at Meta and Google?'
 	];
+
+	let showContactCta = $state(false);
 
 	onMount(() => {
 		if ($page.url.searchParams.get('from') === 'pdf') {
@@ -114,10 +116,8 @@
 			];
 		}
 
-		const mode = (jd || image) ? 'fit' : 'ask';
-
 		/** @type {Record<string, unknown>} */
-		const body = { messages: trimmed, mode };
+		const body = { messages: trimmed, mode: 'advocate' };
 		if (jd) body.jobDescription = jd;
 
 		scrollToBottom();
@@ -168,10 +168,15 @@
 				const { done, value } = await reader.read();
 				if (done) break;
 				assistantText += decoder.decode(value, { stream: true });
-				streamingContent = assistantText;
+				streamingContent = assistantText.replace('[CONTACT_CTA]', '');
 				scrollToBottom();
 			}
 
+			// Strip [CONTACT_CTA] token and show contact card
+			if (assistantText.includes('[CONTACT_CTA]')) {
+				assistantText = assistantText.replace('[CONTACT_CTA]', '').trimEnd();
+				showContactCta = true;
+			}
 			messages = [...messages, { role: 'assistant', content: assistantText }];
 			streamingContent = '';
 			chatState = 'idle';
@@ -264,8 +269,8 @@
 </script>
 
 <svelte:head>
-	<title>Chat with Illia — AI Assistant</title>
-	<meta name="description" content="Ask about Illia Pogodin's experience or check if he fits your open position." />
+	<title>Alex — Illia's Career Assistant</title>
+	<meta name="description" content="Talk to Alex, Illia Pogodin's personal career assistant. Ask about his experience or check if he fits your open role." />
 	<meta name="robots" content="noindex" />
 </svelte:head>
 
@@ -300,8 +305,8 @@
 						<path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="#6366F1" stroke-width="1.5" stroke-linecap="round"/>
 					</svg>
 				</div>
-				<h1>Ask about Illia</h1>
-				<p>Questions about experience, skills, or fit for your role</p>
+				<h1>Hi, I'm Alex</h1>
+				<p>Illia's career assistant — ask me anything, or describe a role and I'll tell you if he's the right fit.</p>
 				<div class="chips">
 					{#each STARTER_CHIPS as chip}
 						<button class="chip" onclick={() => sendMessage(chip)}>{chip}</button>
@@ -351,6 +356,43 @@
 		{/if}
 	</div>
 
+	<!-- Contact CTA card -->
+	{#if showContactCta}
+		<div class="contact-cta">
+			<div class="contact-cta-inner">
+				<div class="contact-cta-text">
+					<strong>Sounds like a match?</strong>
+					<span>Reach out to Illia directly.</span>
+				</div>
+				<div class="contact-cta-actions">
+					<a
+						href="mailto:illia.pogodin@gmail.com?subject=Engineering%20Opportunity%20%E2%80%94%20Let%27s%20Connect&body=Hi%20Illia%2C%0A%0AI%20came%20across%20your%20portfolio%20and%20I%27d%20love%20to%20discuss%20a%20potential%20opportunity%20with%20you.%0A%0ABest%20regards"
+						class="cta-btn cta-email"
+						target="_blank" rel="noopener"
+					>
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15">
+							<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+							<polyline points="22,6 12,13 2,6"/>
+						</svg>
+						Email Illia
+					</a>
+					<a
+						href="https://www.linkedin.com/in/ipogodin"
+						class="cta-btn cta-linkedin"
+						target="_blank" rel="noopener"
+					>
+						<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15">
+							<path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/>
+							<circle cx="4" cy="4" r="2"/>
+						</svg>
+						LinkedIn
+					</a>
+					<button class="cta-dismiss" onclick={() => showContactCta = false} aria-label="Dismiss">✕</button>
+				</div>
+			</div>
+		</div>
+	{/if}
+
 	<!-- Bottom input area -->
 	<div class="composer-wrap">
 		{#if chatState === 'rate_limited'}
@@ -381,7 +423,7 @@
 				bind:value={inputText}
 				oninput={autoResize}
 				onkeydown={handleKeydown}
-				placeholder="Ask about Illia's experience, or describe a role to check fit…"
+				placeholder="Ask about Illia, or describe a role — I'll tell you if it's a match…"
 				rows="1"
 				disabled={chatState !== 'idle'}
 				aria-label="Message input"
@@ -603,6 +645,41 @@
 	@media (prefers-reduced-motion: reduce) {
 		.caret, .typing-dots span { animation: none; }
 	}
+
+	/* ── Contact CTA ── */
+	.contact-cta {
+		flex-shrink: 0;
+		padding: 0 24px 8px;
+		max-width: 720px;
+		width: 100%;
+		margin: 0 auto;
+		box-sizing: border-box;
+	}
+	.contact-cta-inner {
+		display: flex; align-items: center; justify-content: space-between; gap: 16px;
+		background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08));
+		border: 1px solid rgba(99,102,241,0.3);
+		border-radius: 12px; padding: 14px 18px;
+		flex-wrap: wrap;
+	}
+	.contact-cta-text { display: flex; flex-direction: column; gap: 2px; }
+	.contact-cta-text strong { font-size: 14px; color: #F8FAFC; font-weight: 600; }
+	.contact-cta-text span { font-size: 12px; color: #71717A; }
+	.contact-cta-actions { display: flex; align-items: center; gap: 8px; }
+	.cta-btn {
+		display: inline-flex; align-items: center; gap: 6px;
+		padding: 8px 16px; border-radius: 8px;
+		font-size: 13px; font-weight: 600; text-decoration: none;
+		transition: opacity 0.2s, transform 0.15s; cursor: pointer; border: none;
+	}
+	.cta-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+	.cta-email { background: #6366F1; color: #fff; }
+	.cta-linkedin { background: #0A66C2; color: #fff; }
+	.cta-dismiss {
+		background: none; border: none; color: #52525B; cursor: pointer;
+		font-size: 14px; padding: 4px 8px; transition: color 0.2s;
+	}
+	.cta-dismiss:hover { color: #A1A1AA; }
 
 	/* ── Composer ── */
 	.composer-wrap {
