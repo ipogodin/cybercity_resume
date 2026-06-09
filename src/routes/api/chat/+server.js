@@ -208,6 +208,7 @@ export async function POST({ request, locals }) {
 					redis.lpush('chat:log', JSON.stringify({
 						ts: new Date().toISOString(),
 						ip,
+						sid: chatRequest.sessionId ?? null,
 						mode: chatRequest.mode,
 						q: question.slice(0, 500),
 						a: fullResponse.slice(0, 1000)

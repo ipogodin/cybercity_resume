@@ -15,6 +15,7 @@ export interface ChatRequest {
 	mode: ChatMode;
 	jobDescription?: string;
 	requestType?: RequestType;
+	sessionId?: string;
 }
 
 export type GuardResult =
