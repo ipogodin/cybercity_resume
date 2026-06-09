@@ -11,17 +11,21 @@ export async function POST({ request }) {
 		const { ip, reason = 'manual', ttlSeconds } = await request.json();
 		if (!ip || typeof ip !== 'string') {
 			return new Response(JSON.stringify({ error: 'ip required' }), {
-				status: 400,
-				headers: { 'Content-Type': 'application/json' }
+				status: 400, headers: { 'Content-Type': 'application/json' }
 			});
 		}
 
-		const key = `blocked:ip:${ip}`;
+		const pipeline = redis.pipeline();
+		// Individual key (guard fallback / TTL support)
 		if (ttlSeconds && typeof ttlSeconds === 'number') {
-			await redis.set(key, reason, { ex: ttlSeconds });
+			pipeline.set(`blocked:ip:${ip}`, reason, { ex: ttlSeconds });
 		} else {
-			await redis.set(key, reason);
+			pipeline.set(`blocked:ip:${ip}`, reason);
 		}
+		// Hash for O(1) admin listing — no SCAN needed
+		pipeline.hset('blocked:ips', { [ip]: reason });
+		await pipeline.exec();
+
 		addBlockedIp(ip);
 
 		return new Response(JSON.stringify({ ok: true }), {
@@ -29,8 +33,7 @@ export async function POST({ request }) {
 		});
 	} catch {
 		return new Response(JSON.stringify({ error: 'Failed to block IP' }), {
-			status: 500,
-			headers: { 'Content-Type': 'application/json' }
+			status: 500, headers: { 'Content-Type': 'application/json' }
 		});
 	}
 }

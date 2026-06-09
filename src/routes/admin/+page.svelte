@@ -144,10 +144,6 @@
 							<div class="stat-label">Requests Today</div>
 						</div>
 						<div class="stat-card">
-							<div class="stat-value">{stats?.uniqueIpsToday ?? '—'}</div>
-							<div class="stat-label">Unique IPs Today</div>
-						</div>
-						<div class="stat-card">
 							<div class="stat-value">{stats?.blockedCount ?? '—'}</div>
 							<div class="stat-label">Blocked IPs</div>
 						</div>
@@ -156,18 +152,6 @@
 							<div class="stat-label">Abuse Events</div>
 						</div>
 					</div>
-
-					{#if stats?.topIps?.length}
-						<h2>Top IPs Today</h2>
-						<table>
-							<thead><tr><th>IP</th><th>Requests</th></tr></thead>
-							<tbody>
-								{#each stats.topIps as row}
-									<tr><td>{row.ip}</td><td>{row.count}</td></tr>
-								{/each}
-							</tbody>
-						</table>
-					{/if}
 				</div>
 
 			{:else if activeTab === 'blocked'}

@@ -37,7 +37,7 @@ export function _validateChatRequest(body) {
 
 async function writeLog(ip, request, response, usage, durationMs) {
 	try {
-		const key = `log:ip:${ip}`;
+		const today = new Date().toISOString().slice(0, 10);
 		const entry = JSON.stringify({
 			ts: new Date().toISOString(),
 			ip,
@@ -48,9 +48,14 @@ async function writeLog(ip, request, response, usage, durationMs) {
 			tokens: usage,
 			durationMs
 		});
-		const score = Date.now();
-		await redis.zadd(key, { score, member: entry });
-		await redis.expireat(key, Math.floor((Date.now() + 2_592_000_000) / 1000));
+		const pipeline = redis.pipeline();
+		// Single global log set — no SCAN needed to read
+		pipeline.zadd('log:all', { score: Date.now(), member: entry });
+		pipeline.expireat('log:all', Math.floor((Date.now() + 2_592_000_000) / 1000));
+		// Daily total counter — 1 GET to read instead of scanning all rl:* keys
+		pipeline.incr(`daily:requests:${today}`);
+		pipeline.expire(`daily:requests:${today}`, 172800); // 2 days
+		await pipeline.exec();
 	} catch {
 		// log failure is non-fatal
 	}
