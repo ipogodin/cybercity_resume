@@ -13,22 +13,34 @@ export async function GET({ request, url }) {
 		let cursor = 0;
 		const allKeys = [];
 		do {
-			const result = await redis.scan(cursor, { match: 'log:ip:*', count: 100 });
+			const result = await redis.scan(cursor, { match: 'log:ip:*', count: 200 });
 			cursor = result[0];
 			allKeys.push(...result[1]);
 		} while (cursor !== 0);
 
-		// Fetch entries from each key
-		const allEntries = [];
+		if (allKeys.length === 0) {
+			return new Response(JSON.stringify([]), {
+				headers: { 'Content-Type': 'application/json' }
+			});
+		}
+
+		// Read only `limit` newest entries per key using ZRANGE with proper Redis-level limit
+		// This avoids reading the entire sorted set into memory
+		const pipeline = redis.pipeline();
 		for (const key of allKeys) {
-			const raw = await redis.zrange(key, 0, -1, { rev: true });
+			pipeline.zrange(key, 0, limit - 1, { rev: true });
+		}
+		const results = await pipeline.exec();
+
+		const allEntries = [];
+		for (const raw of results) {
+			if (!Array.isArray(raw)) continue;
 			for (const item of raw) {
-				try { allEntries.push(JSON.parse(item)); }
+				try { allEntries.push(JSON.parse(String(item))); }
 				catch { /* skip malformed */ }
 			}
 		}
 
-		// Sort newest first and limit
 		allEntries.sort((a, b) => new Date(b.ts).getTime() - new Date(a.ts).getTime());
 
 		return new Response(JSON.stringify(allEntries.slice(0, limit)), {

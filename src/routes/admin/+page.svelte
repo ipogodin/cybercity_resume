@@ -21,7 +21,8 @@
 		return { Authorization: `Bearer ${token}` };
 	}
 
-	async function login() {
+	/** @param {boolean} [loadData] - whether to load all data after login (default true) */
+	async function login(loadData = true) {
 		loginError = '';
 		try {
 			const res = await fetch('/api/admin/stats', { headers: authHeader() });
@@ -30,7 +31,7 @@
 			if (!res.ok) { loginError = `Server error (${res.status}) — check env vars in Vercel.`; return; }
 			authed = true;
 			sessionStorage.setItem('admin_token', token);
-			await loadAll();
+			if (loadData) await loadAll();
 		} catch {
 			loginError = 'Connection error.';
 		}
@@ -85,11 +86,11 @@
 		} catch { /* non-fatal */ }
 	}
 
-	// Auto-login if token stored
+	// Restore token from session but don't auto-load data — wait for explicit refresh click
 	import { onMount } from 'svelte';
 	onMount(() => {
 		const saved = sessionStorage.getItem('admin_token');
-		if (saved) { token = saved; login(); }
+		if (saved) { token = saved; login(false); }
 	});
 </script>
 

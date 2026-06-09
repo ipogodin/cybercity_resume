@@ -8,17 +8,32 @@ export async function GET({ request }) {
 
 	try {
 		let cursor = 0;
-		const blocked = [];
+		const keys = [];
 		do {
-			const result = await redis.scan(cursor, { match: 'blocked:ip:*', count: 100 });
+			const result = await redis.scan(cursor, { match: 'blocked:ip:*', count: 200 });
 			cursor = result[0];
-			for (const key of result[1]) {
-				const ip = key.replace('blocked:ip:', '');
-				const reason = (await redis.get(key)) ?? 'manual';
-				const ttl = await redis.ttl(key);
-				blocked.push({ ip, reason, ttl: ttl > 0 ? ttl : null });
-			}
+			keys.push(...result[1]);
 		} while (cursor !== 0);
+
+		if (keys.length === 0) {
+			return new Response(JSON.stringify([]), {
+				headers: { 'Content-Type': 'application/json' }
+			});
+		}
+
+		// Batch-read reason + TTL in one pipeline — 2 reads per key → 1 pipeline round-trip
+		const pipeline = redis.pipeline();
+		for (const key of keys) {
+			pipeline.get(key);
+			pipeline.ttl(key);
+		}
+		const values = await pipeline.exec();
+
+		const blocked = keys.map((key, i) => ({
+			ip: key.replace('blocked:ip:', ''),
+			reason: String(values[i * 2] ?? 'manual'),
+			ttl: Number(values[i * 2 + 1]) > 0 ? Number(values[i * 2 + 1]) : null
+		}));
 
 		return new Response(JSON.stringify(blocked), {
 			headers: { 'Content-Type': 'application/json' }
