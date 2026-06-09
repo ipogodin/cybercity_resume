@@ -1,9 +1,9 @@
 import { redis } from './redis.js';
 import { env } from '$env/dynamic/private';
 
-// IPs exempt from rate limiting: always includes localhost fallback + any in RATE_LIMIT_BYPASS_IPS env var
+// IPs exempt from rate limiting: localhost fallback + any in RATE_LIMIT_BYPASS_IPS env var
 const BYPASS_IPS = new Set([
-	'0.0.0.0',  // npm run dev fallback (no x-forwarded-for header locally)
+	'0.0.0.0',
 	'127.0.0.1',
 	'::1',
 	...((env.RATE_LIMIT_BYPASS_IPS ?? '').split(',').map(s => s.trim()).filter(Boolean))
@@ -27,27 +27,77 @@ const PROBE_PATTERNS = [
 	/repeat (the )?(text|instructions|prompt) (above|before)/i
 ];
 
+// ── In-memory block list cache ──────────────────────────────────────────────
+// Caches the blocked IP set for 30s so we don't hit Redis on every request.
+// A new block takes effect within 30s maximum.
+let blockCacheTs = 0;
+const BLOCK_CACHE_TTL_MS = 30_000;
+/** @type {Set<string>} */
+let blockCache = new Set();
+
+/** For tests only — resets the in-memory block cache */
+export function _clearBlockCache() { blockCacheTs = 0; blockCache = new Set(); }
+
+async function isBlocked(ip) {
+	const now = Date.now();
+	if (now - blockCacheTs > BLOCK_CACHE_TTL_MS) {
+		// Refresh cache: scan all blocked keys
+		let cursor = 0;
+		const fresh = new Set();
+		try {
+			do {
+				const result = await redis.scan(cursor, { match: 'blocked:ip:*', count: 200 });
+				cursor = result[0];
+				for (const key of result[1]) {
+					fresh.add(key.replace('blocked:ip:', ''));
+				}
+			} while (cursor !== 0);
+			blockCache = fresh;
+			blockCacheTs = now;
+		} catch {
+			// On Redis error, fall back to stale cache rather than crashing
+		}
+	}
+	return blockCache.has(ip);
+}
+
+// ── In-memory pre-throttle ───────────────────────────────────────────────────
+// Rejects obvious burst traffic before touching Redis.
+// 20 req/10s per IP. Resets per window. Stored in module memory (per Vercel instance).
+const PRE_THROTTLE_MAX = 20;
+const PRE_THROTTLE_WINDOW_MS = 10_000;
+/** @type {Map<string, {count: number, resetAt: number}>} */
+const preThrottle = new Map();
+
+function isPreThrottled(ip) {
+	if (BYPASS_IPS.has(ip)) return false;
+	const now = Date.now();
+	let entry = preThrottle.get(ip);
+	if (!entry || now > entry.resetAt) {
+		entry = { count: 0, resetAt: now + PRE_THROTTLE_WINDOW_MS };
+		preThrottle.set(ip, entry);
+	}
+	entry.count++;
+	return entry.count > PRE_THROTTLE_MAX;
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
 function nextUtcMidnight() {
 	const now = new Date();
-	const midnight = new Date(
+	return new Date(
 		Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1)
-	);
-	return midnight.toISOString();
+	).toISOString();
 }
 
 function utcDateKey() {
-	const now = new Date();
-	return now.toISOString().slice(0, 10); // YYYY-MM-DD
+	return new Date().toISOString().slice(0, 10);
 }
 
 /** @param {string} ip */
 async function checkRateLimit(ip) {
 	const key = `rl:${ip}:${utcDateKey()}`;
 	const count = await redis.incr(key);
-	// Set 24h TTL on first increment
-	if (count === 1) {
-		await redis.expire(key, 86400);
-	}
+	if (count === 1) await redis.expire(key, 86400);
 	return count;
 }
 
@@ -57,6 +107,11 @@ async function checkRateLimit(ip) {
  * @returns {Promise<import('$lib/types').GuardResult>}
  */
 export async function runGuard(ip, lastUserMessage) {
+	// 0. Pre-throttle — no Redis touch
+	if (isPreThrottled(ip)) {
+		return { ok: false, status: 429, body: { error: 'Too many requests.', resetsAt: nextUtcMidnight() } };
+	}
+
 	// 1. Keyword pre-check — no Redis touch
 	const allPatterns = [...INJECTION_PATTERNS, ...PROBE_PATTERNS];
 	const matchedPattern = allPatterns.find((p) => p.test(lastUserMessage));
@@ -78,9 +133,8 @@ export async function runGuard(ip, lastUserMessage) {
 	}
 
 	try {
-		// 2. Block list check — no INCR
-		const blocked = await redis.get(`blocked:ip:${ip}`);
-		if (blocked) {
+		// 2. Block list — uses in-memory cache (30s TTL), avoids Redis GET per request
+		if (await isBlocked(ip)) {
 			return {
 				ok: false,
 				status: 403,
@@ -88,7 +142,7 @@ export async function runGuard(ip, lastUserMessage) {
 			};
 		}
 
-		// 3. Rate limit — skipped for bypass IPs (localhost + explicitly whitelisted)
+		// 3. Rate limit — skipped for bypass IPs
 		if (BYPASS_IPS.has(ip)) return { ok: true };
 
 		const count = await checkRateLimit(ip);
@@ -96,10 +150,7 @@ export async function runGuard(ip, lastUserMessage) {
 			return {
 				ok: false,
 				status: 429,
-				body: {
-					error: 'Daily request limit reached (25/day).',
-					resetsAt: nextUtcMidnight()
-				}
+				body: { error: 'Daily request limit reached (25/day).', resetsAt: nextUtcMidnight() }
 			};
 		}
 

@@ -4,6 +4,7 @@ const mockRedis = {
 	incr: vi.fn(),
 	expire: vi.fn(),
 	get: vi.fn(),
+	scan: vi.fn(),
 	lpush: vi.fn(),
 	ltrim: vi.fn()
 };
@@ -12,13 +13,17 @@ vi.mock('./redis.js', () => ({ redis: mockRedis }));
 vi.mock('$env/dynamic/private', () => ({ env: { RATE_LIMIT_BYPASS_IPS: '' } }));
 
 describe('runGuard', () => {
-	beforeEach(() => {
+	beforeEach(async () => {
 		vi.clearAllMocks();
 		mockRedis.incr.mockResolvedValue(1);
 		mockRedis.expire.mockResolvedValue(1);
 		mockRedis.get.mockResolvedValue(null);
+		mockRedis.scan.mockResolvedValue([0, []]);
 		mockRedis.lpush.mockResolvedValue(1);
 		mockRedis.ltrim.mockResolvedValue(1);
+		// Reset block cache so each test starts fresh
+		const { _clearBlockCache } = await import('./guard.js');
+		_clearBlockCache();
 	});
 
 	it('returns ok:true for a clean message', async () => {
@@ -44,8 +49,9 @@ describe('runGuard', () => {
 	});
 
 	it('returns 403 for blocked IP without Redis INCR', async () => {
-		mockRedis.get.mockResolvedValue('manual');
-		const { runGuard } = await import('./guard.js');
+		mockRedis.scan.mockResolvedValue([0, ['blocked:ip:1.2.3.4']]);
+		const { runGuard, _clearBlockCache } = await import('./guard.js');
+		_clearBlockCache(); // force cache refresh so scan is called
 		const result = await runGuard('1.2.3.4', 'What did Illia do at Google?');
 		expect(result.ok).toBe(false);
 		if (!result.ok) expect(result.status).toBe(403);
@@ -93,8 +99,9 @@ describe('runGuard', () => {
 		expect(mockRedis.ltrim).toHaveBeenCalledWith('events:abuse', 0, 99);
 	});
 
-	it('returns 503 when Redis throws', async () => {
-		mockRedis.get.mockRejectedValue(new Error('Redis down'));
+	it('returns 503 when Redis throws on rate limit', async () => {
+		mockRedis.scan.mockResolvedValue([0, []]);
+		mockRedis.incr.mockRejectedValue(new Error('Redis down'));
 		const { runGuard } = await import('./guard.js');
 		const result = await runGuard('1.2.3.4', 'What did Illia do at IGT?');
 		expect(result.ok).toBe(false);
