@@ -19,18 +19,48 @@
 	let activeTab = $state('overview');
 	let loading = $state(false);
 	let expandedLog = $state(/** @type {number|null} */ (null));
+	let expandedSession = $state(/** @type {string|null} */ (null));
 	let logSearch = $state('');
+	let logDateFrom = $state('');
+	let logDateTo = $state('');
+	let logGroupBySid = $state(true);
 
-	let filteredLog = $derived(
-		logSearch.trim()
-			? logEntries.filter(e => {
-				const term = logSearch.toLowerCase();
-				return (e.q ?? '').toLowerCase().includes(term)
-					|| (e.a ?? '').toLowerCase().includes(term)
-					|| (e.ip ?? '').toLowerCase().includes(term);
-			})
-			: logEntries
-	);
+	let filteredLog = $derived(() => {
+		let entries = logEntries;
+
+		if (logSearch.trim()) {
+			const term = logSearch.toLowerCase();
+			entries = entries.filter(e =>
+				(e.q ?? '').toLowerCase().includes(term)
+				|| (e.a ?? '').toLowerCase().includes(term)
+				|| (e.ip ?? '').toLowerCase().includes(term)
+				|| (e.sid ?? '').toLowerCase().includes(term)
+			);
+		}
+		if (logDateFrom) {
+			const from = new Date(logDateFrom).getTime();
+			entries = entries.filter(e => new Date(e.ts).getTime() >= from);
+		}
+		if (logDateTo) {
+			const to = new Date(logDateTo).getTime() + 86400000; // inclusive end of day
+			entries = entries.filter(e => new Date(e.ts).getTime() <= to);
+		}
+		return entries;
+	});
+
+	/** Group entries by session ID, sorted by most recent session first */
+	let sessionGroups = $derived(() => {
+		/** @type {Map<string, typeof logEntries>} */
+		const map = new Map();
+		for (const e of filteredLog()) {
+			const key = e.sid ?? `solo-${e.ts}`;
+			if (!map.has(key)) map.set(key, []);
+			map.get(key).push(e);
+		}
+		// Sort sessions by most recent message
+		return [...map.entries()]
+			.sort((a, b) => new Date(b[1][0].ts).getTime() - new Date(a[1][0].ts).getTime());
+	});
 
 	function authHeader() {
 		return { Authorization: `Bearer ${token}` };
@@ -247,25 +277,78 @@
 			{:else if activeTab === 'log'}
 				<div class="section">
 					<div class="log-header">
-						<h2>Request Log <span class="count-badge">{filteredLog.length}{logSearch ? ` of ${logEntries.length}` : ''}</span></h2>
-						<input
-							class="log-search"
-							type="search"
-							bind:value={logSearch}
-							placeholder="Search by question, response or IP…"
-							oninput={() => expandedLog = null}
-						/>
+						<h2>Request Log <span class="count-badge">{filteredLog().length}{(logSearch || logDateFrom || logDateTo) ? ` of ${logEntries.length}` : ''}</span></h2>
+						<div class="log-filters">
+							<input
+								class="log-search"
+								type="search"
+								bind:value={logSearch}
+								placeholder="Search question, response, IP, session…"
+								oninput={() => { expandedLog = null; expandedSession = null; }}
+							/>
+							<input class="log-date" type="date" bind:value={logDateFrom} title="From date" />
+							<span class="date-sep">→</span>
+							<input class="log-date" type="date" bind:value={logDateTo} title="To date" />
+							<label class="group-toggle">
+								<input type="checkbox" bind:checked={logGroupBySid} />
+								Group by session
+							</label>
+						</div>
 					</div>
-					{#if filteredLog.length === 0}
-						<p class="empty">{logEntries.length === 0 ? 'No log entries yet. Send a chat message and click Refresh.' : 'No results for that search.'}</p>
-					{:else}
+
+					{#if filteredLog().length === 0}
+						<p class="empty">{logEntries.length === 0 ? 'No log entries yet. Send a chat message and click Refresh.' : 'No results.'}</p>
+					{:else if logGroupBySid}
+						<!-- Session grouped view -->
 						<div class="log-list">
-							{#each filteredLog as entry, i}
+							{#each sessionGroups() as [sid, entries]}
+								{@const isSolo = sid.startsWith('solo-')}
+								{@const isExpanded = expandedSession === sid}
+								<div class="session-group" class:expanded={isExpanded}>
+									<button class="session-header" onclick={() => expandedSession = expandedSession === sid ? null : sid}>
+										<div class="session-meta">
+											{#if !isSolo}
+												<span class="session-id mono">{sid}</span>
+											{/if}
+											<span class="log-ip mono">{entries[0].ip}</span>
+											<span class="tag">{entries.length} msg{entries.length > 1 ? 's' : ''}</span>
+											<span class="log-time">{new Date(entries[0].ts).toLocaleString()}</span>
+										</div>
+										<span class="session-preview">{entries[0].q ?? entries[0].request ?? ''}</span>
+										<span class="log-chevron">{isExpanded ? '▲' : '▼'}</span>
+									</button>
+									{#if isExpanded}
+										<div class="session-messages">
+											{#each entries as entry, i}
+												<div class="session-msg">
+													<div class="session-msg-meta">
+														<span class="msg-num">#{i + 1}</span>
+														<span class="log-time">{new Date(entry.ts).toLocaleString()}</span>
+													</div>
+													<div class="log-section">
+														<span class="log-label">Q</span>
+														<p class="log-text">{entry.q ?? entry.request ?? '—'}</p>
+													</div>
+													<div class="log-section">
+														<span class="log-label">A</span>
+														<p class="log-text">{entry.a ?? entry.response ?? '—'}</p>
+													</div>
+												</div>
+											{/each}
+										</div>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{:else}
+						<!-- Flat view -->
+						<div class="log-list">
+							{#each filteredLog() as entry, i}
 								<div class="log-row" class:expanded={expandedLog === i}>
 									<button class="log-row-header" onclick={() => expandedLog = expandedLog === i ? null : i}>
 										<span class="log-time">{new Date(entry.ts).toLocaleString()}</span>
 										<span class="log-ip mono">{entry.ip}</span>
-										<span class="tag">{entry.mode ?? 'ask'}</span>
+										{#if entry.sid}<span class="session-badge mono">{entry.sid.slice(0,10)}</span>{/if}
 										<span class="log-preview">{entry.q ?? entry.request ?? ''}</span>
 										<span class="log-chevron">{expandedLog === i ? '▲' : '▼'}</span>
 									</button>
@@ -394,16 +477,46 @@
 	.lead-meta { display: flex; gap: 12px; align-items: center; }
 	.lead-q { margin: 0; font-size: 12px; color: #71717A; font-style: italic; }
 
-	.log-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+	.log-header { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
 	.log-header h2 { margin: 0; }
+	.log-filters { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 	.log-search {
-		flex: 1; min-width: 200px; max-width: 360px;
+		flex: 1; min-width: 180px;
 		background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
 		border-radius: 7px; color: #FAFAFA; font-size: 13px; padding: 7px 12px;
 		font-family: inherit; transition: border-color 0.2s;
 	}
 	.log-search:focus { outline: none; border-color: rgba(99,102,241,0.5); }
 	.log-search::placeholder { color: #52525B; }
+	.log-date {
+		background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+		border-radius: 7px; color: #FAFAFA; font-size: 13px; padding: 7px 10px;
+		font-family: inherit; transition: border-color 0.2s; cursor: pointer;
+		color-scheme: dark;
+	}
+	.log-date:focus { outline: none; border-color: rgba(99,102,241,0.5); }
+	.date-sep { color: #52525B; font-size: 12px; }
+	.group-toggle { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #71717A; cursor: pointer; white-space: nowrap; }
+	.group-toggle input { accent-color: #6366F1; cursor: pointer; }
+
+	/* Session groups */
+	.session-group { border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; overflow: hidden; margin-bottom: 4px; transition: border-color 0.2s; }
+	.session-group:hover, .session-group.expanded { border-color: rgba(99,102,241,0.3); }
+	.session-header {
+		width: 100%; display: flex; flex-direction: column; gap: 4px;
+		padding: 10px 14px; background: rgba(17,17,19,0.6);
+		border: none; color: inherit; cursor: pointer; text-align: left; transition: background 0.15s;
+	}
+	.session-header:hover { background: rgba(99,102,241,0.06); }
+	.session-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+	.session-id { font-size: 11px; color: #6366F1; }
+	.session-preview { font-size: 13px; color: #A1A1AA; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 100%; }
+	.session-badge { font-size: 10px; color: #6366F1; background: rgba(99,102,241,0.12); padding: 1px 6px; border-radius: 4px; }
+	.session-messages { display: flex; flex-direction: column; gap: 0; border-top: 1px solid rgba(255,255,255,0.05); }
+	.session-msg { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; flex-direction: column; gap: 8px; }
+	.session-msg:last-child { border-bottom: none; }
+	.session-msg-meta { display: flex; gap: 10px; align-items: center; }
+	.msg-num { font-size: 11px; color: #52525B; font-weight: 600; }
 
 	/* Log list */
 	.log-list { display: flex; flex-direction: column; gap: 4px; }

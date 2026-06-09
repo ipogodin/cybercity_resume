@@ -33,6 +33,7 @@
 	let breakerTrip = $state(false);
 	let threadEl = $state(/** @type {HTMLElement|null} */ (null));
 	let inputEl = $state(/** @type {HTMLTextAreaElement|null} */ (null));
+	let sessionId = '';
 
 	function triggerBreakerTrip() {
 		breakerTrip = true;
@@ -53,6 +54,15 @@
 	let showContactCta = $state(false);
 
 	onMount(() => {
+		// Generate or restore session ID — persists within same browser tab
+		const stored = sessionStorage.getItem('chat_session_id');
+		if (stored) {
+			sessionId = stored;
+		} else {
+			sessionId = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+			sessionStorage.setItem('chat_session_id', sessionId);
+		}
+
 		if ($page.url.searchParams.get('from') === 'pdf') {
 			const pdf = sessionStorage.getItem('fit_pdf');
 			const img = sessionStorage.getItem('fit_image');
@@ -117,7 +127,7 @@
 		}
 
 		/** @type {Record<string, unknown>} */
-		const body = { messages: trimmed, mode: 'advocate' };
+		const body = { messages: trimmed, mode: 'advocate', sessionId };
 		if (jd) body.jobDescription = jd;
 
 		scrollToBottom();
