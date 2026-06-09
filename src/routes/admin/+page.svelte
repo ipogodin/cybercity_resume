@@ -25,10 +25,11 @@
 	async function login(loadData = true) {
 		loginError = '';
 		try {
-			const res = await fetch('/api/admin/stats', { headers: authHeader() });
+			// Ping endpoint: token check only, zero Redis, never hangs
+			const res = await fetch('/api/admin/ping', { headers: authHeader() });
 			if (res.status === 401) { loginError = 'Invalid token.'; return; }
 			if (res.status === 403) { loginError = 'Access denied from this IP address.'; return; }
-			if (!res.ok) { loginError = `Server error (${res.status}) — check env vars in Vercel.`; return; }
+			if (!res.ok) { loginError = `Server error (${res.status}) — check ADMIN_TOKEN in Vercel env vars.`; return; }
 			authed = true;
 			sessionStorage.setItem('admin_token', token);
 			if (loadData) await loadAll();
