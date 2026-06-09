@@ -49,9 +49,8 @@ describe('runGuard', () => {
 	});
 
 	it('returns 403 for blocked IP without Redis INCR', async () => {
-		mockRedis.scan.mockResolvedValue([0, ['blocked:ip:1.2.3.4']]);
-		const { runGuard, _clearBlockCache } = await import('./guard.js');
-		_clearBlockCache(); // force cache refresh so scan is called
+		const { runGuard, addBlockedIp } = await import('./guard.js');
+		addBlockedIp('1.2.3.4'); // block list is memory-only, no Redis involved
 		const result = await runGuard('1.2.3.4', 'What did Illia do at Google?');
 		expect(result.ok).toBe(false);
 		if (!result.ok) expect(result.status).toBe(403);

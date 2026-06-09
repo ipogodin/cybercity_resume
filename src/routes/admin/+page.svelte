@@ -124,10 +124,16 @@
 						<button class:active={activeTab === tab} onclick={() => activeTab = tab}>{tab}</button>
 					{/each}
 				</div>
-				<button class="refresh-btn" onclick={loadAll} disabled={loading}>
-					{loading ? '…' : '↻'}
+				<button class="load-btn" onclick={loadAll} disabled={loading}>
+					{loading ? 'Loading…' : stats ? '↻ Refresh' : '↓ Load data'}
 				</button>
 			</header>
+
+			{#if !stats && !loading}
+				<div class="no-data">
+					<p>Data not loaded — click <strong>↓ Load data</strong> to read from Redis.</p>
+				</div>
+			{/if}
 
 			{#if activeTab === 'overview'}
 				<div class="section">
@@ -258,11 +264,11 @@
 		border-radius: 8px; color: #FAFAFA; font-size: 14px; padding: 10px 12px; width: 100%;
 	}
 	input:focus { outline: none; border-color: #6366F1; }
-	button:not(.refresh-btn):not(.unblock-btn):not(.tabs button) {
+	button:not(.load-btn):not(.unblock-btn):not(.tabs button) {
 		background: #6366F1; border: none; border-radius: 8px; color: #fff;
 		font-size: 14px; font-weight: 600; padding: 10px 20px; cursor: pointer; transition: background 0.2s;
 	}
-	button:not(.refresh-btn):not(.unblock-btn):not(.tabs button):hover { background: #4F46E5; }
+	button:not(.load-btn):not(.unblock-btn):not(.tabs button):hover { background: #4F46E5; }
 	.error { color: #f87171; font-size: 13px; }
 
 	/* Dashboard */
@@ -280,12 +286,17 @@
 	}
 	.tabs button:hover { color: #FAFAFA; }
 	.tabs button.active { background: rgba(99,102,241,0.15); color: #818CF8; }
-	.refresh-btn {
-		background: transparent; border: 1px solid rgba(255,255,255,0.1);
-		border-radius: 6px; color: #71717A; padding: 6px 12px; cursor: pointer;
-		font-size: 16px; transition: all 0.2s;
+	.load-btn {
+		background: #6366F1; border: none;
+		border-radius: 6px; color: #fff; padding: 7px 16px; cursor: pointer;
+		font-size: 13px; font-weight: 600; transition: background 0.2s; white-space: nowrap;
 	}
-	.refresh-btn:hover { color: #FAFAFA; }
+	.load-btn:hover:not(:disabled) { background: #4F46E5; }
+	.load-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+	.no-data {
+		padding: 48px 24px; text-align: center; color: #52525B; font-size: 14px;
+	}
+	.no-data strong { color: #818CF8; }
 
 	.section { padding: 24px; max-width: 1100px; }
 	h2 { font-size: 15px; color: #A1A1AA; font-weight: 600; margin: 24px 0 12px; }

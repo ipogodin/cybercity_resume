@@ -1,7 +1,7 @@
 import { redis } from './redis.js';
 import { env } from '$env/dynamic/private';
 
-// IPs exempt from rate limiting: localhost fallback + any in RATE_LIMIT_BYPASS_IPS env var
+// IPs exempt from rate limiting
 const BYPASS_IPS = new Set([
 	'0.0.0.0',
 	'127.0.0.1',
@@ -27,43 +27,34 @@ const PROBE_PATTERNS = [
 	/repeat (the )?(text|instructions|prompt) (above|before)/i
 ];
 
-// ── In-memory block list cache ──────────────────────────────────────────────
-// Caches the blocked IP set for 30s so we don't hit Redis on every request.
-// A new block takes effect within 30s maximum.
-let blockCacheTs = 0;
-const BLOCK_CACHE_TTL_MS = 30_000;
+// ── In-memory block list ─────────────────────────────────────────────────────
+// No automatic Redis reads. Updated only via admin block/unblock API calls
+// or explicit admin sync. Starts empty on cold start — acceptable for a
+// portfolio site where blocking is a rare manual action.
 /** @type {Set<string>} */
-let blockCache = new Set();
+const blockedIps = new Set();
 
-/** For tests only — resets the in-memory block cache */
-export function _clearBlockCache() { blockCacheTs = 0; blockCache = new Set(); }
+export function addBlockedIp(ip) { blockedIps.add(ip); }
+export function removeBlockedIp(ip) { blockedIps.delete(ip); }
 
-async function isBlocked(ip) {
-	const now = Date.now();
-	if (now - blockCacheTs > BLOCK_CACHE_TTL_MS) {
-		// Refresh cache: scan all blocked keys
-		let cursor = 0;
-		const fresh = new Set();
-		try {
-			do {
-				const result = await redis.scan(cursor, { match: 'blocked:ip:*', count: 200 });
-				cursor = result[0];
-				for (const key of result[1]) {
-					fresh.add(key.replace('blocked:ip:', ''));
-				}
-			} while (cursor !== 0);
-			blockCache = fresh;
-			blockCacheTs = now;
-		} catch {
-			// On Redis error, fall back to stale cache rather than crashing
-		}
-	}
-	return blockCache.has(ip);
+/** Called by admin "sync" action — the only time we read block list from Redis */
+export async function syncBlockListFromRedis() {
+	let cursor = 0;
+	const fresh = new Set();
+	do {
+		const result = await redis.scan(cursor, { match: 'blocked:ip:*', count: 200 });
+		cursor = result[0];
+		for (const key of result[1]) fresh.add(key.replace('blocked:ip:', ''));
+	} while (cursor !== 0);
+	blockedIps.clear();
+	for (const ip of fresh) blockedIps.add(ip);
+	return blockedIps.size;
 }
 
-// ── In-memory pre-throttle ───────────────────────────────────────────────────
-// Rejects obvious burst traffic before touching Redis.
-// 20 req/10s per IP. Resets per window. Stored in module memory (per Vercel instance).
+/** For tests only */
+export function _clearBlockCache() { blockedIps.clear(); }
+
+// ── In-memory pre-throttle (no Redis) ───────────────────────────────────────
 const PRE_THROTTLE_MAX = 20;
 const PRE_THROTTLE_WINDOW_MS = 10_000;
 /** @type {Map<string, {count: number, resetAt: number}>} */
@@ -89,13 +80,9 @@ function nextUtcMidnight() {
 	).toISOString();
 }
 
-function utcDateKey() {
-	return new Date().toISOString().slice(0, 10);
-}
-
 /** @param {string} ip */
 async function checkRateLimit(ip) {
-	const key = `rl:${ip}:${utcDateKey()}`;
+	const key = `rl:${ip}:${new Date().toISOString().slice(0, 10)}`;
 	const count = await redis.incr(key);
 	if (count === 1) await redis.expire(key, 86400);
 	return count;
@@ -107,53 +94,39 @@ async function checkRateLimit(ip) {
  * @returns {Promise<import('$lib/types').GuardResult>}
  */
 export async function runGuard(ip, lastUserMessage) {
-	// 0. Pre-throttle — no Redis touch
+	// 0. Pre-throttle — memory only, zero Redis
 	if (isPreThrottled(ip)) {
 		return { ok: false, status: 429, body: { error: 'Too many requests.', resetsAt: nextUtcMidnight() } };
 	}
 
-	// 1. Keyword pre-check — no Redis touch
+	// 1. Keyword check — memory only, zero Redis
 	const allPatterns = [...INJECTION_PATTERNS, ...PROBE_PATTERNS];
 	const matchedPattern = allPatterns.find((p) => p.test(lastUserMessage));
-
 	if (matchedPattern) {
 		try {
-			const event = {
-				ts: new Date().toISOString(),
-				ip,
+			await redis.lpush('events:abuse', JSON.stringify({
+				ts: new Date().toISOString(), ip,
 				rule: matchedPattern.toString(),
 				snippet: lastUserMessage.slice(0, 200)
-			};
-			await redis.lpush('events:abuse', JSON.stringify(event));
+			}));
 			await redis.ltrim('events:abuse', 0, 99);
-		} catch {
-			// log failure is non-fatal
-		}
+		} catch { /* non-fatal */ }
 		return { ok: false, status: 400, body: { error: 'Message rejected by content policy.' } };
 	}
 
+	// 2. Block list — memory only, zero Redis reads
+	if (blockedIps.has(ip)) {
+		return { ok: false, status: 403, body: { error: 'Your IP has been blocked. Contact the site owner if this is an error.' } };
+	}
+
+	// 3. Rate limit — skip for bypass IPs
+	if (BYPASS_IPS.has(ip)) return { ok: true };
+
 	try {
-		// 2. Block list — uses in-memory cache (30s TTL), avoids Redis GET per request
-		if (await isBlocked(ip)) {
-			return {
-				ok: false,
-				status: 403,
-				body: { error: 'Your IP has been blocked. Contact the site owner if this is an error.' }
-			};
-		}
-
-		// 3. Rate limit — skipped for bypass IPs
-		if (BYPASS_IPS.has(ip)) return { ok: true };
-
 		const count = await checkRateLimit(ip);
 		if (count > 25) {
-			return {
-				ok: false,
-				status: 429,
-				body: { error: 'Daily request limit reached (25/day).', resetsAt: nextUtcMidnight() }
-			};
+			return { ok: false, status: 429, body: { error: 'Daily request limit reached (25/day).', resetsAt: nextUtcMidnight() } };
 		}
-
 		return { ok: true };
 	} catch {
 		return { ok: false, status: 503, body: { error: 'Service temporarily unavailable.' } };

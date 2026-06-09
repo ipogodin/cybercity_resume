@@ -1,5 +1,6 @@
 import { requireAdmin } from '$lib/server/adminAuth.js';
 import { redis } from '$lib/server/redis.js';
+import { removeBlockedIp } from '$lib/server/guard.js';
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function POST({ request }) {
@@ -16,6 +17,7 @@ export async function POST({ request }) {
 		}
 
 		await redis.del(`blocked:ip:${ip}`);
+		removeBlockedIp(ip);
 
 		return new Response(JSON.stringify({ ok: true }), {
 			headers: { 'Content-Type': 'application/json' }
