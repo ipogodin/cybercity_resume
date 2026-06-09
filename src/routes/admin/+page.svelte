@@ -16,6 +16,7 @@
 	let blockError = $state('');
 	let activeTab = $state('overview');
 	let loading = $state(false);
+	let expandedLog = $state(/** @type {number|null} */ (null));
 
 	function authHeader() {
 		return { Authorization: `Bearer ${token}` };
@@ -204,23 +205,35 @@
 
 			{:else if activeTab === 'log'}
 				<div class="section">
-					<h2>Request Log ({logEntries.length})</h2>
+					<h2>Request Log <span class="count-badge">{logEntries.length}</span></h2>
 					{#if logEntries.length === 0}
-						<p class="empty">No log entries.</p>
+						<p class="empty">No log entries yet. Send a chat message and click Refresh.</p>
 					{:else}
-						{#each logEntries as entry}
-							<div class="log-entry">
-								<div class="log-meta">
-									<span class="mono">{entry.ip}</span>
-									<span class="tag">{entry.mode}</span>
-									<span class="tag">{entry.type}</span>
-									<span class="time">{new Date(entry.ts).toLocaleString()}</span>
-									<span class="tokens">{entry.tokens.input}↑ {entry.tokens.output}↓ tokens</span>
+						<div class="log-list">
+							{#each logEntries as entry, i}
+								<div class="log-row" class:expanded={expandedLog === i}>
+									<button class="log-row-header" onclick={() => expandedLog = expandedLog === i ? null : i}>
+										<span class="log-time">{new Date(entry.ts).toLocaleString()}</span>
+										<span class="log-ip mono">{entry.ip}</span>
+										<span class="tag">{entry.mode ?? 'ask'}</span>
+										<span class="log-preview">{entry.q ?? entry.request ?? ''}</span>
+										<span class="log-chevron">{expandedLog === i ? '▲' : '▼'}</span>
+									</button>
+									{#if expandedLog === i}
+										<div class="log-detail">
+											<div class="log-section">
+												<span class="log-label">Question</span>
+												<p class="log-text">{entry.q ?? entry.request ?? '—'}</p>
+											</div>
+											<div class="log-section">
+												<span class="log-label">Response</span>
+												<p class="log-text">{entry.a ?? entry.response ?? '—'}</p>
+											</div>
+										</div>
+									{/if}
 								</div>
-								<div class="log-req">Q: {entry.request}</div>
-								<div class="log-res">A: {entry.response}</div>
-							</div>
-						{/each}
+							{/each}
+						</div>
 					{/if}
 				</div>
 			{/if}
@@ -317,6 +330,38 @@
 	.rule { font-size: 11px; color: #fbbf24; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.snippet { font-size: 12px; color: #71717A; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.empty { color: #52525B; font-size: 14px; }
+
+	.count-badge { font-size: 12px; color: #52525B; font-weight: 400; margin-left: 6px; }
+
+	/* Log list */
+	.log-list { display: flex; flex-direction: column; gap: 4px; }
+	.log-row {
+		border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; overflow: hidden;
+		transition: border-color 0.2s;
+	}
+	.log-row:hover, .log-row.expanded { border-color: rgba(99,102,241,0.3); }
+	.log-row-header {
+		width: 100%; display: flex; align-items: center; gap: 12px;
+		padding: 10px 14px; background: rgba(17,17,19,0.6);
+		border: none; color: inherit; cursor: pointer; text-align: left;
+		transition: background 0.15s;
+	}
+	.log-row-header:hover { background: rgba(99,102,241,0.06); }
+	.log-time { font-size: 11px; color: #52525B; white-space: nowrap; flex-shrink: 0; }
+	.log-ip { font-size: 12px; color: #71717A; white-space: nowrap; flex-shrink: 0; }
+	.log-preview {
+		flex: 1; font-size: 13px; color: #A1A1AA;
+		overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+	}
+	.log-chevron { font-size: 10px; color: #52525B; flex-shrink: 0; }
+
+	.log-detail {
+		padding: 14px 16px; display: flex; flex-direction: column; gap: 12px;
+		background: rgba(9,9,11,0.6); border-top: 1px solid rgba(255,255,255,0.05);
+	}
+	.log-section { display: flex; flex-direction: column; gap: 4px; }
+	.log-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #52525B; font-weight: 600; }
+	.log-text { margin: 0; font-size: 13px; color: #E4E4E7; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
 	.vercel-note { margin: 16px 0 0; font-size: 12px; color: #3F3F46; }
 	.vercel-note a { color: #6366F1; text-decoration: none; }
 	.vercel-note a:hover { text-decoration: underline; }

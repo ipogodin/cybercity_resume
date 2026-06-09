@@ -9,8 +9,8 @@ export async function GET({ request, url }) {
 	const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50', 10), 200);
 
 	try {
-		// 1 command — no SCAN
-		const raw = await redis.zrange('log:all', 0, limit - 1, { rev: true });
+		// 1 read — LRANGE on the capped list, newest first
+		const raw = await redis.lrange('log:all', 0, limit - 1);
 		const entries = raw
 			.map(item => { try { return JSON.parse(String(item)); } catch { return null; } })
 			.filter(Boolean);

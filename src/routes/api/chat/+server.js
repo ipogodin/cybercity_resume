@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import { env } from '$env/dynamic/private';
 import { runGuard } from '$lib/server/guard.js';
 import { buildSystemPrompt } from '$lib/server/prompt.js';
-// Redis used only for rate limiting and abuse events — not for logging
+import { redis } from '$lib/server/redis.js';
 
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 
@@ -180,6 +180,18 @@ export async function POST({ request, locals }) {
 					controller.enqueue(encoder.encode(msg));
 				} finally {
 					controller.close();
+					// Fire-and-forget log — 2 writes, keeps last 500 entries
+					const lastMsg = trimmedMessages.slice().reverse().find(m => m.role === 'user');
+					const question = Array.isArray(lastMsg?.content)
+						? lastMsg.content.filter(p => p.type === 'text').map(p => p.text).join(' ')
+						: (lastMsg?.content ?? '');
+					redis.lpush('log:all', JSON.stringify({
+						ts: new Date().toISOString(),
+						ip,
+						mode: chatRequest.mode,
+						q: question.slice(0, 500),
+						a: fullResponse.slice(0, 1000)
+					})).then(() => redis.ltrim('log:all', 0, 499)).catch(() => {});
 				}
 			}
 		});
