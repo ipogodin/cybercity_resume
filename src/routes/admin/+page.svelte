@@ -17,6 +17,18 @@
 	let activeTab = $state('overview');
 	let loading = $state(false);
 	let expandedLog = $state(/** @type {number|null} */ (null));
+	let logSearch = $state('');
+
+	let filteredLog = $derived(
+		logSearch.trim()
+			? logEntries.filter(e => {
+				const term = logSearch.toLowerCase();
+				return (e.q ?? '').toLowerCase().includes(term)
+					|| (e.a ?? '').toLowerCase().includes(term)
+					|| (e.ip ?? '').toLowerCase().includes(term);
+			})
+			: logEntries
+	);
 
 	function authHeader() {
 		return { Authorization: `Bearer ${token}` };
@@ -205,12 +217,21 @@
 
 			{:else if activeTab === 'log'}
 				<div class="section">
-					<h2>Request Log <span class="count-badge">{logEntries.length}</span></h2>
-					{#if logEntries.length === 0}
-						<p class="empty">No log entries yet. Send a chat message and click Refresh.</p>
+					<div class="log-header">
+						<h2>Request Log <span class="count-badge">{filteredLog.length}{logSearch ? ` of ${logEntries.length}` : ''}</span></h2>
+						<input
+							class="log-search"
+							type="search"
+							bind:value={logSearch}
+							placeholder="Search by question, response or IP…"
+							oninput={() => expandedLog = null}
+						/>
+					</div>
+					{#if filteredLog.length === 0}
+						<p class="empty">{logEntries.length === 0 ? 'No log entries yet. Send a chat message and click Refresh.' : 'No results for that search.'}</p>
 					{:else}
 						<div class="log-list">
-							{#each logEntries as entry, i}
+							{#each filteredLog as entry, i}
 								<div class="log-row" class:expanded={expandedLog === i}>
 									<button class="log-row-header" onclick={() => expandedLog = expandedLog === i ? null : i}>
 										<span class="log-time">{new Date(entry.ts).toLocaleString()}</span>
@@ -332,6 +353,17 @@
 	.empty { color: #52525B; font-size: 14px; }
 
 	.count-badge { font-size: 12px; color: #52525B; font-weight: 400; margin-left: 6px; }
+
+	.log-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+	.log-header h2 { margin: 0; }
+	.log-search {
+		flex: 1; min-width: 200px; max-width: 360px;
+		background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+		border-radius: 7px; color: #FAFAFA; font-size: 13px; padding: 7px 12px;
+		font-family: inherit; transition: border-color 0.2s;
+	}
+	.log-search:focus { outline: none; border-color: rgba(99,102,241,0.5); }
+	.log-search::placeholder { color: #52525B; }
 
 	/* Log list */
 	.log-list { display: flex; flex-direction: column; gap: 4px; }
