@@ -5,9 +5,9 @@
 ### Languages
 
 - **Java** — Expert. Primary language across 15+ years. Used at Google (Messages backend), Salesforce (GraphQL + REST APIs), Wargaming, IGT, Deutsche Bank, Belleron, Alertme.
-- **Python** — Familiar. Used at Meta for Tupperware infrastructure tooling and AI/ML workload optimization.
+- **Python** — Intermediate. Used at Meta for Tupperware infrastructure tooling and AI/ML workload optimization.
 - **Scala** — Intermediate. Used at IGT for microservices and OSGI monolith migration.
-- **C++** — Intermediate. Used at Meta for infrastructure tooling; earlier at Alertme for device communication layer.
+- **C++** — Familiar. Approximately one year of use at Meta for infrastructure tooling. Earlier exposure at Alertme for device communication layer.
 - **Go (Golang)** — Intermediate. Used at Google and in parts of Salesforce backend work.
 - **JavaScript** — Intermediate. Illia does not position himself as a frontend engineer, but has used JavaScript throughout his career. Most recently at Meta: built React-based tooling for on-call investigation and infrastructure observability. Also used for this portfolio site (SvelteKit + Svelte 5).
 - **SQL** — Advanced. PostgreSQL, MySQL, MSSQL, Oracle across multiple companies. Notable at Wargaming: diagnosed severe performance issues caused by unstructured JSON data stored directly in Postgres cells, which made queries extremely slow. Redesigned the promotion engine database to v2 — normalized schema, query optimization, and stored procedures — significantly improving query performance and long-term maintainability.
