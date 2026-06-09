@@ -140,18 +140,15 @@
 				<div class="section">
 					<div class="stat-grid">
 						<div class="stat-card">
-							<div class="stat-value">{stats?.requestsToday ?? '—'}</div>
-							<div class="stat-label">Requests Today</div>
-						</div>
-						<div class="stat-card">
 							<div class="stat-value">{stats?.blockedCount ?? '—'}</div>
 							<div class="stat-label">Blocked IPs</div>
 						</div>
 						<div class="stat-card">
-							<div class="stat-value">{stats?.abuseEventsLast24h ?? '—'}</div>
+							<div class="stat-value">{stats?.abuseEvents ?? '—'}</div>
 							<div class="stat-label">Abuse Events</div>
 						</div>
 					</div>
+					<p class="vercel-note">For request logs and traffic see <a href="https://vercel.com/dashboard" target="_blank" rel="noopener">Vercel dashboard → Functions</a></p>
 				</div>
 
 			{:else if activeTab === 'blocked'}
@@ -320,6 +317,9 @@
 	.rule { font-size: 11px; color: #fbbf24; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.snippet { font-size: 12px; color: #71717A; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 	.empty { color: #52525B; font-size: 14px; }
+	.vercel-note { margin: 16px 0 0; font-size: 12px; color: #3F3F46; }
+	.vercel-note a { color: #6366F1; text-decoration: none; }
+	.vercel-note a:hover { text-decoration: underline; }
 
 	@media (max-width: 768px) {
 		.stat-grid { grid-template-columns: repeat(2, 1fr); }

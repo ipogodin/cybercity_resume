@@ -2,7 +2,7 @@ import OpenAI from 'openai';
 import { env } from '$env/dynamic/private';
 import { runGuard } from '$lib/server/guard.js';
 import { buildSystemPrompt } from '$lib/server/prompt.js';
-import { redis } from '$lib/server/redis.js';
+// Redis used only for rate limiting and abuse events — not for logging
 
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });
 
@@ -35,31 +35,6 @@ export function _validateChatRequest(body) {
 	return /** @type {import('$lib/types').ChatRequest} */ (body);
 }
 
-async function writeLog(ip, request, response, usage, durationMs) {
-	try {
-		const today = new Date().toISOString().slice(0, 10);
-		const entry = JSON.stringify({
-			ts: new Date().toISOString(),
-			ip,
-			mode: request.mode,
-			type: request.requestType ?? 'message',
-			request: (request.messages.at(-1)?.content ?? '').slice(0, 500),
-			response: response.slice(0, 500),
-			tokens: usage,
-			durationMs
-		});
-		const pipeline = redis.pipeline();
-		// Single global log set — no SCAN needed to read
-		pipeline.zadd('log:all', { score: Date.now(), member: entry });
-		pipeline.expireat('log:all', Math.floor((Date.now() + 2_592_000_000) / 1000));
-		// Daily total counter — 1 GET to read instead of scanning all rl:* keys
-		pipeline.incr(`daily:requests:${today}`);
-		pipeline.expire(`daily:requests:${today}`, 172800); // 2 days
-		await pipeline.exec();
-	} catch {
-		// log failure is non-fatal
-	}
-}
 
 /** @type {import('@sveltejs/kit').RequestHandler} */
 export async function POST({ request, locals }) {
@@ -205,13 +180,6 @@ export async function POST({ request, locals }) {
 					controller.enqueue(encoder.encode(msg));
 				} finally {
 					controller.close();
-					writeLog(
-						ip,
-						{ ...chatRequest, messages: trimmedMessages },
-						fullResponse,
-						usage,
-						Date.now() - startMs
-					);
 				}
 			}
 		});
