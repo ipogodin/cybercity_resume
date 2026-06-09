@@ -11,6 +11,8 @@
 	let abuseEvents = $state([]);
 	/** @type {Array<import('$lib/types').LogEntry>} */
 	let logEntries = $state([]);
+	/** @type {Array<{ts:string, ip:string, email:string, q:string}>} */
+	let leads = $state([]);
 
 	let blockIpInput = $state('');
 	let blockError = $state('');
@@ -54,16 +56,18 @@
 	async function loadAll() {
 		loading = true;
 		try {
-			const [s, b, e, l] = await Promise.all([
+			const [s, b, e, l, ld] = await Promise.all([
 				fetch('/api/admin/stats', { headers: authHeader() }).then(r => r.json()),
 				fetch('/api/admin/blocked', { headers: authHeader() }).then(r => r.json()),
 				fetch('/api/admin/events', { headers: authHeader() }).then(r => r.json()),
-				fetch('/api/admin/log', { headers: authHeader() }).then(r => r.json())
+				fetch('/api/admin/log', { headers: authHeader() }).then(r => r.json()),
+				fetch('/api/admin/leads', { headers: authHeader() }).then(r => r.json())
 			]);
 			stats = s;
 			blockedList = Array.isArray(b) ? b : [];
 			abuseEvents = Array.isArray(e) ? e : [];
 			logEntries = Array.isArray(l) ? l : [];
+			leads = Array.isArray(ld) ? ld : [];
 		} catch {
 			/* non-fatal */
 		} finally {
@@ -134,7 +138,7 @@
 			<header>
 				<span class="logo">Admin Dashboard</span>
 				<div class="tabs">
-					{#each ['overview', 'blocked', 'events', 'log'] as tab}
+					{#each ['overview', 'leads', 'blocked', 'events', 'log'] as tab}
 						<button class:active={activeTab === tab} onclick={() => activeTab = tab}>{tab}</button>
 					{/each}
 				</div>
@@ -162,6 +166,31 @@
 						</div>
 					</div>
 					<p class="vercel-note">For request logs and traffic see <a href="https://vercel.com/dashboard" target="_blank" rel="noopener">Vercel dashboard → Functions</a></p>
+				</div>
+
+			{:else if activeTab === 'leads'}
+				<div class="section">
+					<h2>Leads <span class="count-badge">{leads.length}</span></h2>
+					{#if leads.length === 0}
+						<p class="empty">No leads yet. Contacts left by visitors in advocate mode appear here.</p>
+					{:else}
+						<div class="leads-list">
+							{#each leads as lead}
+								<div class="lead-card">
+									<div class="lead-email">
+										<a href="mailto:{lead.email}?subject=Following up on your interest in Illia Pogodin&body=Hi,%0A%0AThank you for reaching out via Illia's portfolio. I'd love to connect and discuss potential opportunities.%0A%0ABest,%0AIllia">{lead.email}</a>
+									</div>
+									<div class="lead-meta">
+										<span class="mono">{lead.ip}</span>
+										<span class="time">{new Date(lead.ts).toLocaleString()}</span>
+									</div>
+									{#if lead.q}
+										<p class="lead-q">{lead.q}</p>
+									{/if}
+								</div>
+							{/each}
+						</div>
+					{/if}
 				</div>
 
 			{:else if activeTab === 'blocked'}
@@ -353,6 +382,17 @@
 	.empty { color: #52525B; font-size: 14px; }
 
 	.count-badge { font-size: 12px; color: #52525B; font-weight: 400; margin-left: 6px; }
+
+	/* Leads */
+	.leads-list { display: flex; flex-direction: column; gap: 10px; }
+	.lead-card {
+		background: rgba(17,17,19,0.85); border: 1px solid rgba(99,102,241,0.2);
+		border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px;
+	}
+	.lead-email a { font-size: 15px; font-weight: 600; color: #818CF8; text-decoration: none; }
+	.lead-email a:hover { text-decoration: underline; }
+	.lead-meta { display: flex; gap: 12px; align-items: center; }
+	.lead-q { margin: 0; font-size: 12px; color: #71717A; font-style: italic; }
 
 	.log-header { display: flex; align-items: center; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
 	.log-header h2 { margin: 0; }

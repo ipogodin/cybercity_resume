@@ -7,18 +7,16 @@ vi.mock('./knowledge/index.js', () => ({
 }));
 
 describe('buildSystemPrompt', () => {
-	it('ask mode includes EXPERIENCE CONTEXT, no JOB DESCRIPTION section', async () => {
+	it('any mode includes resume context', async () => {
 		const { buildSystemPrompt } = await import('./prompt.js');
 		const result = buildSystemPrompt('ask');
-		expect(result).toContain('EXPERIENCE CONTEXT');
-		expect(result).not.toContain('JOB DESCRIPTION');
+		expect(result).toContain("ILLIA'S BACKGROUND");
 	});
 
-	it('fit mode includes both EXPERIENCE CONTEXT and JOB DESCRIPTION', async () => {
+	it('advocate mode with JD includes position description', async () => {
 		const { buildSystemPrompt } = await import('./prompt.js');
-		const result = buildSystemPrompt('fit', 'We need a senior backend engineer.');
-		expect(result).toContain('EXPERIENCE CONTEXT');
-		expect(result).toContain('JOB DESCRIPTION');
+		const result = buildSystemPrompt('advocate', 'We need a senior backend engineer.');
+		expect(result).toContain('POSITION DESCRIPTION');
 	});
 
 	it('strips HTML tags from job description', async () => {

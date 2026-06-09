@@ -1,4 +1,4 @@
-export type ChatMode = 'ask' | 'fit';
+export type ChatMode = 'ask' | 'fit' | 'advocate';  // UI sends 'advocate' as default going forward
 export type RequestType = 'message' | 'pdf_upload' | 'image_upload' | 'jd_paste';
 
 export type MessageContentPart =

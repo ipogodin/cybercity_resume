@@ -28,11 +28,25 @@ function detectTestTrigger(msg) {
 	return null;
 }
 
+const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+
 export function _validateChatRequest(body) {
 	if (!body || typeof body !== 'object') return null;
 	if (!Array.isArray(body.messages)) return null;
-	if (!body.mode || !['ask', 'fit'].includes(body.mode)) return null;
+	if (!body.mode) body.mode = 'advocate'; // default
 	return /** @type {import('$lib/types').ChatRequest} */ (body);
+}
+
+async function saveLead(ip, email, question) {
+	try {
+		await redis.lpush('leads:all', JSON.stringify({
+			ts: new Date().toISOString(),
+			ip,
+			email,
+			q: question.slice(0, 300)
+		}));
+		await redis.ltrim('leads:all', 0, 199);
+	} catch { /* non-fatal */ }
 }
 
 
@@ -63,6 +77,12 @@ export async function POST({ request, locals }) {
 	const lastUserMessage = Array.isArray(lastMsg?.content)
 		? lastMsg.content.filter(p => p.type === 'text').map(p => p.text).join(' ')
 		: (lastMsg?.content ?? '');
+
+	// Detect and save email addresses left by visitors (fire-and-forget)
+	const emails = lastUserMessage.match(EMAIL_RE);
+	if (emails && chatRequest.mode === 'advocate') {
+		for (const email of emails) saveLead(ip, email, lastUserMessage);
+	}
 
 	// Secret test triggers — simulate error paths without touching real infrastructure
 	const testCode = detectTestTrigger(lastUserMessage);
