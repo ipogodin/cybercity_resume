@@ -26,6 +26,8 @@
 		try {
 			const res = await fetch('/api/admin/stats', { headers: authHeader() });
 			if (res.status === 401) { loginError = 'Invalid token.'; return; }
+			if (res.status === 403) { loginError = 'Access denied from this IP address.'; return; }
+			if (!res.ok) { loginError = `Server error (${res.status}) — check env vars in Vercel.`; return; }
 			authed = true;
 			sessionStorage.setItem('admin_token', token);
 			await loadAll();
