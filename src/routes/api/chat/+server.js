@@ -185,13 +185,13 @@ export async function POST({ request, locals }) {
 					const question = Array.isArray(lastMsg?.content)
 						? lastMsg.content.filter(p => p.type === 'text').map(p => p.text).join(' ')
 						: (lastMsg?.content ?? '');
-					redis.lpush('log:all', JSON.stringify({
+					redis.lpush('chat:log', JSON.stringify({
 						ts: new Date().toISOString(),
 						ip,
 						mode: chatRequest.mode,
 						q: question.slice(0, 500),
 						a: fullResponse.slice(0, 1000)
-					})).then(() => redis.ltrim('log:all', 0, 499)).catch(() => {});
+					})).then(() => redis.ltrim('chat:log', 0, 499)).catch(() => {});
 				}
 			}
 		});
