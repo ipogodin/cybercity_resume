@@ -25,9 +25,9 @@
 		</header>
 
 		<div class="contact-grid">
-			<a href="mailto:illia.pogodin@gmail.com" class="card contact-card">
+			<a href="mailto:illia@pogodin.ai" class="card contact-card">
 				<p class="contact-label">Email</p>
-				<p class="contact-value">illia.pogodin@gmail.com</p>
+				<p class="contact-value">illia@pogodin.ai</p>
 				<span class="contact-arrow">→</span>
 			</a>
 

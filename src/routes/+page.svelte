@@ -314,7 +314,7 @@
 		<!-- Contact -->
 		<div class="card card-contact">
 			<p class="card-label">Contact</p>
-			<p class="contact-email">illia.pogodin@gmail.com</p>
+			<p class="contact-email">illia@pogodin.ai</p>
 			<p class="contact-phone">206.484.4931</p>
 			<div class="social">
 				<a href="https://www.linkedin.com/in/ipogodin" target="_blank" rel="noopener" class="social-btn">LinkedIn</a>

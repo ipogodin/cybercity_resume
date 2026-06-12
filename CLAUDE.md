@@ -206,7 +206,7 @@ Professional career projects (no personal open-source). Fields: `name`, `descrip
 ```js
 {
   name: 'Illia Pogodin',
-  email: 'illia.pogodin@gmail.com',
+  email: 'illia@pogodin.ai',
   phone: '206.484.4931',
   location: 'Seattle, WA',
   resumeUrl: '/resume.pdf',
@@ -327,7 +327,7 @@ Canvas effects: `src/lib/utils/canvasEffects.js` — 17 effects, single export `
 | **Previous** | Google (2024), Salesforce (2019–2023), Wargaming (2018–2019), IGT (2016–2018), Earlier (2010–2016: Deutsche Bank, Belleron, Alertme, Ocado, E-Motion) |
 | **Education** | M.S. Applied Mathematics, National University of Ukraine, Faculty of Cybernetics |
 | **Location** | Seattle, WA |
-| **Email** | illia.pogodin@gmail.com |
+| **Email** | illia@pogodin.ai |
 | **Phone** | 206.484.4931 |
 | **LinkedIn** | linkedin.com/in/ipogodin |
 
