@@ -84,9 +84,8 @@
 {/if}
 
 <style>
-	/* Cyberpunk CSS variables — scoped to /cyberpunk routes only */
-	:global(html):has(body.cyberpunk-active),
-	:global(.cyberpunk-active) {
+	/* Cyberpunk CSS variables — injected only when this layout is mounted (/cyberpunk/* routes) */
+	:global(:root) {
 		--color-bg-primary: #0a0e27;
 		--color-bg-secondary: #1a1d3f;
 		--color-bg-overlay: rgba(10, 14, 39, 0.95);
