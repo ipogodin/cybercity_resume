@@ -376,7 +376,7 @@
 				</div>
 				<div class="contact-cta-actions">
 					<a
-						href="mailto:illia.pogodin@gmail.com?subject=Engineering%20Opportunity%20%E2%80%94%20Let%27s%20Connect&body=Hi%20Illia%2C%0A%0AI%20came%20across%20your%20portfolio%20and%20I%27d%20love%20to%20discuss%20a%20potential%20opportunity%20with%20you.%0A%0ABest%20regards"
+						href="mailto:illia@pogodin.ai?subject=Engineering%20Opportunity%20%E2%80%94%20Let%27s%20Connect&body=Hi%20Illia%2C%0A%0AI%20came%20across%20your%20portfolio%20and%20I%27d%20love%20to%20discuss%20a%20potential%20opportunity%20with%20you.%0A%0ABest%20regards"
 						class="cta-btn cta-email"
 						target="_blank" rel="noopener"
 					>

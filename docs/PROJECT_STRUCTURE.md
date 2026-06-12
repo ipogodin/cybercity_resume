@@ -174,7 +174,7 @@ Categories: Languages, Backend & Frameworks, Databases, Infrastructure & Cloud, 
 ```js
 contact = {
   name: 'Illia Pogodin',
-  email: 'illia.pogodin@gmail.com',
+  email: 'illia@pogodin.ai',
   phone: '206.484.4931',
   location: 'Seattle, WA',
   resumeUrl: '/resume.pdf',
@@ -315,4 +315,4 @@ Supported commands: `help`, `whoami`, `get contact data [--detailed]`, `sudo get
 - **Current**: Meta, Software Engineer L5, Bellevue WA (2025–present)
 - **Previous**: Google (2024), Salesforce (2019–2023), Wargaming (2018–2019), IGT (2016–2018), Earlier (2010–2016: Deutsche Bank, Belleron, Alertme, Ocado, E-Motion)
 - **Education**: M.S. Applied Mathematics, National University of Ukraine, Faculty of Cybernetics
-- **Contact**: illia.pogodin@gmail.com | 206.484.4931 | LinkedIn: /in/ipogodin
+- **Contact**: illia@pogodin.ai | 206.484.4931 | LinkedIn: /in/ipogodin

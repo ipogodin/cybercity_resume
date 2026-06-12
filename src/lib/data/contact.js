@@ -5,7 +5,7 @@
 
 export const contact = {
 	name: 'Illia Pogodin',
-	email: 'illia.pogodin@gmail.com',
+	email: 'illia@pogodin.ai',
 	phone: '206.484.4931',
 	location: 'Seattle, WA',
 	resumeUrl: '/resume.pdf',
