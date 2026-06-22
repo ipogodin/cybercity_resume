@@ -1,7 +1,9 @@
 <script>
 	import StarField from '$lib/components/StarField.svelte';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
+	// ── AI fit input ──
 	let fitQuery = $state('');
 	let fitPdfError = $state('');
 
@@ -16,9 +18,8 @@
 	let placeholderText = $state(PLACEHOLDERS[0]);
 	let placeholderFading = $state(false);
 
-	import { onMount } from 'svelte';
 	onMount(() => {
-		const interval = setInterval(() => {
+		const phInterval = setInterval(() => {
 			placeholderFading = true;
 			setTimeout(() => {
 				placeholderIndex = (placeholderIndex + 1) % PLACEHOLDERS.length;
@@ -26,7 +27,8 @@
 				placeholderFading = false;
 			}, 400);
 		}, 3500);
-		return () => clearInterval(interval);
+
+		return () => clearInterval(phInterval);
 	});
 
 	function submitFitCheck() {
@@ -85,64 +87,7 @@
 		e.currentTarget.value = '';
 	}
 
-	const experience = [
-		{
-			company: 'Meta', role: 'L5 Software Engineer', period: '2025 – present',
-			current: true,
-			project: 'Tupperware Allocator — Meta\'s internal Kubernetes-like fleet allocation platform',
-			highlights: [
-				'$700K+ cost reduction in 2026 via fleet-rebalancing strategy for AI-training placement',
-				'Prevented ~25K task interruptions/hr for high-memory, multi-core AI workloads',
-				'Introduced production observability and placement diagnostics adopted org-wide'
-			]
-		},
-		{
-			company: 'Google', role: 'Senior Software Engineer (TVC)', period: '2024',
-			current: false,
-			project: 'Google Messages — RCS infrastructure serving 1.6B active users',
-			highlights: [
-				'Delivered lawful-intercept integration for RCS messaging at compliance-sensitive scale',
-				'Backend optimisation for onboarding ~300M Apple users into Google\'s RCS infrastructure'
-			]
-		},
-		{
-			company: 'Salesforce', role: 'Senior Member of Technical Staff', period: '2019 – 2023',
-			current: false,
-			project: 'Revenue Cloud — GraphQL & REST API platform',
-			highlights: [
-				'Architected GraphQL API platform for Airbnb, Bank of America; built modular extension system',
-				'Security champion and technical mentor across 15–25 engineers',
-				'Saved ~200 engineering hours/year by redesigning phishing-training infrastructure'
-			]
-		},
-		{
-			company: 'Wargaming', role: 'Senior SDE', period: '2018 – 2019',
-			current: false,
-			project: 'Game platform services',
-			highlights: [
-				'Rebuilt promotion engine, business-object validation, pricing configurability, and product-definition DB structures'
-			]
-		},
-		{
-			company: 'IGT', role: 'SDE III', period: '2016 – 2018',
-			current: false,
-			project: 'Gaming platform microservices',
-			highlights: [
-				'Redesigned key platform service, reducing latency by 10×',
-				'Migrated OSGI monolith to unified Scala; delivered company-wide metrics library'
-			]
-		}
-	];
-
-	const prior = [
-		{ company: 'Deutsche Bank', period: '2015 – 2016', note: 'Investment fund platform optimisation (+20% speed); led SVN→Git migration' },
-		{ company: 'Belleron (via DAXX)', period: '2014 – 2015', note: 'Storm-based distributed anti-fraud system from scratch for a major bank' },
-		{ company: 'Alertme (via DataArt)', period: '2012 – 2014', note: 'High-throughput REST API for smart home startup (scheduling, devices, notifications)' },
-		{ company: 'Ocado TNA (via DataArt)', period: '2012 – 2014', note: 'Time management system for a major UK retailer' },
-		{ company: 'E-Motion', period: '2011 – 2012', note: 'Call management system; UI rework cut backend calls by 2.5×' },
-		{ company: 'CubicStudio', period: '2009 – 2011', note: 'Junior — pawnbroker marketplace system (Out of Pawn)' }
-	];
-
+	// ── Skills ──
 	const skills = {
 		'Languages': ['Java', 'Scala', 'Python'],
 		'Frameworks': ['Spring', 'Kafka', 'Hibernate', 'Liquibase', 'JPA'],
@@ -150,6 +95,52 @@
 		'Platform': ['Distributed Systems', 'Fleet Allocation', 'Microservices', 'Kubernetes'],
 		'Practices': ['Platform Architecture', 'Observability', 'Reliability', 'TDD', 'API Design']
 	};
+
+	// ── Career timeline (proportional widths, 2009–2026) ──
+	const timelineSegments = [
+		{ label: 'Earlier',    short: '2009–2016', pct: 41, dim: true,  current: false },
+		{ label: 'IGT',        short: '2016–18',   pct: 12, dim: false, current: false },
+		{ label: 'Wargaming',  short: '2018–19',   pct:  6, dim: false, current: false },
+		{ label: 'Salesforce', short: '2019–23',   pct: 24, dim: false, current: false },
+		{ label: 'Google',     short: '2024',       pct:  6, dim: false, current: false },
+		{ label: 'Meta',       short: '2025–now',  pct: 11, dim: false, current: true  },
+	];
+
+	// ── Side projects ──
+	const sideProjects = [
+		{
+			name: 'Dwarfer',
+			description: 'Link shortener for everyday use + YouTube GIF platform',
+			url: 'https://dwarfer.link',
+			label: 'dwarfer.link'
+		},
+		{
+			name: 'Pray Game',
+			description: 'Browser-native video game, playable in any tab',
+			url: 'https://tea43.github.io/pray-game/',
+			label: 'pray-game'
+		},
+		{
+			name: 'Plate Signs',
+			description: 'License plates as custom decorative signs',
+			url: 'https://platesigns.vercel.app/',
+			label: 'platesigns.vercel.app'
+		},
+		{
+			name: 'CyberCity',
+			description: 'Cyberpunk interactive version of this resume',
+			url: '/cyberpunk',
+			label: 'pogodin.ai/cyberpunk',
+			noPreload: true,
+			reload: true
+		},
+		{
+			name: 'Gigilo',
+			description: 'GitHub activity board as a 2D message canvas',
+			url: 'https://github.com/ipogodin/gigilo',
+			label: 'github/gigilo'
+		}
+	];
 </script>
 
 <svelte:head>
@@ -191,8 +182,8 @@
 			</div>
 		</div>
 
-		<!-- Meta -->
-		<div class="card card-meta">
+		<!-- Meta — clickable, links to /work -->
+		<a href="/work" class="card card-meta">
 			<div class="company-badge current">
 				<span class="live-dot"></span>Current
 			</div>
@@ -200,16 +191,18 @@
 			<p class="role">L5 Software Engineer</p>
 			<p class="period accent">2025 – present</p>
 			<p class="card-detail">Tupperware Allocator · fleet allocation platform</p>
-		</div>
+			<span class="card-arrow">View details →</span>
+		</a>
 
-		<!-- Google -->
-		<div class="card card-google">
+		<!-- Google — clickable, links to /work -->
+		<a href="/work" class="card card-google">
 			<div class="company-badge past">Previous</div>
 			<h3>Google</h3>
 			<p class="role">Senior Software Engineer</p>
 			<p class="period muted">2024</p>
 			<p class="card-detail">Google Messages · RCS · 1.6B users</p>
-		</div>
+			<span class="card-arrow">View details →</span>
+		</a>
 
 		<!-- AI Chat card — row 3, full width -->
 		<div class="card card-chat">
@@ -249,49 +242,37 @@
 			</div>
 		</div>
 
-		<!-- Career timeline -->
+		<!-- Career timeline — row 4, full width -->
 		<div class="card card-timeline">
-			<p class="section-label">Career · 2009 – present</p>
-			<div class="timeline">
-				{#each experience as job}
-				<div class="tl-item">
-					<p class="tl-company">{job.company}</p>
-					<p class="tl-years">{job.period}</p>
-					<div class="tl-bar-wrap">
-						<div class="tl-bar" style="width:{job.current ? '20%' : job.company === 'Salesforce' ? '65%' : job.company === 'Wargaming' ? '14%' : job.company === 'Google' ? '7%' : '25%'}; opacity:{job.current ? '0.9' : '0.45'}"></div>
+			<div class="tl-header">
+				<p class="section-label">Career · 2009 – present</p>
+				<a href="/work" class="tl-detail-link">Full history →</a>
+			</div>
+			<div class="tl-track">
+				{#each timelineSegments as seg}
+					<div
+						class="tl-seg"
+						class:tl-seg-dim={seg.dim}
+						class:tl-seg-current={seg.current}
+						style="flex: {seg.pct}"
+						title="{seg.label} · {seg.short}"
+					>
+						<span class="tl-seg-label">{seg.label}</span>
+						<span class="tl-seg-period">{seg.short}</span>
 					</div>
-				</div>
 				{/each}
-				<div class="tl-item">
-					<p class="tl-company">Earlier</p>
-					<p class="tl-years">2009 – 2016</p>
-					<div class="tl-bar-wrap"><div class="tl-bar" style="width:100%;opacity:0.2"></div></div>
-				</div>
+			</div>
+			<div class="tl-axis">
+				<span>2009</span>
+				<span>2013</span>
+				<span>2016</span>
+				<span>2019</span>
+				<span>2023</span>
+				<span>now</span>
 			</div>
 		</div>
 
-		<!-- Location -->
-		<div class="card card-location">
-			<div class="loc-icon">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="20" height="20">
-					<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-					<circle cx="12" cy="9" r="2.5"/>
-				</svg>
-			</div>
-			<div>
-				<p class="loc-name">Seattle, WA</p>
-				<p class="loc-sub">Open to Senior / Staff opportunities</p>
-			</div>
-		</div>
-
-		<!-- Education -->
-		<div class="card card-edu">
-			<p class="section-label">Education</p>
-			<p class="edu-degree">M.S. Applied Mathematics</p>
-			<p class="edu-school">National University of Ukraine<br>Faculty of Cybernetics</p>
-		</div>
-
-		<!-- Skills -->
+		<!-- Skills — row 5, col 1-2 -->
 		<div class="card card-skills">
 			<p class="card-label">Skills</p>
 			<div class="tag-groups">
@@ -303,17 +284,21 @@
 			</div>
 		</div>
 
-		<!-- Projects count -->
-		<div class="card card-projects">
-			<p class="card-label">Work</p>
-			<p class="proj-count">5+</p>
-			<p class="proj-sub">companies at scale</p>
-			<a href="/work" class="proj-link">Full history →</a>
-		</div>
-
-		<!-- Contact -->
-		<div class="card card-contact">
-			<p class="card-label">Contact</p>
+		<!-- Contact + Location combined — row 5, col 3 -->
+		<div class="card card-contact-loc">
+			<div class="cl-loc">
+				<div class="loc-icon">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="18" height="18" aria-hidden="true">
+						<path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+						<circle cx="12" cy="9" r="2.5"/>
+					</svg>
+				</div>
+				<div>
+					<p class="loc-name">Seattle, WA</p>
+					<p class="loc-sub">Open to Senior / Staff opportunities</p>
+				</div>
+			</div>
+			<div class="cl-divider"></div>
 			<p class="contact-email">illia@pogodin.ai</p>
 			<p class="contact-phone">206.484.4931</p>
 			<div class="social">
@@ -322,11 +307,40 @@
 			</div>
 		</div>
 
+		<!-- Side Projects — row 6, full width -->
+		<div class="card card-side-projects">
+			<div class="sp-header">
+				<p class="section-label">Side Projects</p>
+			</div>
+			<div class="sp-grid">
+				{#each sideProjects as proj}
+					<a
+						href={proj.url}
+						target={proj.url.startsWith('http') ? '_blank' : undefined}
+						rel={proj.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+						data-sveltekit-preload-data={proj.noPreload ? 'off' : undefined}
+						data-sveltekit-reload={proj.reload ? true : undefined}
+						class="sp-item"
+					>
+						<div class="sp-item-top">
+							<p class="sp-name">{proj.name}</p>
+							<span class="sp-label">{proj.label}</span>
+						</div>
+						<p class="sp-desc">{proj.description}</p>
+					</a>
+				{/each}
+			</div>
+		</div>
+
+		<!-- Education — row 7, full width, bottom -->
+		<div class="card card-edu">
+			<p class="section-label">Education</p>
+			<p class="edu-degree">M.S. Applied Mathematics</p>
+			<p class="edu-school">National University of Ukraine · Faculty of Cybernetics</p>
+		</div>
 
 	</main>
 </div>
-
-<a href="/cyberpunk" class="easter-egg" data-sveltekit-preload-data="off">◈ cybercity</a>
 
 <style>
 	:global(body) {
@@ -339,7 +353,7 @@
 	}
 
 	h1, h2, h3, .logo, nav a, .eyebrow, .section-label, .card-label,
-	.company-badge, .tl-company, .edu-degree, .proj-count, .proj-link,
+	.company-badge, .tl-seg-label, .edu-degree, .sp-name,
 	.loc-name, .hero-title { font-family: 'Space Grotesk', sans-serif; }
 
 	.site {
@@ -396,11 +410,23 @@
 		border: 1px solid rgba(255,255,255,0.07);
 		border-radius: 14px;
 		padding: 28px;
+		transition: border-color 0.25s;
+		display: block;
+	}
+
+	/* Lift effect only for actual links */
+	a.card {
+		text-decoration: none;
+		color: inherit;
+		cursor: pointer;
 		transition: border-color 0.25s, transform 0.25s;
 	}
-	.card:hover {
-		border-color: rgba(99,102,241,0.35);
+	a.card:hover {
+		border-color: rgba(99,102,241,0.4);
 		transform: translateY(-2px);
+	}
+	.card:not(a):hover {
+		border-color: rgba(255,255,255,0.12);
 	}
 
 	/* ── Hero ── */
@@ -470,50 +496,31 @@
 	}
 	.btn-ghost:hover { border-color: rgba(255,255,255,0.25); color: #FAFAFA; }
 
-	.fit-bar {
-		display: flex; align-items: center; gap: 0;
-		background: rgba(255,255,255,0.05);
-		border: 1px solid rgba(255,255,255,0.1);
-		border-radius: 10px;
-		overflow: hidden;
-		margin-top: 8px;
-		transition: border-color 0.2s;
-	}
-	.fit-bar:focus-within { border-color: rgba(99,102,241,0.6); }
-	.fit-bar input {
-		flex: 1; background: transparent; border: none;
-		color: #FAFAFA; font-size: 14px; font-family: 'DM Sans', sans-serif;
-		padding: 12px 16px; outline: none;
-	}
-	.fit-bar input::placeholder { color: #52525B; }
-	.fit-bar button {
-		background: #6366F1; border: none;
-		color: #fff; font-size: 16px; font-weight: 600;
-		padding: 0 18px; height: 100%; min-height: 44px;
-		cursor: pointer; transition: background 0.2s;
-		flex-shrink: 0;
-	}
-	.fit-bar button:hover:not(:disabled) { background: #4F46E5; }
-	.fit-bar button:disabled { background: rgba(99,102,241,0.3); cursor: default; }
-	.fit-upload-btn {
-		display: flex; align-items: center; justify-content: center;
-		padding: 0 10px; color: #52525B; cursor: pointer; transition: color 0.2s; flex-shrink: 0;
-	}
-	.fit-upload-btn:hover { color: #A1A1AA; }
-	#home-pdf-upload { display: none; }
-	.fit-pdf-error { margin: 4px 0 0; font-size: 12px; color: #f87171; }
-	.fit-hint { margin: 6px 0 0; font-size: 12px; color: #3F3F46; }
-	.fit-hint a { color: #6366F1; text-decoration: none; }
-	.fit-hint a:hover { text-decoration: underline; }
-
 	/* ── Company cards ── */
 	.card-meta {
 		grid-column: 3; grid-row: 1;
 		background:
 			radial-gradient(ellipse at 85% 15%, rgba(99,102,241,0.12) 0%, transparent 65%),
 			rgba(17,17,19,0.85);
+		display: flex;
+		flex-direction: column;
 	}
-	.card-google { grid-column: 3; grid-row: 2; }
+	.card-google {
+		grid-column: 3; grid-row: 2;
+		display: flex;
+		flex-direction: column;
+	}
+	.card-arrow {
+		margin-top: auto;
+		padding-top: 14px;
+		font-size: 12px;
+		font-family: 'Space Grotesk', sans-serif;
+		font-weight: 500;
+		color: #6366F1;
+		opacity: 0;
+		transition: opacity 0.2s;
+	}
+	a.card:hover .card-arrow { opacity: 1; }
 
 	.company-badge {
 		display: inline-flex; align-items: center; gap: 7px;
@@ -521,6 +528,7 @@
 		font-size: 11px; font-weight: 600;
 		letter-spacing: 0.06em; text-transform: uppercase;
 		margin-bottom: 14px;
+		width: fit-content;
 	}
 	.company-badge.current {
 		background: rgba(99,102,241,0.15);
@@ -543,81 +551,6 @@
 	.period.muted { color: #71717A; }
 	.card-detail { font-size: 12px; color: #52525B; }
 
-	/* ── Timeline ── */
-	.card-timeline { grid-column: 1 / 4; grid-row: 4; padding: 28px 32px; }
-	.section-label {
-		font-size: 11px; font-weight: 600;
-		letter-spacing: 0.12em; text-transform: uppercase;
-		color: #71717A; margin-bottom: 18px;
-	}
-	.timeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
-	.tl-item {
-		background: rgba(255,255,255,0.03);
-		border: 1px solid rgba(255,255,255,0.07);
-		border-radius: 10px; padding: 14px 16px;
-		transition: border-color 0.2s, background 0.2s;
-	}
-	.tl-item:hover {
-		background: rgba(99,102,241,0.06);
-		border-color: rgba(99,102,241,0.2);
-	}
-	.tl-company { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; margin-bottom: 3px; }
-	.tl-years { font-size: 11px; color: #71717A; font-family: 'Space Grotesk', sans-serif; margin-bottom: 8px; }
-	.tl-bar-wrap { height: 2px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
-	.tl-bar { height: 100%; border-radius: 2px; background: #6366F1; }
-
-	/* ── Location ── */
-	.card-location {
-		grid-column: 1 / 3; grid-row: 5;
-		display: flex; align-items: center; gap: 18px; padding: 22px 28px;
-	}
-	.loc-icon {
-		width: 42px; height: 42px; border-radius: 10px; flex-shrink: 0;
-		background: rgba(99,102,241,0.12);
-		border: 1px solid rgba(99,102,241,0.2);
-		display: flex; align-items: center; justify-content: center;
-		color: #6366F1;
-	}
-	.loc-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
-	.loc-sub { font-size: 13px; color: #71717A; }
-
-	/* ── Education ── */
-	.card-edu { grid-column: 3; grid-row: 5; padding: 22px 28px; }
-	.edu-degree { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 14px; margin-bottom: 4px; }
-	.edu-school { font-size: 12px; color: #71717A; line-height: 1.5; }
-
-	/* ── Bottom row ── */
-	.card-skills   { grid-column: 1; grid-row: 6; }
-	.card-projects { grid-column: 2; grid-row: 6; }
-	.card-contact  { grid-column: 3; grid-row: 6; }
-
-	.card-label { font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: #71717A; margin-bottom: 14px; }
-	.tag-groups { display: flex; flex-wrap: wrap; gap: 6px; }
-	.tag {
-		background: rgba(255,255,255,0.04);
-		border: 1px solid rgba(255,255,255,0.07);
-		border-radius: 6px; padding: 4px 10px;
-		font-size: 12px; color: #A1A1AA;
-		font-family: 'Space Grotesk', sans-serif; font-weight: 500;
-	}
-	.proj-count { font-size: 38px; font-weight: 700; line-height: 1; margin-bottom: 2px; }
-	.proj-sub { font-size: 13px; color: #71717A; margin-bottom: 14px; }
-	.proj-link { font-size: 13px; font-weight: 500; color: #6366F1; text-decoration: none; }
-	.proj-link:hover { text-decoration: underline; }
-	.contact-email { font-size: 13px; color: #6366F1; font-family: 'Space Grotesk', sans-serif; margin-bottom: 4px; }
-	.contact-phone { font-size: 13px; color: #71717A; margin-bottom: 14px; }
-	.social { display: flex; gap: 8px; flex-wrap: wrap; }
-	.social-btn {
-		background: rgba(255,255,255,0.04);
-		border: 1px solid rgba(255,255,255,0.07);
-		border-radius: 6px; padding: 5px 12px;
-		font-size: 12px; color: #71717A;
-		font-family: 'Space Grotesk', sans-serif; font-weight: 500;
-		text-decoration: none;
-		transition: border-color 0.2s, color 0.2s;
-	}
-	.social-btn:hover { border-color: rgba(255,255,255,0.2); color: #FAFAFA; }
-
 	/* ── AI Chat card ── */
 	.card-chat {
 		grid-column: 1 / -1;
@@ -625,7 +558,6 @@
 		padding: 28px 32px;
 		position: relative;
 		overflow: hidden;
-		/* Shimmering border via animated gradient background */
 		background:
 			linear-gradient(#111113, #111113) padding-box,
 			linear-gradient(var(--angle, 0deg), rgba(99,102,241,0.7), rgba(139,92,246,0.3), rgba(99,102,241,0.1), rgba(99,102,241,0.7)) border-box;
@@ -645,14 +577,11 @@
 			animation: none;
 			border: 1px solid rgba(99,102,241,0.25);
 		}
+		.pulse-dot, .live-dot, .ai-dot { animation: none; }
 	}
 
-	.chat-card-inner {
-		display: flex; align-items: center; gap: 40px;
-	}
-	.chat-card-left {
-		flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; min-width: 220px;
-	}
+	.chat-card-inner { display: flex; align-items: center; gap: 40px; }
+	.chat-card-left { flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; min-width: 220px; }
 	.chat-ai-badge {
 		display: inline-flex; align-items: center; gap: 7px;
 		font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
@@ -667,23 +596,16 @@
 		0%, 100% { opacity: 1; transform: scale(1); }
 		50% { opacity: 0.5; transform: scale(0.8); }
 	}
-	@media (prefers-reduced-motion: reduce) {
-		.ai-dot { animation: none; }
-	}
 	.chat-card-headline {
 		font-size: 18px; font-weight: 600; font-family: 'Space Grotesk', sans-serif;
 		color: #FAFAFA; line-height: 1.4;
 	}
-	.chat-card-link {
-		font-size: 13px; color: #6366F1; text-decoration: none; transition: color 0.2s;
-	}
+	.chat-card-link { font-size: 13px; color: #6366F1; text-decoration: none; transition: color 0.2s; }
 	.chat-card-link:hover { color: #818CF8; }
 
-	.chat-card-right {
-		flex: 1; display: flex; flex-direction: column; gap: 8px;
-	}
+	.chat-card-right { flex: 1; display: flex; flex-direction: column; gap: 8px; }
 	.chat-input-wrap {
-		display: flex; align-items: center; gap: 0;
+		display: flex; align-items: center;
 		background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
 		border-radius: 10px; overflow: hidden; transition: border-color 0.2s;
 	}
@@ -696,9 +618,7 @@
 	}
 	.chat-card-input.placeholder-fading::placeholder { opacity: 0; }
 	.chat-card-input::placeholder { color: #52525B; transition: opacity 0.35s ease-in; }
-	.chat-card-actions {
-		display: flex; align-items: center; gap: 0; padding-right: 6px;
-	}
+	.chat-card-actions { display: flex; align-items: center; padding-right: 6px; }
 	.chat-attach-btn {
 		display: flex; align-items: center; justify-content: center;
 		width: 34px; height: 34px; color: #52525B; cursor: pointer;
@@ -716,34 +636,203 @@
 	.fit-pdf-error { font-size: 12px; color: #f87171; }
 	.chat-card-hint { font-size: 12px; color: #3F3F46; }
 
-	/* ── Easter egg ── */
-	.easter-egg {
-		position: fixed; bottom: 22px; right: 28px;
-		font-size: 11px; font-family: 'Space Grotesk', sans-serif;
-		color: rgba(255,255,255,0.28); text-decoration: none;
-		letter-spacing: 0.06em; transition: color 0.35s; z-index: 200;
+	/* ── Career Timeline ── */
+	.card-timeline { grid-column: 1 / -1; grid-row: 4; padding: 24px 32px; }
+	.tl-header {
+		display: flex; align-items: center; justify-content: space-between;
+		margin-bottom: 14px;
 	}
-	.easter-egg:hover { color: rgba(99,102,241,0.6); }
+	.section-label {
+		font-size: 11px; font-weight: 600;
+		letter-spacing: 0.12em; text-transform: uppercase;
+		color: #71717A; margin: 0;
+	}
+	.tl-detail-link {
+		font-size: 12px; font-weight: 500; color: #6366F1;
+		text-decoration: none; transition: color 0.2s;
+	}
+	.tl-detail-link:hover { color: #818CF8; }
 
-	/* ── Mobile ── */
+	.tl-track {
+		display: flex;
+		height: 68px;
+		gap: 3px;
+		border-radius: 10px;
+		overflow: hidden;
+	}
+	.tl-seg {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		padding: 0 12px;
+		background: rgba(99,102,241,0.35);
+		border-radius: 8px;
+		overflow: hidden;
+		min-width: 0;
+		transition: background 0.2s;
+		cursor: default;
+	}
+	.tl-seg-dim {
+		background: rgba(255,255,255,0.05);
+	}
+	.tl-seg-dim:hover { background: rgba(255,255,255,0.09); }
+	.tl-seg:not(.tl-seg-dim):not(.tl-seg-current):hover { background: rgba(99,102,241,0.5); }
+	.tl-seg-current {
+		background: #6366F1;
+	}
+	.tl-seg-current:hover { background: #4F46E5; }
+	.tl-seg-label {
+		font-size: 11px; font-weight: 600;
+		font-family: 'Space Grotesk', sans-serif;
+		white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+		color: #FAFAFA;
+	}
+	.tl-seg-period {
+		font-size: 10px; color: rgba(255,255,255,0.55);
+		white-space: nowrap; overflow: hidden;
+		font-family: 'Space Grotesk', sans-serif;
+		margin-top: 2px;
+	}
+	.tl-axis {
+		display: flex; justify-content: space-between;
+		margin-top: 8px;
+		padding: 0 2px;
+		font-size: 10px; color: #3F3F46;
+		font-family: 'Space Grotesk', sans-serif;
+	}
+
+	/* ── Skills — row 5, col 1-2 ── */
+	.card-skills { grid-column: 1 / 3; grid-row: 5; }
+	.card-label {
+		font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+		text-transform: uppercase; color: #71717A; margin-bottom: 14px;
+	}
+	.tag-groups { display: flex; flex-wrap: wrap; gap: 6px; }
+	.tag {
+		background: rgba(255,255,255,0.04);
+		border: 1px solid rgba(255,255,255,0.07);
+		border-radius: 6px; padding: 4px 10px;
+		font-size: 12px; color: #A1A1AA;
+		font-family: 'Space Grotesk', sans-serif; font-weight: 500;
+	}
+
+	/* ── Contact + Location combined — row 5, col 3 ── */
+	.card-contact-loc { grid-column: 3; grid-row: 5; }
+	.cl-loc {
+		display: flex; align-items: center; gap: 14px;
+		margin-bottom: 14px;
+	}
+	.loc-icon {
+		width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+		background: rgba(99,102,241,0.12);
+		border: 1px solid rgba(99,102,241,0.2);
+		display: flex; align-items: center; justify-content: center;
+		color: #6366F1;
+	}
+	.loc-name { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+	.loc-sub { font-size: 12px; color: #71717A; }
+	.cl-divider { height: 1px; background: rgba(255,255,255,0.06); margin-bottom: 14px; }
+	.contact-email { font-size: 13px; color: #6366F1; font-family: 'Space Grotesk', sans-serif; margin-bottom: 4px; }
+	.contact-phone { font-size: 13px; color: #71717A; margin-bottom: 14px; }
+	.social { display: flex; gap: 8px; flex-wrap: wrap; }
+	.social-btn {
+		background: rgba(255,255,255,0.04);
+		border: 1px solid rgba(255,255,255,0.07);
+		border-radius: 6px; padding: 5px 12px;
+		font-size: 12px; color: #71717A;
+		font-family: 'Space Grotesk', sans-serif; font-weight: 500;
+		text-decoration: none;
+		transition: border-color 0.2s, color 0.2s;
+	}
+	.social-btn:hover { border-color: rgba(255,255,255,0.2); color: #FAFAFA; }
+
+	/* ── Side Projects — row 6, full width ── */
+	.card-side-projects { grid-column: 1 / -1; grid-row: 6; }
+	.sp-header {
+		display: flex; align-items: center; justify-content: space-between;
+		margin-bottom: 16px;
+	}
+.sp-grid {
+		display: grid;
+		grid-template-columns: repeat(5, 1fr);
+		gap: 10px;
+	}
+	.sp-item {
+		background: rgba(255,255,255,0.03);
+		border: 1px solid rgba(255,255,255,0.07);
+		border-radius: 10px;
+		padding: 16px;
+		text-decoration: none;
+		color: inherit;
+		cursor: pointer;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		transition: border-color 0.2s, background 0.2s, transform 0.2s;
+	}
+	.sp-item:hover {
+		border-color: rgba(99,102,241,0.3);
+		background: rgba(99,102,241,0.06);
+		transform: translateY(-2px);
+	}
+	.sp-item-top {
+		display: flex;
+		align-items: baseline;
+		justify-content: space-between;
+		gap: 8px;
+		flex-wrap: wrap;
+	}
+	.sp-name {
+		font-weight: 600; font-size: 14px;
+		font-family: 'Space Grotesk', sans-serif;
+	}
+	.sp-label {
+		font-size: 10px; color: #6366F1;
+		white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+		font-family: 'Space Grotesk', sans-serif;
+	}
+	.sp-desc { font-size: 12px; color: #71717A; line-height: 1.55; }
+
+	/* ── Education — row 7, full width, bottom ── */
+	.card-edu { grid-column: 1 / -1; grid-row: 7; padding: 22px 32px; }
+	.edu-degree {
+		font-family: 'Space Grotesk', sans-serif; font-weight: 600;
+		font-size: 15px; margin-bottom: 4px; margin-top: 0;
+	}
+	.edu-school { font-size: 13px; color: #71717A; line-height: 1.5; }
+
+/* ── Mobile ── */
 	@media (max-width: 768px) {
 		nav { padding: 16px 20px; }
 		.bento { grid-template-columns: 1fr 1fr; padding: 80px 16px 0; gap: 10px; }
+
 		.card-hero { grid-column: 1 / 3; grid-row: 1; min-height: auto; padding: 28px; }
 		h1 { font-size: 36px; }
 		.hero-bio { display: none; }
-		.card-meta { grid-column: 1; grid-row: 2; }
+
+		.card-meta   { grid-column: 1; grid-row: 2; }
 		.card-google { grid-column: 2; grid-row: 2; }
-		.card-chat { grid-column: 1 / 3; grid-row: 3; padding: 22px 20px; }
-		.card-timeline { grid-column: 1 / 3; grid-row: 4; padding: 20px; }
-		.timeline { grid-template-columns: repeat(3, 1fr); }
-		.card-location { grid-column: 1 / 3; grid-row: 5; }
-		.card-edu { grid-column: 1 / 3; grid-row: 6; }
-		.card-skills { grid-column: 1 / 3; grid-row: 7; }
-		.card-projects { grid-column: 1; grid-row: 8; }
-		.card-contact { grid-column: 2; grid-row: 8; }
-		.chat-card-inner { flex-direction: column; gap: 18px; }
+
+		.card-chat { grid-column: 1 / 3; grid-row: 3; padding: 20px; }
+		.chat-card-inner { flex-direction: column; gap: 16px; }
 		.chat-card-left { min-width: unset; }
 		.chat-card-headline { font-size: 16px; }
+
+		.card-timeline { grid-column: 1 / 3; grid-row: 4; padding: 18px 20px; }
+		.tl-track { height: 56px; }
+		.tl-seg-label { font-size: 10px; }
+		.tl-seg-period { display: none; }
+
+		.card-skills      { grid-column: 1 / 3; grid-row: 5; }
+		.card-contact-loc { grid-column: 1 / 3; grid-row: 6; }
+
+		.card-side-projects { grid-column: 1 / 3; grid-row: 7; }
+		.sp-grid { grid-template-columns: 1fr 1fr; }
+
+		.card-edu { grid-column: 1 / 3; grid-row: 8; }
+	}
+
+	@media (min-width: 769px) and (max-width: 1024px) {
+		.sp-grid { grid-template-columns: repeat(3, 1fr); }
 	}
 </style>

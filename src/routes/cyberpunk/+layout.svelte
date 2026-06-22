@@ -76,12 +76,14 @@
 	<meta name="description" content="Interactive cyberpunk-themed resume portfolio" />
 </svelte:head>
 
-<LoadingScreen {isLoading} />
+<div class="cyber-root">
+	<LoadingScreen {isLoading} />
 
-{#if contentReady}
-	<AudioToggle />
-	{@render children?.()}
-{/if}
+	{#if contentReady}
+		<AudioToggle />
+		{@render children?.()}
+	{/if}
+</div>
 
 <style>
 	/* Cyberpunk CSS variables — injected only when this layout is mounted (/cyberpunk/* routes) */
@@ -113,26 +115,30 @@
 		--z-rain: 30; --z-ui: 40; --z-modal: 50; --z-overlay: 60;
 	}
 
-	:global(html),
-	:global(body) {
-		overflow: hidden;
+	/*
+	 * IMPORTANT: Do NOT put overflow:hidden or position:fixed on :global(body/html) here.
+	 * Those rules bleed onto other routes when SvelteKit preloads this layout's CSS chunk
+	 * on hover (data-sveltekit-preload-data="hover" is set on the root body in app.html).
+	 * Instead, the .cyber-root container handles full-screen lock for cyberpunk routes.
+	 */
+	.cyber-root {
+		position: fixed;
+		inset: 0;
 		width: 100%;
 		height: 100%;
-	}
-	:global(body) {
+		overflow: hidden;
 		background-color: var(--color-bg-primary);
 		color: var(--color-text-primary);
 		font-family: 'Rajdhani', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-		position: fixed;
 	}
 
-	/* Cyberpunk link + scrollbar + selection styles — only active here */
-	:global(a) { color: var(--color-neon-cyan); text-decoration: none; transition: all 0.15s ease; }
-	:global(a:hover) { color: var(--color-neon-pink); text-shadow: var(--shadow-neon-pink); }
-	:global(button:focus-visible), :global(a:focus-visible) { outline: 2px solid var(--color-neon-cyan); outline-offset: 2px; }
-	:global(::-webkit-scrollbar) { width: 10px; height: 10px; }
-	:global(::-webkit-scrollbar-track) { background: var(--color-bg-secondary); }
-	:global(::-webkit-scrollbar-thumb) { background: var(--color-neon-cyan); border-radius: 5px; }
-	:global(::-webkit-scrollbar-thumb:hover) { background: var(--color-neon-purple); }
-	:global(::selection) { background-color: var(--color-neon-cyan); color: var(--color-bg-primary); }
+	/* Cyberpunk link + scrollbar + selection styles — scoped inside cyber-root */
+	.cyber-root :global(a) { color: var(--color-neon-cyan); text-decoration: none; transition: all 0.15s ease; }
+	.cyber-root :global(a:hover) { color: var(--color-neon-pink); text-shadow: var(--shadow-neon-pink); }
+	.cyber-root :global(button:focus-visible), .cyber-root :global(a:focus-visible) { outline: 2px solid var(--color-neon-cyan); outline-offset: 2px; }
+	.cyber-root :global(::-webkit-scrollbar) { width: 10px; height: 10px; }
+	.cyber-root :global(::-webkit-scrollbar-track) { background: var(--color-bg-secondary); }
+	.cyber-root :global(::-webkit-scrollbar-thumb) { background: var(--color-neon-cyan); border-radius: 5px; }
+	.cyber-root :global(::-webkit-scrollbar-thumb:hover) { background: var(--color-neon-purple); }
+	.cyber-root :global(::selection) { background-color: var(--color-neon-cyan); color: var(--color-bg-primary); }
 </style>
