@@ -150,7 +150,9 @@ contact:    { west: 'hub' }
 │           └── character2.png           # Alternate static
 ├── docs/                             # Developer docs (see docs/INDEX.md for full index)
 ├── util_scripts/
-│   └── process_character_animation.py  # Python: extract frames, remove bg, assemble WebM
+│   ├── process_character_animation.py  # Python: extract frames, remove bg, assemble WebM
+│   ├── sync_projects.mjs               # Refresh Alex's side-project knowledge draft from GitHub / local ~/dev
+│   └── projects.config.json            # GitHub user + curated repo allowlist for sync_projects.mjs
 ├── package.json
 ├── svelte.config.js                  # adapter-vercel, nodejs22.x runtime
 ├── vite.config.ts
@@ -408,9 +410,20 @@ Key files:
 - `src/lib/server/prompt.js` — Alex's system prompt (personality, calibration,
   fit-eval format, `[CONTACT_CTA]` rules, anti-injection SECURITY section).
 - `src/lib/server/knowledge/` — resume context (`experience.md`, `skills.md`,
-  `education.md`) assembled by `index.js`. **Proficiency levels here are
-  authoritative** — the prompt requires Alex to state claims at these exact
-  levels (e.g. Go is *Intermediate*, Java is *Expert*).
+  `education.md`, `projects.md`) assembled by `index.js`. **Proficiency levels
+  here are authoritative** — the prompt requires Alex to state claims at these
+  exact levels (e.g. Go is *Intermediate*, Java is *Expert*).
+  - `projects.md` — curated side-project / entrepreneurial context (Dwarfer,
+    Evergreen Electric, YMCA, this site itself, etc.) with its own calibration
+    notes ("shipped and working," never inflate scale; frontend framed as
+    full-stack delivery, not expertise).
+  - Refresh flow: run `node util_scripts/sync_projects.mjs` (on a machine with
+    network; optional `GITHUB_TOKEN`, optional `--local ~/dev` to scan local git
+    repos). It writes a **gitignored draft** `projects.generated.md` from the
+    allowlist in `util_scripts/projects.config.json`; manually curate changes
+    into `projects.md`. The draft is never imported by the app.
+  - The prompt (`prompt.js`) includes a builder/entrepreneurial positioning
+    line, subordinate to the calibration rules.
 - `src/lib/server/guard.js` — injection/probe keyword filter (kept narrow to
   avoid rejecting legitimate pasted job descriptions), in-memory pre-throttle
   and block set, Redis daily rate limit (25/day per IP).

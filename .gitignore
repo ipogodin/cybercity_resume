@@ -54,6 +54,9 @@ lerna-debug.log*
 /coverage
 /.nyc_output
 
+# Generated draft from util_scripts/sync_projects.mjs (curate into projects.md instead)
+src/lib/server/knowledge/projects.generated.md
+
 # Temp
 *.tmp
 *.temp

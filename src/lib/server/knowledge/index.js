@@ -1,13 +1,15 @@
 import experienceMd from './experience.md?raw';
 import skillsMd from './skills.md?raw';
 import educationMd from './education.md?raw';
+import projectsMd from './projects.md?raw';
 
 const MAX_CONTEXT_CHARS = 30_000;
 
 const REQUIRED_SECTIONS = [
 	{ name: 'experience', content: experienceMd },
 	{ name: 'skills',     content: skillsMd },
-	{ name: 'education',  content: educationMd }
+	{ name: 'education',  content: educationMd },
+	{ name: 'projects',   content: projectsMd }
 ];
 
 export function buildResumeContext() {

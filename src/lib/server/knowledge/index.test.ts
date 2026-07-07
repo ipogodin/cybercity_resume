@@ -3,6 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('./experience.md?raw', () => ({ default: '## Experience\nWorked at Meta and Google.' }));
 vi.mock('./skills.md?raw',    () => ({ default: '## Skills\nJava, Python, Distributed Systems.' }));
 vi.mock('./education.md?raw', () => ({ default: '## Education\nM.S. Applied Mathematics.' }));
+vi.mock('./projects.md?raw',  () => ({ default: '## Side Projects\nDwarfer, Evergreen Electric.' }));
 
 describe('buildResumeContext', () => {
 	beforeEach(() => { vi.resetModules(); });
@@ -13,6 +14,7 @@ describe('buildResumeContext', () => {
 		expect(result).toContain('## Experience');
 		expect(result).toContain('## Skills');
 		expect(result).toContain('## Education');
+		expect(result).toContain('## Side Projects');
 	});
 
 	it('joins sections with --- separator', async () => {

@@ -1,0 +1,16 @@
+{
+  "githubUser": "ipogodin",
+  "allowlist": [
+    "cybercity_resume",
+    "dwarfer-gif-extension",
+    "evergreenElectric",
+    "YMCA",
+    "wedding_2026",
+    "SHS",
+    "smalboi"
+  ],
+  "notes": {
+    "dwarfer-gif-extension": "Backed by dwarfer.link service; smalboi is the underlying URL shortener.",
+    "cybercity_resume": "This site — includes Alex, the AI career assistant."
+  }
+}
