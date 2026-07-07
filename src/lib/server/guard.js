@@ -1,23 +1,31 @@
 import { redis } from './redis.js';
 import { env } from '$env/dynamic/private';
 
-// IPs exempt from rate limiting
+// IPs exempt from rate limiting.
+// NOTE: '0.0.0.0' is intentionally NOT bypassed — it is the fallback value when
+// no client IP can be resolved, so bypassing it would grant unlimited,
+// un-throttled model calls to any request without a resolvable IP.
 const BYPASS_IPS = new Set([
-	'0.0.0.0',
 	'127.0.0.1',
 	'::1',
 	...((env.RATE_LIMIT_BYPASS_IPS ?? '').split(',').map(s => s.trim()).filter(Boolean))
 ]);
 
+// Precise jailbreak/override patterns. Kept deliberately narrow so that
+// legitimate pasted job descriptions (which often contain phrases like
+// "you will act as a technical lead" or "you are now expected to…") are NOT
+// falsely rejected. The strengthened system prompt is the primary defense
+// against injection; this list only catches unambiguous override attempts.
 const INJECTION_PATTERNS = [
-	/ignore (previous|all|prior) instructions?/i,
-	/you are now/i,
-	/disregard (your|all|previous)/i,
-	/act as (a |an )?(?!illia)/i,
-	/jailbreak/i,
+	/ignore (all |the )?(previous|prior|above) instructions?/i,
+	/disregard (all |the |your )?(previous|prior|above)?\s*(instructions?|rules?|prompt)/i,
+	/forget (all |everything |your )?(previous|prior|above)?\s*(instructions?|rules?)/i,
+	/you are now (a |an |going to |in |the |dan\b)/i,
+	/\bjailbreak\b/i,
 	/\bDAN\b/,
 	/new persona/i,
-	/pretend (you are|to be)/i
+	/pretend (you are|to be|that)/i,
+	/act as (a |an )?(dan|ai|assistant|chatbot|a different|another)\b/i
 ];
 
 const PROBE_PATTERNS = [

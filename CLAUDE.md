@@ -394,3 +394,34 @@ Full documentation is in `docs/`. See [docs/INDEX.md](docs/INDEX.md) for a compl
 | `docs/REVIEW_PLAN.md` | Security/code issues found and fixed |
 | `docs/AUDIO_SETUP.md` | Audio file specs and placement |
 | `docs/animated-character-plan.md` | How `character_animated.webm` was created |
+| `docs/ALEX_REVIEW.md` | Hiring-manager assessment + code review of the Alex AI assistant: behavioral findings, security fixes, design feedback, naming |
+
+---
+
+## AI Assistant — "Alex" (chat at `/chat`)
+
+The primary `pogodin.ai` site runs a clean, modern portfolio with an AI career
+assistant named **Alex** (the cyberpunk experience lives at `/cyberpunk`). Alex
+answers questions about Illia and does honest fit evaluations for hiring managers.
+
+Key files:
+- `src/lib/server/prompt.js` — Alex's system prompt (personality, calibration,
+  fit-eval format, `[CONTACT_CTA]` rules, anti-injection SECURITY section).
+- `src/lib/server/knowledge/` — resume context (`experience.md`, `skills.md`,
+  `education.md`) assembled by `index.js`. **Proficiency levels here are
+  authoritative** — the prompt requires Alex to state claims at these exact
+  levels (e.g. Go is *Intermediate*, Java is *Expert*).
+- `src/lib/server/guard.js` — injection/probe keyword filter (kept narrow to
+  avoid rejecting legitimate pasted job descriptions), in-memory pre-throttle
+  and block set, Redis daily rate limit (25/day per IP).
+- `src/lib/server/adminAuth.js` — Bearer-token admin auth (`timingSafeEqual`,
+  fails closed).
+- `src/hooks.server.js` — `resolveClientIp()` (spoof-resistant: prefers
+  `x-real-ip`, else last `x-forwarded-for` hop — **never** the leftmost),
+  admin IP allowlist, security headers + CSP.
+- `src/routes/api/chat/+server.js` — streaming chat endpoint (OpenAI gpt-4o),
+  lead capture, secret error-simulation test triggers.
+- `src/routes/chat/+page.svelte` — chat UI (empty-state chips, streaming,
+  contact CTA card, JD/image upload).
+
+See `docs/ALEX_REVIEW.md` for the July 2026 review and the hardening applied.

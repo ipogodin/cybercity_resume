@@ -763,7 +763,7 @@
 		max-height: 120px;
 		overflow-y: auto;
 	}
-	.composer textarea::placeholder { color: #3F3F46; }
+	.composer textarea::placeholder { color: #52525B; }
 
 	.composer-actions {
 		display: flex;
@@ -809,7 +809,7 @@
 	@media (prefers-reduced-motion: reduce) { .send-spinner { animation: none; } }
 
 	.upload-error { margin: 6px 0 0; font-size: 12px; color: #f87171; }
-	.composer-hint { margin: 6px 0 0; font-size: 11px; color: #27272A; text-align: center; }
+	.composer-hint { margin: 6px 0 0; font-size: 11px; color: #71717A; text-align: center; }
 
 	/* ── Breaker trip error animation ── */
 	.breaker-overlay {

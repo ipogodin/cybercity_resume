@@ -65,7 +65,7 @@ export async function POST({ request, locals }) {
 	const chatRequest = _validateChatRequest(body);
 	if (!chatRequest) {
 		return new Response(
-			JSON.stringify({ error: 'Invalid request: messages (array) and mode (ask|fit) required' }),
+			JSON.stringify({ error: 'Invalid request: "messages" must be an array' }),
 			{ status: 400, headers: { 'Content-Type': 'application/json' } }
 		);
 	}

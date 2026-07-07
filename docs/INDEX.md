@@ -34,3 +34,4 @@
 | File | Description |
 |---|---|
 | [PERFORMANCE_REPORT.md](PERFORMANCE_REPORT.md) | Production build analysis — bundle sizes, optimization notes, and performance metrics |
+| [ALEX_REVIEW.md](ALEX_REVIEW.md) | Hiring-manager assessment of the live Alex assistant + code review: behavioral findings, security/abuse fixes (IP spoofing, rate-limit bypass), prompt calibration, design feedback, naming. |
