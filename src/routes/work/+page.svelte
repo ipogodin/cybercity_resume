@@ -100,7 +100,7 @@
 		},
 		{
 			company: 'E-Motion',
-			period: '2011 – 2012',
+			period: '2012',
 			highlights: [
 				'Call management system for automating call-center operations with metadata-based reporting.',
 				'UI rework reducing backend calls by 2.5×; doubled test coverage.'
@@ -108,7 +108,7 @@
 		},
 		{
 			company: 'CubicStudio',
-			period: '2009 – 2011',
+			period: '2010 – 2012',
 			highlights: [
 				'Junior developer on Out of Pawn — a marketplace and catalogue system for a pawnbroker network.'
 			]
@@ -143,7 +143,7 @@
 			<p class="section-label">Experience</p>
 			<div class="jobs">
 				{#each experience as job}
-				<article class="job-card" class:current={job.current}>
+				<article class="job-card" id={job.company.toLowerCase().replace(/[^a-z0-9]+/g, '-')} class:current={job.current}>
 					<div class="job-header">
 						<div class="job-left">
 							{#if job.current}
@@ -166,8 +166,8 @@
 		</section>
 
 		<!-- Prior experience -->
-		<section class="section">
-			<p class="section-label">Prior Experience · 2009 – 2016</p>
+		<section class="section" id="prior">
+			<p class="section-label">Prior Experience · 2010 – 2016</p>
 			<div class="prior-grid">
 				{#each prior as job}
 				<div class="prior-card">
@@ -264,7 +264,7 @@
 	.page-header h1 { font-size: 48px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
 	.page-sub { font-size: 15px; color: #71717A; }
 
-	.section { margin-bottom: 56px; }
+	.section { margin-bottom: 56px; scroll-margin-top: 100px; }
 	.section-label { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #71717A; margin-bottom: 20px; }
 
 	/* ── Job cards ── */
@@ -275,6 +275,7 @@
 		border: 1px solid rgba(255,255,255,0.07);
 		border-radius: 14px; padding: 28px 32px;
 		transition: border-color 0.2s;
+		scroll-margin-top: 100px;
 	}
 	.job-card.current { border-color: rgba(99,102,241,0.25); }
 	.job-card:hover { border-color: rgba(99,102,241,0.35); }

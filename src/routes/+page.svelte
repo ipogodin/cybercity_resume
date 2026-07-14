@@ -96,14 +96,14 @@
 		'Practices': ['Platform Architecture', 'Observability', 'Reliability', 'TDD', 'API Design']
 	};
 
-	// ── Career timeline (proportional widths, 2009–2026) ──
+	// ── Career timeline (proportional widths, 2010–2026) ──
 	const timelineSegments = [
-		{ label: 'Earlier',    short: '2009–2016', pct: 41, dim: true,  current: false },
-		{ label: 'IGT',        short: '2016–18',   pct: 12, dim: false, current: false },
-		{ label: 'Wargaming',  short: '2018–19',   pct:  6, dim: false, current: false },
-		{ label: 'Salesforce', short: '2019–23',   pct: 24, dim: false, current: false },
-		{ label: 'Google',     short: '2024',       pct:  6, dim: false, current: false },
-		{ label: 'Meta',       short: '2025–now',  pct: 11, dim: false, current: true  },
+		{ label: 'Earlier',    short: '2010–2016', pct: 41, dim: true,  current: false, href: '/work#prior' },
+		{ label: 'IGT',        short: '2016–18',   pct: 12, dim: false, current: false, href: '/work#igt' },
+		{ label: 'Wargaming',  short: '2018–19',   pct:  6, dim: false, current: false, href: '/work#wargaming' },
+		{ label: 'Salesforce', short: '2019–23',   pct: 24, dim: false, current: false, href: '/work#salesforce' },
+		{ label: 'Google',     short: '2024',       pct:  6, dim: false, current: false, href: '/work#google' },
+		{ label: 'Meta',       short: '2025–now',  pct: 11, dim: false, current: true,  href: '/work#meta' },
 	];
 
 	// ── Side projects ──
@@ -245,25 +245,26 @@
 		<!-- Career timeline — row 4, full width -->
 		<div class="card card-timeline">
 			<div class="tl-header">
-				<p class="section-label">Career · 2009 – present</p>
+				<p class="section-label">Career · 2010 – present</p>
 				<a href="/work" class="tl-detail-link">Full history →</a>
 			</div>
 			<div class="tl-track">
 				{#each timelineSegments as seg}
-					<div
+					<a
+						href={seg.href}
 						class="tl-seg"
 						class:tl-seg-dim={seg.dim}
 						class:tl-seg-current={seg.current}
 						style="flex: {seg.pct}"
-						title="{seg.label} · {seg.short}"
+						title="{seg.label} · {seg.short} — view details"
 					>
 						<span class="tl-seg-label">{seg.label}</span>
 						<span class="tl-seg-period">{seg.short}</span>
-					</div>
+					</a>
 				{/each}
 			</div>
 			<div class="tl-axis">
-				<span>2009</span>
+				<span>2010</span>
 				<span>2013</span>
 				<span>2016</span>
 				<span>2019</span>
@@ -669,9 +670,11 @@
 		border-radius: 8px;
 		overflow: hidden;
 		min-width: 0;
-		transition: background 0.2s;
-		cursor: default;
+		transition: background 0.2s, transform 0.2s;
+		cursor: pointer;
+		text-decoration: none;
 	}
+	.tl-seg:hover { transform: translateY(-2px); }
 	.tl-seg-dim {
 		background: rgba(255,255,255,0.05);
 	}
