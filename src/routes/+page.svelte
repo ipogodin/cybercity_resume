@@ -109,6 +109,12 @@
 	// ── Side projects ──
 	const sideProjects = [
 		{
+			name: 'Lorava',
+			description: 'Turns your parents\' stories into the book their grandchildren will read',
+			url: 'https://lorava.co',
+			label: 'lorava.co'
+		},
+		{
 			name: 'Dwarfer',
 			description: 'Link shortener for everyday use + YouTube GIF platform',
 			url: 'https://dwarfer.link',
